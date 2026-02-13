@@ -27,14 +27,14 @@
     in
     {
       # Export the main Emacs configuration as a module that can be imported by
-      # hosts.  We wrap the module to provide the flake-inputs it expects.
+      # hosts.  We apply the emacs-overlay here.
       nixosModules.default = { ... }: {
         imports = [ ./emacs.nix ];
-        _module.args.flake-inputs = { inherit emacs-overlay; };
+        nixpkgs.overlays = [ emacs-overlay.overlays.default ];
       };
       darwinModules.default = { ... }: {
         imports = [ ./emacs.nix ];
-        _module.args.flake-inputs = { inherit emacs-overlay; };
+        nixpkgs.overlays = [ emacs-overlay.overlays.default ];
       };
 
       # Export the SSH config module for Emacs.
