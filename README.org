@@ -1,0 +1,57 @@
+#+title:     Emacs Configuration
+#+language:  en
+
+* Overview
+
+This repository contains Logan's Emacs configuration, including:
+- Emacs Lisp configuration files (~lisp/~)
+- Org-mode configuration files (~org/~)
+- Nix-based package management (~emacs.nix~)
+- Tree-sitter grammar derivations (~nix/derivations/~)
+
+* Usage
+
+This flake can be imported into your NixOS, nix-darwin, or home-manager
+configuration:
+
+#+begin_src nix
+{
+  inputs = {
+    emacs-config.url = "git+https://gitea.proton/logan/emacs-config";
+    # ... other inputs
+  };
+
+  outputs = { self, emacs-config, ... }: {
+    # For NixOS or nix-darwin hosts:
+    darwinConfigurations.myhost = nix-darwin.lib.darwinSystem {
+      modules = [
+        emacs-config.darwinModules.default
+        # ... other modules
+      ];
+    };
+
+    # For home-manager:
+    homeConfigurations.myuser = home-manager.lib.homeManagerConfiguration {
+      modules = [
+        emacs-config.homeModules.ssh-config-emacs
+        # ... other modules
+      ];
+    };
+  };
+}
+#+end_src
+
+* Structure
+
+- ~emacs.nix~ :: Main Emacs configuration with package definitions.
+- ~lisp/~ :: Emacs Lisp configuration files.
+- ~org/~ :: Org-mode configuration files for various modes and features.
+- ~nix/~ :: Additional Nix modules and derivations.
+  - ~derivations/~ :: Custom package derivations (e.g., ~tree-sitter-jq~).
+  - ~home-configs/~ :: Home Manager configuration modules.
+- ~doom-emacs.org~ :: Documentation for Doom Emacs-specific configurations.
+
+* History
+
+This repository was extracted from the main dotfiles repository while
+preserving git history for the Emacs-related files.
