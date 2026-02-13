@@ -26,7 +26,7 @@
     pkgs.dsq
     (pkgs.emacsWithPackagesFromUsePackage {
       alwaysTangle = false;
-      config = ../lisp/init.el;
+      config = ./lisp/init.el;
       # Use `config` above as the default init file.
       defaultInitFile = true;
       extraEmacsPackages = (epkgs: let
@@ -361,7 +361,7 @@
             grammars.tree-sitter-just
             grammars.tree-sitter-json
             grammars.tree-sitter-json5
-            (pkgs.callPackage ./derivations/tree-sitter-jq.nix {})
+            (pkgs.callPackage ./nix/derivations/tree-sitter-jq.nix {})
             grammars.tree-sitter-latex
             grammars.tree-sitter-make
             grammars.tree-sitter-markdown
