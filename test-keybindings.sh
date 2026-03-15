@@ -21,12 +21,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-EMACS="${SCRIPT_DIR}/result/bin/emacs"
+EMACS="${EMACS:-${SCRIPT_DIR}/result/bin/emacs}"
 LOG="${SCRIPT_DIR}/test-keybindings.log"
 
 if [ ! -x "$EMACS" ]; then
-  echo "Error: ./result/bin/emacs not found."
-  echo "Run 'just build' first, then run this test."
+  echo "Error: Emacs not found at: $EMACS"
+  echo "Run 'just build' first, or set EMACS=/path/to/emacs."
   exit 1
 fi
 
