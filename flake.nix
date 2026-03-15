@@ -66,6 +66,7 @@
           default = pkgs.callPackage ./emacs-package.nix {
             inherit emacs-flake-inputs;
           };
+          emacs-app = pkgs.callPackage ./nix/derivations/emacs-app.nix {};
         }
       );
 

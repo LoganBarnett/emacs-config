@@ -175,9 +175,35 @@ configuration:
 - ~lisp/~ :: Emacs Lisp configuration files.
 - ~org/~ :: Org-mode configuration files for various modes and features.
 - ~nix/~ :: Additional Nix modules and derivations.
-  - ~derivations/~ :: Custom package derivations (e.g., ~tree-sitter-jq~).
+  - ~derivations/~ :: Custom package derivations (e.g., ~tree-sitter-jq~,
+    ~emacs-app~).
   - ~home-configs/~ :: Home Manager configuration modules.
 - ~doom-emacs.org~ :: Documentation for Doom Emacs-specific configurations.
+
+** ~emacs-app~ (macOS)
+
+On macOS, this flake exports an ~emacs-app~ package that opens the GUI
+~Emacs.app~ bundle instead of the terminal binary:
+
+#+begin_src sh
+emacs-app          # open Emacs.app
+emacs-app foo.org  # open a file in Emacs.app
+#+end_src
+
+Internally it calls ~open -a Emacs "$@"~, which lets macOS route the launch
+through the ~.app~ bundle so the GUI (fonts, input methods, system integration)
+is used rather than the Nix store terminal binary.
+
+To make ~emacs-app~ available on your ~PATH~, include it in your host
+configuration:
+
+#+begin_src nix
+environment.systemPackages = [
+  emacs-config.packages.${system}.emacs-app
+];
+#+end_src
+
+This package is macOS/darwin only.
 
 * History
 
