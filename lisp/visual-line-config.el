@@ -59,11 +59,13 @@
 ;; ## The visual-line-mode companion stack
 ;;
 ;; When visual-line-mode IS enabled the following modes activate with it to
-;; make the experience as bearable as possible:
+;; make the experience as bearable as possible.  visual-fill-column-mode is
+;; intentionally absent: it pins wrapping at a fixed column by adding a right
+;; margin, but the gutter (line numbers, git indicators) has variable width and
+;; throws off the calculation, causing text to clip before 80 columns.  Since
+;; visual-line-mode is only used here to read others' unwrapped files, wrapping
+;; at the window edge is sufficient.
 ;;
-;;   visual-fill-column-mode  -- wraps at a fixed column width instead of the
-;;                              window edge, so resizing a frame doesn't shift
-;;                              the wrap point
 ;;   adaptive-wrap-prefix-mode -- indents continuation lines to align with the
 ;;                              first non-whitespace character of the logical
 ;;                              line, e.g. list item continuations stay under
@@ -88,12 +90,6 @@
   (require 'doom-lib)
   (require 'doom-use-package)
   (require 'doom-keybinds))
-
-;; Wrap at fill-column (80) rather than the window edge.
-(use-package visual-fill-column
-  :hook (visual-line-mode . visual-fill-column-mode)
-  :custom
-  (visual-fill-column-width 80))
 
 ;; Indent continuation lines to align with the logical line's first
 ;; non-whitespace character.
