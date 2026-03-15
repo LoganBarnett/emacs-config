@@ -1,7 +1,7 @@
 # The Emacs derivation. Callable via pkgs.callPackage for direct builds
 # (e.g. nix build .#default) and imported by emacs.nix for the system
 # packages module.
-{ lib, pkgs, flake-inputs, ... }: pkgs.emacsWithPackagesFromUsePackage {
+{ lib, pkgs, emacs-flake-inputs, ... }: pkgs.emacsWithPackagesFromUsePackage {
   alwaysTangle = false;
   config = ./lisp/init.el;
   # Use `config` above as the default init file.
@@ -109,7 +109,7 @@
       pname = "dnd";
       ename = "dnd";
       version = "0.0.1";
-      src = flake-inputs.org-dnd;
+      src = emacs-flake-inputs.org-dnd;
       packageRequires = [
         epkgs.dash
         epkgs.request
