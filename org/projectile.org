@@ -221,6 +221,10 @@ Files are returned as relative paths to DIRECTORY."
 #+begin_src emacs-lisp :results none :noweb yes :tangle yes
 (use-package project
   :ensure t
+  ;; Auto-remember projects when visiting files, not just via project commands.
+  :hook (find-file . (lambda ()
+                       (when-let ((proj (project-current)))
+                         (project-remember-project proj))))
   :init
   ;; We might want this for project.el too, but I haven't tested it yet.
   <<config/projectile-buffers-kill-all>>
