@@ -10,3 +10,8 @@
 org/*.el
 # Ignore any compiled lisp files that might make their way in due to tests.
 *.elc
+# Ignore Nix generated builds.
+/result
+# Ignore log files emitted while troubleshooting (largely from the LLM, and not
+# a formal process in this repo)..
+*.log

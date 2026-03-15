@@ -7,6 +7,13 @@
 
 ;;; Code:
 
+;; Load the Nix-generated file that sets `config/base-dir' to the pre-tangled
+;; org files in the Nix store.  This must come before any call to
+;; `init-org-file'.  The t t args suppress errors and messages so that running
+;; outside of Nix (local checkout) degrades gracefully to the fallback path
+;; computed from load-file-name in `init-org-file'.
+(load "emacs-config-base-dir" t t)
+
 ;; Show messages while we start up.
 ;;(view-echo-area-messages)
 (toggle-debug-on-quit)

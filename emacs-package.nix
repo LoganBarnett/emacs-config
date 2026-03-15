@@ -75,20 +75,25 @@
       preBuild = ''
         # init.el is installed as default.el via defaultInitFile = true.
         rm -f init.el
-        cat > site-start.el << 'HEREDOC'
-        ;;; site-start.el --- Emacs config path setup -*- lexical-binding: t; -*-
+        # Generate a uniquely-named file (NOT site-start.el) so it is not
+        # shadowed by the site-start.el that emacsWithPackages auto-generates
+        # for emacs-packages-deps.  init.el loads this with (load
+        # "emacs-config-base-dir" t t) early in startup.
+        cat > emacs-config-base-dir.el << 'HEREDOC'
+        ;;; emacs-config-base-dir.el --- Nix store path for org sources  -*- lexical-binding: t; -*-
         ;;; Commentary:
-        ;; Runs before default.el (init.el).  Sets config/base-dir so that
-        ;; init-org-file can find pre-tangled org files in the Nix store
-        ;; without computing paths relative to load-file-name (which points
-        ;; at site-lisp when loading default.el, not the org/ directory).
+        ;; Loaded explicitly by init.el via (load "emacs-config-base-dir" t t).
+        ;; Sets config/base-dir so that init-org-file can find pre-tangled org
+        ;; files in the Nix store without computing paths relative to
+        ;; load-file-name (which points at site-lisp, not the org/ directory).
         ;;; Code:
         (defvar config/base-dir
           "${emacs-config-org-sources}/share/emacs-config/"
           "Root directory of the Emacs configuration.
         The org/ subdirectory holds pre-tangled .el files alongside the
         original .org sources so org-babel-load-file loads without retangling.")
-        ;;; site-start.el ends here
+        (provide 'emacs-config-base-dir)
+        ;;; emacs-config-base-dir.el ends here
         HEREDOC
       '';
       # Compile each file individually so a failure on one does not abort
