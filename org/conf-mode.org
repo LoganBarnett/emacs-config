@@ -24,7 +24,7 @@
 ** stitch
 #+begin_src emacs-lisp :results none :noweb yes
   (require 'use-package)
-  (use-package "conf-mode"
+  (use-package conf-mode
     :defer t
     :init
     <<config/systemd-files>>

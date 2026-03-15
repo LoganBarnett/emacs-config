@@ -23,7 +23,7 @@ module that does it.
 ** stitch
 
 #+begin_src emacs-lisp :results none :noweb yes
-(use-package "yaml-mode"
+(use-package yaml-mode
   :config
   <<config/yaml-disable-word-wrap>>
   )

@@ -41,12 +41,12 @@
 ;; configure typescript
 (defun config-typescript ()
   "Setup Typescript support."
-  (use-package "tide"
+  (use-package tide
     :init
     :config
     (require 'flycheck)
     (require 'cl-lib)
-    (use-package "typescript-mode"
+    (use-package typescript-mode
       :config
       (setq-default typescript-indent-level 2)
       )

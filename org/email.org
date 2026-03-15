@@ -1107,7 +1107,7 @@ to default behaviors.
   <<config/evil-collection-mu4e-pr-860-fix-key-conflict>>
   (require 'use-package)
   (message "initializing mu4e with use-package...")
-  (use-package "mu4e"
+  (use-package mu4e
     :init
     (map!
      :leader

@@ -23,7 +23,7 @@
 
 
   ;; (require 'mode-line-frame)
-  ;; (use-package "common-header-mode-line"
+  ;; (use-package common-header-mode-line
   ;; :init
   ;; :config
   ;; (require 'common-header-mode-line)

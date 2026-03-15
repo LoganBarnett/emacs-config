@@ -8,7 +8,7 @@
 * use-package
 
   #+begin_src emacs-lisp :results none
-    (use-package "markdown-mode"
+    (use-package markdown-mode
       :init
       :config
       ;; auto-fill-mode is intentionally absent: visual-line-config.el enables

@@ -51,7 +51,7 @@
 
 (require 'use-package)
 
-(use-package "claude-code-ide"
+(use-package claude-code-ide
   :init
   (setq
    claude-code-ide-terminal-backend 'eat

@@ -39,7 +39,7 @@
 * use-package
 
   #+begin_src emacs-lisp
-    (use-package "graphviz-dot-mode"
+    (use-package graphviz-dot-mode
       :defer t
       :init
       :config

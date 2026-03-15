@@ -43,7 +43,7 @@
 * all together
 
 #+begin_src emacs-lisp
-  (use-package "web-mode"
+  (use-package web-mode
     :defer t
     :init
     :config

@@ -196,7 +196,7 @@ This snippet should cause the variable to be read from the =.gitconfig=.
 
 #+name: config/magit-read-gpgsign-from-gitconfig
 #+begin_src emacs-lisp :results none :tangle no
-(use-package "transient"
+(use-package transient
   :config
   (transient-define-argument magit:--gpg-sign ()
     :description "Sign using gpg"
@@ -279,7 +279,7 @@ the home page value but that's not as useful as linking to the file itself.
     (kill-new url)
     (message "Copied to clipboard: %S" url)))
 
-(use-package "browse-at-remote"
+(use-package browse-at-remote
   :demand t
   :init
   ;; Unbind browse-at-remote* (not sure what the tail of this is). This allows
@@ -372,14 +372,14 @@ of things.
 ;; Not working, and I think in fact is is breaking my local setup.
 ;; <<config/magit-load-remote-keychain-env>>
 
-(use-package "git-gutter-fringe"
+(use-package git-gutter-fringe
   :demand t
   :init
   :config
   <<config/git-gutter-fringe-hook>>
   )
 
-(use-package "magit"
+(use-package magit
   :defer t
   :init
   ;; This is supposed to be set before magit loads, according to the docs.

@@ -488,7 +488,7 @@ Finally, tie it all together on demand.
 ;; I've gutted much of my config while switching to the tree-sitter variants of
 ;; the various JavaScript modes.  I haven't done full testing on anything so
 ;; this is left for reference until I'm a lot more happy with it.
-;; (use-package "js2-mode"
+;; (use-package js2-mode
 ;;   :defer t
 ;;   :init
 ;;   (message "initializing Javascript via js2-mode")
@@ -504,7 +504,7 @@ Finally, tie it all together on demand.
 ;;   <<config/javascript-allow-prettier-on-save>>
 ;; )
 
-(use-package "js-ts-mode"
+(use-package js-ts-mode
   :defer t
   :init
   (message "initializing Javascript via js2-ts-mode")
@@ -526,7 +526,7 @@ Finally, tie it all together on demand.
 ;; I've gutted much of my config while switching to the tree-sitter variants of
 ;; the various JavaScript modes.  I haven't done full testing on anything so
 ;; this is left for reference until I'm a lot more happy with it.
-;; (use-package "rjsx-mode"
+;; (use-package rjsx-mode
 ;;   :defer t
 ;;   :init
 ;;   (message "initializing Javascript via rjsx-mode")
@@ -585,7 +585,7 @@ Finally, tie it all together on demand.
 
 *** js-mode
 #+begin_src emacs-lisp :results none :noweb yes
-;; (use-package "js-mode"
+;; (use-package js-mode
 ;;   :init
 ;;   (message "Initializing JavaScript via js-mode.")
 ;;   :config

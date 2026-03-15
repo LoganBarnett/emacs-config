@@ -12,7 +12,7 @@ The =dnd= package is consumed via Nix from the [[https://github.com/LoganBarnett
 
 #+name: config/dnd-load
 #+begin_src emacs-lisp :results none :tangle yes
-(use-package "dnd"
+(use-package dnd
   :demand t
   )
 #+end_src

@@ -9,7 +9,7 @@
 This is a quick dump from =config-org-mode.el=.
 
 #+begin_src emacs-lisp :results none :noweb yes
-  (use-package "org-contacts"
+  (use-package org-contacts
     :after org
     :preface
     (defvar my/org-contacts-template "* %(org-contacts-template-name)

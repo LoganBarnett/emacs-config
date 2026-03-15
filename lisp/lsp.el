@@ -15,7 +15,7 @@
 
 (require 'use-package)
 
-(use-package "lsp-mode"
+(use-package lsp-mode
   :init
   :config
   ;; Ensure that direnv is used to find rust-analyzer.

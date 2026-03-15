@@ -15,7 +15,7 @@ and requires an agent to run on the puppet manager (I've heard this called a
 ** stitch
 
 #+begin_src emacs-lisp :results none
-(use-package "puppet-mode"
+(use-package puppet-mode
   :init
   (add-to-list 'auto-mode-alist '("\\.pp\\'" . puppet-mode))
   :config

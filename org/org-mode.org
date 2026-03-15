@@ -1367,7 +1367,7 @@ This is the region of offending code, I think:
 * stitch
 
 #+begin_src emacs-lisp :results none :noweb yes :tangle yes
-(use-package "org"
+(use-package org
   :init
   <<config/org-mode-insert-inactive-time-stamp-with-time-fn>>
   ;; Alphabetical list items must be set before `org-mode' loads.

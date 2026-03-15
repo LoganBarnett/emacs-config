@@ -177,7 +177,7 @@ We can add =org-babel= support using [[https://github.com/wose/ob-scad][ob-scad]
   (--all-p #'integerp xs)
   )
 
-(use-package "scad-mode"
+(use-package scad-mode
   :init
   ;; I'm not sure which of these work, and `safe-local-variable' isn't even
   ;; documented, but there are suggestions to use it.

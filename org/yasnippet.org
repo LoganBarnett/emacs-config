@@ -108,7 +108,7 @@ intuitive.
   (message "inside yatemplate-expand-yas-buffer")
   (yas-expand-snippet (buffer-string) (point-min) (point-max)))
 
-(use-package "yatemplate"
+(use-package yatemplate
   :demand t
   ;; :after yasnippet
   :init
@@ -304,7 +304,7 @@ templates]] for more details on things like the =__= files.
   #+begin_src emacs-lisp :results none :noweb yes
   (require 'use-package)
 
-  (use-package "yasnippet"
+  (use-package yasnippet
     :demand t
     :init
     ;; Ensure `auto-insert-mode' is loaded so we can touch `auto-insert-alist'.

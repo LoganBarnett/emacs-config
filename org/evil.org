@@ -550,7 +550,7 @@ It may not be apparent but =use-package= works as you'd want it to even if the
 library is already loaded.
 
 #+begin_src emacs-lisp :results none :noweb yes
-(use-package "evil"
+(use-package evil
   :ensure t
   :init
   ;; These must be set before evil is loaded.

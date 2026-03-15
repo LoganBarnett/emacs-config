@@ -57,7 +57,7 @@ https://github.com/emacs-lsp/lsp-ui
 * combined
 
   #+begin_src emacs-lisp :results none
-    ;; (use-package "lsp-mode"
+    ;; (use-package lsp-mode
     ;;   :defer t
     ;;   :init
     ;;   :config

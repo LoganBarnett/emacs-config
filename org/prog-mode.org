@@ -83,7 +83,7 @@ paragraph form.
   ;;                                       :done-regex "[[:space:]]*)]}"
   ;;                                       :split-advance-fn 'js2-mode-forward-sexp)
   ;;                  :respace multi-line-always-newline-respacer))
-  ;; (use-package "color-identifiers-mode"
+  ;; (use-package color-identifiers-mode
   ;;   :ensure t
   ;;   :init
   ;;   (global-color-identifiers-mode)
@@ -349,9 +349,13 @@ This highlights indentation, which can be helpful for large sets of indentation.
 #+begin_src emacs-lisp :results none :tangle yes :noweb yes
 ;; (setq-default highlight-indent-guides-method 'character)
 ;; (add-hook 'prog-mode-hook #'highlight-indent-guides-mode)
-(use-package "indent-bars"
+(use-package indent-bars
   :hook
-  ((prog-mode) . indent-bars-mode)
+  ;; indent-bars tries to compute display colors at activation time which
+  ;; fails in batch/non-graphical sessions (color-rgb-to-hex gets called on
+  ;; "unspecified-bg").  Guard so the mode is only activated when a display
+  ;; is present.
+  ((prog-mode) . (lambda () (when (display-graphic-p) (indent-bars-mode))))
   :init
   ;; Look out for this - it's possible it's not being loaded somehow.
   <<config/standard-indent>>
@@ -446,7 +450,7 @@ are there so many ways to configure indentation?!
 <<config/indentation-highlight>>
 <<config/prog-mode-disable-line-wrapping-fn>>
 
-(use-package "prog-mode"
+(use-package prog-mode
   :init
   <<config/dtrt-indent-bless-safe-local-variables>>
   <<config/prog-mode-comment-and-yank-newline-fix>>

@@ -303,7 +303,7 @@ command control it, as those still work.
 
 #+begin_src emacs-lisp :results none :noweb yes
   (require 'use-package)
-  (use-package "tramp"
+  (use-package tramp
     :init
     <<config/tramp-log-verbosity>>
     :config

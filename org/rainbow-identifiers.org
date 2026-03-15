@@ -30,7 +30,7 @@ clown-barf on my screen without much gain. Let's make them more vibrant.
 
 * stitch
 #+begin_src emacs-lisp :results none :noweb yes
-(use-package "rainbow-identifiers"
+(use-package rainbow-identifiers
   :init
   (add-hook 'prog-mode-hook #'rainbow-identifiers-mode)
   :config

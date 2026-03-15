@@ -61,7 +61,7 @@ around it with:
 #+begin_src emacs-lisp :noweb yes
   (require 'use-package)
 
-  ;; (use-package "lsp-java"
+  ;; (use-package lsp-java
   ;;   :init
     ;; <<config/lsp-java-fix-missing-vars>>
     <<config/java-organize-imports-on-save-disable>>

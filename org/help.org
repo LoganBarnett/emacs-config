@@ -16,7 +16,7 @@ perks is that you can see where identifiers are being used, and also see the
 code itself.
 
 #+begin_src emacs-lisp :results none :exports code :noweb yes
-  (use-package "helpful"
+  (use-package helpful
     :ensure t
     :init
     :config

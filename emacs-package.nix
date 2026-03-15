@@ -29,17 +29,26 @@
       nativeBuildInputs = [ pkgs.emacs ];
       buildPhase = ''
         runHook preBuild
-        for f in *.org; do
-          echo "[build] Tangling $f"
-          emacs --batch \
-            --load org \
-            --eval "(setq org-confirm-babel-evaluate nil)" \
-            --eval "(org-babel-tangle-file \"$(pwd)/$f\" nil \"emacs-lisp\")" \
-            2>&1 \
-            || echo "[build] No emacs-lisp tangle output for $f"
+        # Split org files into NIX_BUILD_CORES chunks and tangle each chunk
+        # in a separate parallel Emacs process.
+        files=(*.org)
+        n=''${#files[@]}
+        cores=''${NIX_BUILD_CORES:-4}
+        [ "$cores" -eq 0 ] && cores=$(nproc)
+        chunk=$(( (n + cores - 1) / cores ))
+        pids=()
+        i=0
+        while [ $i -lt $n ]; do
+          slice=("''${files[@]:$i:$chunk}")
+          emacs --batch --script ${./nix/tangle-group.el} "''${slice[@]}" 2>&1 &
+          pids+=($!)
+          i=$(( i + chunk ))
         done
-        # Discard empty output files - org files where all blocks are
-        # :tangle no produce zero bytes.
+        wait "''${pids[@]}"
+
+        # Discard any truly-empty .el files (zero bytes).  tangle-group.el
+        # writes a stub for org files with no :tangle yes blocks, so genuine
+        # build failures are the only way a .el ends up empty.
         find . -maxdepth 1 -name "*.el" -empty -delete
         runHook postBuild
       '';
@@ -106,15 +115,13 @@
         ;;; emacs-config-base-dir.el ends here
         HEREDOC
       '';
-      # Compile each file individually so a failure on one does not abort
-      # the entire build.  Files that cannot be compiled load fine as .el.
+      # Compile all .el files in a single Emacs session to avoid per-file
+      # startup overhead.  condition-case around each file preserves the
+      # original behaviour: a failure on one file does not abort the rest.
       buildPhase = ''
         runHook preBuild
-        for f in *.el; do
-          ${pkgs.emacs}/bin/emacs --batch -L . \
-            -f batch-byte-compile "$f" 2>&1 \
-            || echo "[build] $f will load as interpreted .el"
-        done
+        ${pkgs.emacs}/bin/emacs --batch -L . \
+          --script ${./nix/compile-all.el} *.el 2>&1
         runHook postBuild
       '';
     });

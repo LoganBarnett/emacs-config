@@ -209,7 +209,7 @@ element out of the current form.
 #+begin_src emacs-lisp :results none :noweb yes
 <<config/advice-unadvice>>
 <<config/fill-string>>
-(use-package "lisp-mode"
+(use-package lisp-mode
   :init
   <<config/lisp-safe-local-variable-values>>
   <<config/lisp-file-local-variables-prompt-if-unsafe>>

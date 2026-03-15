@@ -11,7 +11,7 @@
   "Configure Plantuml."
   (interactive)
 
-  (use-package "plantuml-mode"
+  (use-package plantuml-mode
     :config
     (setq-default plantuml-exec-mode 'executable)
     ;; (setq-default plantuml-jar-path

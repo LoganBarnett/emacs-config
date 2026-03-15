@@ -21,7 +21,7 @@ be the same language used in a =Jenkinsfile=.
 #+begin_src emacs-lisp :noweb yes
   (message "initializing groovy with use-package...")
   (require 'use-package)
-  (use-package "groovy-mode"
+  (use-package groovy-mode
     :defer t
     :init
     (message "initializing groovy...")

@@ -37,7 +37,7 @@ Keep in mind that =dtrt-indent= can override this value.  Use
 * stitch
 
 #+begin_src emacs-lisp :results none :noweb yes
-(use-package "css-mode"
+(use-package css-mode
   :init
   <<config/css-indentation-offset-fix>>
   :config

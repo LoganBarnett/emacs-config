@@ -129,7 +129,7 @@ reminding me it might be needed.
 * stitch
 
 #+begin_src emacs-lisp :results none :noweb yes
-(use-package "rustic"
+(use-package rustic
   :init
   (message "add rust to path manually...")
   (add-to-list 'exec-path (expand-file-name "/run/current-system/sw/bin"))

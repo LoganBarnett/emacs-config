@@ -9,7 +9,7 @@
 ;; configure rainbow-mode
 (defun config-rainbow-mode ()
   "Configure rainbow-mode."
-  (use-package "rainbow-mode"
+  (use-package rainbow-mode
     ;; :init
     :config
     (add-hook 'css-mode-hook 'rainbow-mode)

@@ -284,7 +284,7 @@ work with Ruby blocks.
 ** stitch
 
 #+begin_src emacs-lisp :results none :noweb yes
-(use-package "enh-ruby-mode"
+(use-package enh-ruby-mode
   :mode "\\.rb\\'" "\\`Gemfile" "\\.gemspec\\'"
   :init
   ;; Lifted from what ruby-mode uses.

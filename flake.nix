@@ -61,12 +61,15 @@
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
-        in
-        {
-          default = pkgs.callPackage ./emacs-package.nix {
+          configuredEmacs = pkgs.callPackage ./emacs-package.nix {
             inherit emacs-flake-inputs;
           };
-          emacs-app = pkgs.callPackage ./nix/derivations/emacs-app.nix {};
+        in
+        {
+          default = configuredEmacs;
+          emacs-app = pkgs.callPackage ./nix/derivations/emacs-app.nix {
+            emacs = configuredEmacs;
+          };
         }
       );
 
@@ -75,8 +78,13 @@
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+          configuredEmacs = pkgs.callPackage ./emacs-package.nix {
+            inherit emacs-flake-inputs;
+          };
           darwinPackages = if pkgs.stdenv.isDarwin then [
-            (pkgs.callPackage ./nix/derivations/emacs-app.nix {})
+            (pkgs.callPackage ./nix/derivations/emacs-app.nix {
+              emacs = configuredEmacs;
+            })
           ] else [];
         in
         {

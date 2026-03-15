@@ -21,7 +21,7 @@ cleaning up whitespace.
   like a place where I'd want it as well.
 
   #+BEGIN_SRC emacs-lisp
-    (use-package "ws-butler"
+    (use-package ws-butler
       ;; :ensure t
       :config
       (setq-default ws-butler-keep-whitespace-before-point nil)
@@ -39,7 +39,7 @@ cleaning up whitespace.
   highlights text that flows over the limit, which has proven faster for [[https://emacs.stackexchange.com/a/31145/14851][others]].
 
   #+begin_src emacs-lisp :results none
-(use-package "whitespace"
+(use-package whitespace
   ;; :ensure t
   :init
   (setq-default

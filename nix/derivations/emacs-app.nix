@@ -1,12 +1,18 @@
-{ lib, writeShellScriptBin }:
+{ lib, writeShellScriptBin, emacs }:
 
-# Wrapper that opens the GUI Emacs.app on macOS via `open -a Emacs`.
-# Any file/URL arguments are forwarded to the open command.
+# Wrapper that opens the Nix-built Emacs on macOS.
+# Prefers the .app bundle in the derivation (for proper macOS GUI integration)
+# and falls back to running the binary directly.
 (writeShellScriptBin "emacs-app" ''
-  exec /usr/bin/open -a Emacs "$@"
+  app="${emacs}/Applications/Emacs.app"
+  if [ -d "$app" ]; then
+    exec /usr/bin/open -n "$app" --args "$@"
+  else
+    exec ${lib.getExe emacs} "$@"
+  fi
 '').overrideAttrs (_: {
   meta = {
-    description = "Open Emacs.app (GUI Emacs) on macOS via the open command";
+    description = "Open the Nix-built Emacs (GUI) on macOS";
     platforms = lib.platforms.darwin;
   };
 })

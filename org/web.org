@@ -200,7 +200,7 @@ Keep in mind that =dtrt-indent= can override this value.  Use
 #+begin_src emacs-lisp :results none :noweb yes
   (require 'use-package)
 
-  (use-package "org"
+  (use-package org
     :config
     <<config/web-mode-indentation-use-spaces>>
     ;; (config/add-web-capture-template)

@@ -117,7 +117,7 @@
   #+begin_src emacs-lisp :results none
     (require 'use-package)
 
-    (use-package "helm"
+    (use-package helm
       :defer t
       :config
       ;; Frames seem really buggy. I run into multiple problems with them:

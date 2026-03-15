@@ -28,7 +28,7 @@
 * use-package
 
 #+begin_src emacs-lisp :results none :noweb yes
-  (use-package "flycheck"
+  (use-package flycheck
     ;; :defer t
     ;; :ensure t
     :init

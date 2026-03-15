@@ -99,17 +99,18 @@ loaded directly with `load-file' -- bypassing `org-babel-load-file''s
 freshness check, which would otherwise attempt to retangle and fail with
 a permission-denied error on the read-only Nix store.
 
-When no pre-tangled .el is found (e.g. the Nix build tangle step did not
-produce one for this file), the org file is tangled at startup into
-`temporary-file-directory' and the result is loaded from there.  Org
-files with no emacs-lisp tangle blocks produce no output and are silently
-skipped.
+When `config/base-dir' is set (Nix context) and no pre-tangled .el is
+found, an error is signalled.  All org files with tangle blocks must
+produce a .el during the Nix build phase; a missing .el indicates a
+misconfigured :tangle header or a build regression.
 
-Falls back to computing the path relative to the current file's directory
-when `config/base-dir' is not set, which preserves behavior when running
-from a local checkout outside of Nix."
+When `config/base-dir' is not set (local checkout outside of Nix), the
+org file is tangled at startup into `temporary-file-directory' and the
+result is loaded from there.  Org files with no emacs-lisp tangle blocks
+produce no output and are silently skipped."
   (message "[INIT] %s" file)
-  (let* ((base-dir (if (boundp 'config/base-dir)
+  (let* ((nix-build-p (boundp 'config/base-dir))
+         (base-dir (if nix-build-p
                        config/base-dir
                      ;; Fallback: go up from lisp/ to the config root.
                      (expand-file-name ".."
@@ -124,21 +125,27 @@ from a local checkout outside of Nix."
         ;; can arise when the Nix build install ordering varies -- and would
         ;; fail with permission-denied on the read-only store.
         (load-file el-path)
-      ;; .el not pre-tangled (e.g. the Nix build tangle step skipped it or
-      ;; produced an empty result for an all-:tangle-no org file).  Tangle
-      ;; into a writable temp directory and load from there.  If no blocks
-      ;; produce output (no-code org file), org-babel-tangle-file writes
-      ;; nothing and we skip the load gracefully.
-      (let ((temp-el (expand-file-name
-                      (concat (file-name-base org-path) ".el")
-                      temporary-file-directory))
-            (org-confirm-babel-evaluate nil))
-        ;; org-babel-tangle-file lives in ob.el which isn't loaded at
-        ;; startup.  Require it explicitly so the function is available.
-        (require 'ob)
-        (org-babel-tangle-file org-path temp-el "emacs-lisp")
-        (when (file-exists-p temp-el)
-          (load-file temp-el))))))
+      (if nix-build-p
+          ;; In a Nix build all tangle blocks must have been compiled during
+          ;; the build phase.  A missing .el means :tangle yes is absent on
+          ;; one or more blocks, or the build step failed.  Error loudly.
+          (error "[INIT] No pre-tangled .el found for %s (expected: %s). \
+All emacs-lisp blocks that should run must not have :tangle no. \
+Run 'just build' to retangle."
+                 file el-path)
+        ;; Local checkout: tangle at startup into a writable temp directory.
+        ;; If no blocks produce output (no-code org file), org-babel-tangle-file
+        ;; writes nothing and we skip the load gracefully.
+        (let ((temp-el (expand-file-name
+                        (concat (file-name-base org-path) ".el")
+                        temporary-file-directory))
+              (org-confirm-babel-evaluate nil))
+          ;; org-babel-tangle-file lives in ob.el which isn't loaded at
+          ;; startup.  Require it explicitly so the function is available.
+          (require 'ob)
+          (org-babel-tangle-file org-path temp-el "emacs-lisp")
+          (when (file-exists-p temp-el)
+            (load-file temp-el)))))))
 
 (defun config/init-org-file-private (file)
   "Load private FILE from a sibling dotfiles-private directory.
@@ -220,7 +227,7 @@ to the config root.  Skips silently if the file does not exist."
   (setq-default tab-width 2)
 
   ;; prog-mode stuff
-  ;; (use-package "color-identifiers-mode"
+  ;; (use-package color-identifiers-mode
   ;;   :ensure t
   ;;   :init
   ;;   (global-color-identifiers-mode)
@@ -228,7 +235,7 @@ to the config root.  Skips silently if the file does not exist."
   ;;   )
 
   ;; rainbow identifiers (aka semantic syntax highlighting)
-  ;; (use-package "rainbow-identifiers"
+  ;; (use-package rainbow-identifiers
   ;;   :ensure t
   ;;   :init
   ;;   ;; (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)

@@ -20,7 +20,7 @@
   #+begin_src emacs-lisp :tangle yes
     (require 'use-package)
 
-    (use-package "which-key"
+    (use-package which-key
       :ensure t
       :init
       ;; Enable globally.  Docs don't really say this but it's there.

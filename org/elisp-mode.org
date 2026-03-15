@@ -128,7 +128,7 @@ Configure fill-column for better formatting:
 Beware: The package is =elisp-mode.el= and the mode is =emacs-lisp-mode=.
 
 #+begin_src emacs-lisp :results none :noweb yes
-(use-package "elisp-mode"
+(use-package elisp-mode
   :init
   <<config/elisp-tab-width-set>>
   (add-hook 'emacs-lisp-mode-hook #'config/elisp-tab-width-set)

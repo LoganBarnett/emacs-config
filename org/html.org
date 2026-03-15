@@ -66,7 +66,7 @@ Using =use-package= here actually runs =mhtml-mode= and that causes startup
 issues.  Just disable it for now.
 
 #+begin_src emacs-lisp :results none :noweb yes
-(use-package "mhtml-mode"
+(use-package mhtml-mode
   :init
   <<config/html-set-file-templates>>
   :config

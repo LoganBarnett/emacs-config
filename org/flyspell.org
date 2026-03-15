@@ -56,8 +56,8 @@ of =prog-mode= as well.
 
 ** initialize
 
-#+begin_src emacs-lisp :results none :noweb yes
-(use-package "flyspell"
+#+begin_src emacs-lisp :results none :noweb yes :tangle yes
+(use-package flyspell
   :demand t
   :init
   :config
