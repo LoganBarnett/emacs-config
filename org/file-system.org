@@ -88,6 +88,65 @@ If FORCE-P, overwrite the destination file if it exists, without confirmation."
   (delete-file (buffer-file-name))
   )
 
+;; Path yanking functions
+(defun config/yank-filename ()
+  "Copy the current buffer's filename (without directory) to the kill ring."
+  (interactive)
+  (if-let ((filename (buffer-file-name)))
+      (let ((name (file-name-nondirectory filename)))
+        (kill-new name)
+        (message "Copied filename: %s" name))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/yank-absolute-path ()
+  "Copy the current buffer's absolute file path to the kill ring."
+  (interactive)
+  (if-let ((filename (buffer-file-name)))
+      (progn
+        (kill-new filename)
+        (message "Copied absolute path: %s" filename))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/yank-relative-path ()
+  "Copy the current buffer's relative file path to the kill ring.
+Relative to project root if in a project, otherwise to `default-directory'."
+  (interactive)
+  (if-let ((filename (buffer-file-name)))
+      (let* ((root (or (and (fboundp 'projectile-project-root)
+                            (projectile-project-root))
+                       (and (fboundp 'doom-project-root)
+                            (doom-project-root))
+                       default-directory))
+             (relative (file-relative-name filename root)))
+        (kill-new relative)
+        (message "Copied relative path: %s" relative))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/yank-relative-directory ()
+  "Copy the current buffer's relative directory path (no filename) to the kill ring.
+Relative to project root if in a project, otherwise to `default-directory'."
+  (interactive)
+  (if-let ((filename (buffer-file-name)))
+      (let* ((root (or (and (fboundp 'projectile-project-root)
+                            (projectile-project-root))
+                       (and (fboundp 'doom-project-root)
+                            (doom-project-root))
+                       default-directory))
+             (dir (file-name-directory filename))
+             (relative (file-relative-name dir root)))
+        (kill-new relative)
+        (message "Copied relative directory: %s" relative))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/yank-absolute-directory ()
+  "Copy the current buffer's absolute directory path (no filename) to the kill ring."
+  (interactive)
+  (if-let ((filename (buffer-file-name)))
+      (let ((dir (file-name-directory filename)))
+        (kill-new dir)
+        (message "Copied absolute directory: %s" dir))
+    (user-error "Buffer is not visiting a file")))
+
 (eval-after-load "evil"
   (progn
     (map!
@@ -97,6 +156,12 @@ If FORCE-P, overwrite the destination file if it exists, without confirmation."
      :desc "File rename (no-vc)" "R" #'config/rename-current-buffer-file-no-vc
      :desc "File delete" "d" #'config/current-buffer-file-delete-vc
      :desc "File delete (no VC)" "D" #'config/current-buffer-file-delete-no-vc
+     (:prefix ("p" . "path")
+      :desc "Yank filename" "n" #'config/yank-filename
+      :desc "Yank absolute path" "a" #'config/yank-absolute-path
+      :desc "Yank relative path" "r" #'config/yank-relative-path
+      :desc "Yank relative directory" "d" #'config/yank-relative-directory
+      :desc "Yank absolute directory" "D" #'config/yank-absolute-directory)
      )
     ;; This keeps eval-after-load from calling the last thing evaluated (which
     ;; would be the function passed to `map!').
