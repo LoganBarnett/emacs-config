@@ -100,6 +100,12 @@
 ;; wraps rather than ends.  Built into Emacs 29+.
 (add-hook 'visual-line-mode-hook #'visual-wrap-prefix-mode)
 
+;; Show fringe indicators: a right-curly-arrow in the right fringe where a line
+;; wraps, and a left-curly-arrow in the left fringe on continuation lines.
+;; Defaults to (nil nil).  visual-line-mode reads this variable when it
+;; activates, so setting it here is sufficient.
+(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+
 ;; Raise so-long-mode's trigger threshold.  The default (250) is aggressive
 ;; enough to fire on ordinary prose paragraphs, which would undo visual-line-mode
 ;; in the very buffers we care about.  1000 characters still catches truly
