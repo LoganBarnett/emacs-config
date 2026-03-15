@@ -231,6 +231,7 @@ Files are returned as relative paths to DIRECTORY."
   :init
   ;; We might want this for project.el too, but I haven't tested it yet.
   <<config/projectile-buffers-kill-all>>
+  (add-to-list 'project-switch-commands '(magit-project-status "Magit" ?m))
   (map!
     :leader
     (:prefix ("p" . "project")
