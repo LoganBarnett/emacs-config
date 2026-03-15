@@ -34,6 +34,9 @@
     :init
     ;; turn on flychecking globally
     (add-hook 'prog-mode-hook #'flycheck-mode)
+    ;; Enable flycheck in org-mode so the modeline badge shows spelling errors
+    ;; via flycheck-aspell (configured below).
+    (add-hook 'org-mode-hook #'flycheck-mode)
     (setq-default syntax-checking-enable-by-default t)
     :config
     ;; node-modules support shamelessly lifted from here
@@ -56,5 +59,16 @@
     ;; use eslint with web-mode for jsx files
     ;; (flycheck-add-mode 'javascript-eslint 'web-mode)
     ;; (flycheck-add-mode 'javascript-jshint 'web-mode)
+    )
+
+  (use-package flycheck-aspell
+    :after flycheck
+    :config
+    ;; flycheck-aspell registers org-aspell-dynamic automatically on load.
+    ;; It uses aspell with a TeX-like filter which strips org markup reasonably
+    ;; well (=code=, *bold*, [[links]], etc.).
+    ;;
+    ;; Inherit the dictionary from ispell so it stays in sync with flyspell.
+    (setq flycheck-aspell-language ispell-current-dictionary)
     )
 #+end_src

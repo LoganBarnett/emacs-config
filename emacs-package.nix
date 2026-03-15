@@ -661,6 +661,9 @@
       epkgs.floobits
       # Generalized error reporting.
       epkgs.flycheck
+      # Spelling errors via aspell as a flycheck checker, so the modeline
+      # segment shows a count of misspellings alongside linting errors.
+      epkgs.flycheck-aspell
       # Spell checking with flycheck.
       # epkgs.flyspell
       # epkgs.flyspell-correct
