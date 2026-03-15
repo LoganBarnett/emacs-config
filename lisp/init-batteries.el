@@ -200,6 +200,14 @@
     (setq initial-buffer-choice #'config/initial-buffer)
     (toggle-debug-on-error)
     (message "[INIT] Done!")
+
+    ;; Run initialization complete hook
+    (run-hooks 'config/init-complete-hook)
+    (message "[INIT] Initialization complete hook executed.")
   )
+
+(defvar config/init-complete-hook nil
+  "Hook run when Emacs initialization is fully complete.
+This includes loading all org files, packages, and custom configurations.")
 
 (provide 'batteries-init)
