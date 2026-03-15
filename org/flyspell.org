@@ -59,13 +59,24 @@ of =prog-mode= as well.
 #+begin_src emacs-lisp :results none :noweb yes :tangle yes
 (use-package flyspell
   :demand t
-  :init
   :config
   (require 'flyspell-correct)
-  ;; Use the ido interface for a popup-like correction menu that shows
-  ;; suggestions and actions (save to dict, accept for session/buffer, etc.).
-  ;; flyspell-correct-ido is bundled with flyspell-correct.
-  (require 'flyspell-correct-ido)
+  ;; Use completing-read as the correction interface so it works with Vertico
+  ;; (which enhances completing-read with a popup) and is compatible with
+  ;; Embark (which can act on completing-read candidates).
+  (setq flyspell-correct-interface
+        (lambda (candidates word)
+          (let* ((actions '(("Save to personal dictionary" . save)
+                            ("Accept for buffer (LocalWords)"  . buffer)
+                            ("Accept for session"             . session)
+                            ("Skip"                           . skip)))
+                 (all-candidates (append candidates (mapcar #'car actions)))
+                 (choice (completing-read
+                          (format "Correct '%s': " word)
+                          all-candidates nil t)))
+            (if-let ((action (cdr (assoc choice actions))))
+                (cons action word)
+              choice))))
   <<config/flyspell-mute>>
   <<config/flyspell-keybindings>>
   <<flyspell-add-to-modes>>
