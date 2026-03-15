@@ -149,6 +149,7 @@
     (init-org-file "graphviz-dot.org")
     (init-org-file "html.org")
     (init-org-file "markdown.org")
+    (load-library "visual-line-config.el")
     (init-org-file "web.org")
     (init-org-file "web-mode.org")
     (init-org-file "font.org")

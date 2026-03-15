@@ -11,7 +11,9 @@
     (use-package "markdown-mode"
       :init
       :config
-      (add-hook 'markdown-mode-hook 'auto-fill-mode)
+      ;; auto-fill-mode is intentionally absent: visual-line-config.el enables
+      ;; visual-line-mode and explicitly disables auto-fill-mode so that editing
+      ;; files with long unwrapped lines does not insert hard newlines.
       (add-hook 'markdown-mode-hook 'flyspell-mode)
       )
   #+end_src

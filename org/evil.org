@@ -88,6 +88,18 @@ first line.
    use =evil-collection= and instead wire up my own bindings by hand. I've found
    a way to do this that seems to work consistently enough.
 
+** visual line mode
+
+When =visual-line-mode= is active, make all evil motions and operators work on
+visual (screen) lines rather than logical lines.  This means =d3j= deletes 3
+visual lines, counts in general respect visual lines, and =0=/=$= go to the
+visual line boundaries.  Must be set before evil is loaded.
+
+#+name: config/evil-respect-visual-line-mode
+#+begin_src emacs-lisp :results none :tangle no
+(setq evil-respect-visual-line-mode t)
+#+end_src
+
 ** fix: backslash (\)
 
 The backslash key will trigger ~evil-execute-in-emacs-state~ which is just
@@ -546,6 +558,7 @@ library is already loaded.
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
   <<config/evil-search-module>>
+  <<config/evil-respect-visual-line-mode>>
   (message "requiring evil-mode...")
   (require 'evil)
   (require 'evil-exchange)
