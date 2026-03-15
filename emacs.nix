@@ -29,6 +29,99 @@
       # Use `config` above as the default init file.
       defaultInitFile = true;
       extraEmacsPackages = (epkgs: let
+        # Tangle all org/*.org files into .el files using a batch Emacs process.
+        # Both .org sources and the tangled .el files are installed together under
+        # share/emacs-config/org/ so that org-babel-load-file can load the .el
+        # without retangling.  In the Nix store all files share the same epoch
+        # timestamp, so org-babel-load-file sees them as equally old and skips
+        # retangling (which would fail anyway on the read-only store).
+        emacs-config-org-sources = pkgs.stdenv.mkDerivation {
+          pname = "emacs-config-org-sources";
+          version = "0.0.0";
+          src = ./org;
+          nativeBuildInputs = [ pkgs.emacs ];
+          buildPhase = ''
+            runHook preBuild
+            mkdir -p tangled
+            for f in *.org; do
+              echo "[build] Tangling $f"
+              emacs --batch \
+                --load org \
+                --eval "(setq org-confirm-babel-evaluate nil)" \
+                --eval "(org-babel-tangle-file \
+                           \"$(pwd)/$f\" \
+                           \"$(pwd)/tangled/$(basename $f .org).el\" \
+                           \"emacs-lisp\")" \
+                2>&1 \
+                || echo "[build] No emacs-lisp tangle output for $f"
+            done
+            # Discard empty output files - org files where all blocks are
+            # :tangle no produce zero bytes.
+            find tangled -maxdepth 1 -name "*.el" -empty -delete
+            runHook postBuild
+          '';
+          installPhase = ''
+            runHook preInstall
+            mkdir -p $out/share/emacs-config/org
+            install -m 444 *.org $out/share/emacs-config/org/
+            for f in tangled/*.el; do
+              [ -e "$f" ] && install -m 444 "$f" $out/share/emacs-config/org/ \
+                || true
+            done
+            runHook postInstall
+          '';
+        };
+
+        # Install the hand-written lisp/*.el files as an Emacs package so they
+        # land in site-lisp and are available via load-library.  init.el is
+        # excluded here because emacsWithPackagesFromUsePackage already places it
+        # in site-lisp as default.el via defaultInitFile = true.
+        #
+        # A site-start.el is generated in preBuild.  Emacs loads site-start.el
+        # before default.el (init.el), so config/base-dir is set by the time
+        # init-org-file runs.  This tells init-org-file where the pre-tangled
+        # org files live without computing paths relative to load-file-name.
+        #
+        # trivialBuild byte-compiles each .el.  Files that fail compilation
+        # (e.g. because an external macro is not available at build time) still
+        # load fine as plain .el at runtime.
+        emacs-config-lisp = (pkgs.emacs.pkgs.trivialBuild {
+          pname = "emacs-config-lisp";
+          version = "0.0.0";
+          src = ./lisp;
+          packageRequires = [];
+          preBuild = ''
+            # init.el is installed as default.el via defaultInitFile = true.
+            rm -f init.el
+            cat > site-start.el << 'HEREDOC'
+            ;;; site-start.el --- Emacs config path setup -*- lexical-binding: t; -*-
+            ;;; Commentary:
+            ;; Runs before default.el (init.el).  Sets config/base-dir so that
+            ;; init-org-file can find pre-tangled org files in the Nix store
+            ;; without computing paths relative to load-file-name (which points
+            ;; at site-lisp when loading default.el, not the org/ directory).
+            ;;; Code:
+            (defvar config/base-dir
+              "${emacs-config-org-sources}/share/emacs-config/"
+              "Root directory of the Emacs configuration.
+            The org/ subdirectory holds pre-tangled .el files alongside the
+            original .org sources so org-babel-load-file loads without retangling.")
+            ;;; site-start.el ends here
+            HEREDOC
+          '';
+          # Compile each file individually so a failure on one does not abort
+          # the entire build.  Files that cannot be compiled load fine as .el.
+          buildPhase = ''
+            runHook preBuild
+            for f in *.el; do
+              ${pkgs.emacs}/bin/emacs --batch -L . \
+                -f batch-byte-compile "$f" 2>&1 \
+                || echo "[build] $f will load as interpreted .el"
+            done
+            runHook postBuild
+          '';
+        });
+
         claude-code-ide = (pkgs.emacs.pkgs.trivialBuild {
           pname = "claude-code-ide";
           ename = "claude-code-ide";
@@ -632,7 +725,8 @@
           })
         ];
       in
-        completion-packages
+        [ emacs-config-lisp ]
+        ++ completion-packages
         ++ editing
         ++ languages
         ++ programs

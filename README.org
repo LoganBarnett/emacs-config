@@ -93,6 +93,37 @@ for it (not MELPA).
 
 **
 
+** Editing ~org/~ Configuration Files
+
+Org-based configs follow a literate programming pattern:
+
+1. Each logical setting or feature lives in a named source block:
+
+   #+begin_src org
+   ,#+name: config/my-feature
+   ,#+begin_src emacs-lisp :results none :tangle no
+   (setq my-feature-variable t)
+   ,#+end_src
+   #+end_src
+
+2. A ~* stitch~ section at the bottom of the file assembles named blocks into
+   the final ~use-package~ (or other) form via noweb references:
+
+   #+begin_src org
+   ,#+begin_src emacs-lisp :results none :noweb yes
+   (use-package my-package
+     :init
+     <<config/my-feature>>
+     ...)
+   ,#+end_src
+   #+end_src
+
+Within a ~use-package~ form, ~:init~ is for variable settings that must precede
+the package load, and ~:config~ is for everything that runs after.  Named blocks
+containing function definitions should be expanded at the top level of the
+~* all together~ / ~* stitch~ section, before any ~use-package~ form, so that
+the functions exist by the time ~use-package~ references them.
+
 ** Trajectory
 
 *** ~org-mode~ vs vanilla Lisp

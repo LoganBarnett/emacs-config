@@ -82,28 +82,40 @@
   )
 
 (defun init-org-file (file)
-  "Logs FILE before it loading a file to help with debugging init issues."
+  "Load the pre-tangled elisp for the org FILE.
+Uses `config/base-dir' (set by site-start.el in the Nix package) to
+locate the org/ directory in the Nix store, where both the .org sources
+and the tangled .el files live.  Because both files share an epoch
+timestamp in the store, org-babel-load-file loads the .el directly
+without retangling.
+
+Falls back to computing the path relative to the current file's directory
+when `config/base-dir' is not set, which preserves behavior when running
+from a local checkout outside of Nix."
   (message "[INIT] %s" file)
-  ;; Get the parent directory of the lisp/ directory (the config root)
-  (let ((base-dir (expand-file-name ".."
-                                    (file-name-directory
-                                     (or load-file-name buffer-file-name)))))
-    (org-babel-load-file (expand-file-name (format "org/%s" file) base-dir)))
-  )
+  (let ((base-dir (if (boundp 'config/base-dir)
+                      config/base-dir
+                    ;; Fallback: go up from lisp/ to the config root.
+                    (expand-file-name ".."
+                                      (file-name-directory
+                                       (or load-file-name buffer-file-name))))))
+    (org-babel-load-file (expand-file-name (format "org/%s" file) base-dir))))
 
 (defun config/init-org-file-private (file)
-  "Logs private FILE before it loading a file to help with debugging init issues."
+  "Load private FILE from a sibling dotfiles-private directory.
+Like `init-org-file' but looks in a dotfiles-private directory adjacent
+to the config root.  Skips silently if the file does not exist."
   (message "[INIT] private %s" file)
-  ;; Look for private files in ../dotfiles-private relative to config root
-  (let* ((base-dir (expand-file-name ".."
-                                     (file-name-directory
-                                      (or load-file-name buffer-file-name))))
+  (let* ((base-dir (if (boundp 'config/base-dir)
+                       config/base-dir
+                     (expand-file-name ".."
+                                       (file-name-directory
+                                        (or load-file-name buffer-file-name)))))
          (private-dir (expand-file-name "../dotfiles-private" base-dir))
          (file-path (expand-file-name (format "org/%s" file) private-dir)))
     (if (file-exists-p file-path)
         (org-babel-load-file file-path)
-      (message "[INIT] Private file %s not found, skipping" file)))
-  )
+      (message "[INIT] Private file %s not found, skipping" file))))
 
 (defun dirty-init ()
   "A dump of init stuff found in dotspacemacs/user-config but is custom."
@@ -284,9 +296,8 @@
   (message "[DIRTY INIT] INIT DONE!")
   )
 
-;; Add the current lisp directory to load path
-(add-to-list 'load-path
-             (file-name-directory (or load-file-name buffer-file-name)))
+;; lisp/*.el files are installed to site-lisp by the emacs-config-lisp Nix
+;; package and are already on the load-path via EMACSLOADPATH from the wrapper.
 (load-library "init-batteries")
 (batteries-init)
 (toggle-debug-on-quit)
