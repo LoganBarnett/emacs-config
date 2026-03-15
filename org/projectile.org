@@ -59,7 +59,7 @@ depth, where 0 means the directory is the project, and 1 means the first level
 of directories under that directory.
 
 #+name: config/projectile-projects-directory
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq-default config/project-search-path
               '(
                 ("~/dev" . t)
@@ -91,7 +91,7 @@ seemed to solve my problem. Perhaps there was a delay?
 New versions of =fd= have colors. Pretty! But it messes up the =consul= UI with
 a bunch of raw color codes. Disable color.
 #+name: config/projectile-fd-turn-off-colors
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (setq-default
  projectile-git-fd-args
  "-H -0 -E .git -tf --strip-cwd-prefix --color never"
@@ -113,6 +113,7 @@ empty.
 
 ** over tramp
 
+#+name: config/projectile-debug-helpers
 #+begin_src emacs-lisp :results none :tangle no
 
 (defun config/projectile-dir-files-alien-debug (directory)
@@ -219,6 +220,8 @@ Files are returned as relative paths to DIRECTORY."
 * stitch
 
 #+begin_src emacs-lisp :results none :noweb yes :tangle yes
+<<config/projectile-projects-directory>>
+<<config/projectile-fd-turn-off-colors>>
 (use-package project
   :ensure t
   ;; Auto-remember projects when visiting files, not just via project commands.

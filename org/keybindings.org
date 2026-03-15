@@ -14,7 +14,7 @@ Generally this is bound to =M-x=. Spacemacs has a good default and I'd like to
 stick with it.
 
 #+name: execute
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (map!
   :leader
   :desc "Execute a function"
@@ -47,14 +47,14 @@ hassle to overcome, so let's pick another key. I don't have any ideas. Perhaps I
 should just try to get used to it for now.
 
 #+name: local-leader-key
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (on-doom
   ;; (setq doom-localleader-key "C-SPC")
  )
 #+end_src
 
 * stitch
-#+begin_src emacs-lisp :results none :noweb yes
+#+begin_src emacs-lisp :results none :noweb yes :tangle yes
 <<execute>>
 <<local-leader-key>>
 #+end_src

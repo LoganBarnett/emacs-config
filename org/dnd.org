@@ -11,7 +11,7 @@
 The =dnd= package is consumed via Nix from the [[https://github.com/LoganBarnett/org-dnd][org-dnd]] repo.
 
 #+name: config/dnd-load
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (use-package dnd
   :demand t
   )
@@ -34,7 +34,8 @@ The =dnd= package is consumed via Nix from the [[https://github.com/LoganBarnett
 
 * music
 
-  #+begin_src emacs-lisp :results none
+#+name: config/dnd-music-utils
+  #+begin_src emacs-lisp :results none :tangle no
 
   (setq-default dnd/profile-path (expand-file-name "~/notes/dnd2024.org"))
 
@@ -120,7 +121,7 @@ The =dnd= package is consumed via Nix from the [[https://github.com/LoganBarnett
 * utilities
 ** equipment weight
 #+name: org-dnd-equipment-weight
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (defun dnd/total-equipment-weight (weights qtys)
   "Calculate the total weights using WEIGHTS * QTYS."
   (reduce
@@ -134,10 +135,11 @@ The =dnd= package is consumed via Nix from the [[https://github.com/LoganBarnett
 #+end_src
 
 * using
-  #+begin_src emacs-lisp :results none :noweb yes
+  #+begin_src emacs-lisp :results none :noweb yes :tangle yes
     (with-eval-after-load 'org
       (message "Loading D&D settings...")
       <<org-dnd-key-bindings>>
+      <<config/dnd-music-utils>>
       <<org-dnd-equipment-weight>>
       (require 'request)
       <<config/dnd-load>>

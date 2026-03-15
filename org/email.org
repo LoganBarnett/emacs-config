@@ -50,7 +50,7 @@ I will be using =maildir-account-dir= quite a bit. To ensure this is used
 globally, we use =defvar= up front to declare it.
 
 #+name: config/maildir-account-dir-create
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (defcustom maildir-account-dir "unset"
   "The base mail directory in mu for an account.")
 (defcustom maildir-account-inbox-subdir "unset"
@@ -81,7 +81,7 @@ Doom doesn't bind =mu4e= that I have seen.
 I need my line numbers.
 
 #+name: mu4e-line-numbers
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (add-hook 'mu4e-headers-mode-hook #'display-line-numbers-mode)
 (add-hook 'mu4e-view-mode-hook #'display-line-numbers-mode)
 #+end_src
@@ -110,7 +110,7 @@ from =mu4e-headers-mode= (the view with the list of emails). We want to turn
 that off, so we can capture anything from its header:
 
 #+name: config/email-mu4e-link-to-message
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq org-mu4e-link-query-in-headers-mode nil)
 #+end_src
 
@@ -209,7 +209,7 @@ For completion (particularly for mail directories), =mu4e= defaults to using
 Instead, we fall back on the default, which should be =ivy= in my configuration.
 
 #+name: config/mu4e-mail-directory-completion
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq mu4e-completing-read-function 'completing-read)
 #+end_src
 
@@ -221,7 +221,8 @@ I have my own =org-contacts= file I wish to use. I can also add some
 actions with =o= being the keybinding to add an =org-contact= contact per
 the [[http://www.djcbsoftware.nl/code/mu/mu4e/Maintaining-an-address_002dbook-with-org_002dcontacts.html][documentation]].
 
-#+begin_src emacs-lisp :results none :tangle yes
+#+name: config/mu4e-org-contacts
+#+begin_src emacs-lisp :results none :tangle no
 (defun config/mu4e-org-contacts ()
   (setq-default mu4e-org-contacts-file "~/notes/contacts.org")
   (add-to-list 'mu4e-headers-actions
@@ -236,7 +237,8 @@ the [[http://www.djcbsoftware.nl/code/mu/mu4e/Maintaining-an-address_002dbook-wi
      By default =mu4e= looks for =~/Maildir= which is not where I have my mail
      synced.
 
-#+begin_src emacs-lisp :tangle yes
+#+name: config/mu4e-set-maildir
+#+begin_src emacs-lisp :tangle no
 (defun config/mu4e-set-maildir ()
   (setq-default mu4e-maildir (expand-file-name "~/mail"))
   (setq-default mu4e-change-filenames-when-moving t)
@@ -254,7 +256,8 @@ http://pragmaticemacs.com/emacs/master-your-inbox-with-mu4e-and-org-mode/
 
      Turning on image support is simple.
 
-#+begin_src emacs-lisp :tangle yes
+#+name: config/mu4e-enable-images
+#+begin_src emacs-lisp :tangle no
 (defun config/mu4e-enable-images ()
   (setq-default mu4e-view-show-images t)
   (setq-default mu4e-view-prefer-html t)
@@ -268,7 +271,8 @@ http://pragmaticemacs.com/emacs/master-your-inbox-with-mu4e-and-org-mode/
      Toggling to plain text is shadowed by =evil-mode=. For now let's provide an
      interactive function to handle it.
 
-     #+begin_src emacs-lisp :results none :tangle yes
+#+name: config/mu4e-view-plaintext
+     #+begin_src emacs-lisp :results none :tangle no
        (defun my/mu4e-view-plaintext ()
          "Provide an interactive toggle of plain text and html of mail messages."
          (interactive)
@@ -329,7 +333,8 @@ using email.
 
 *** sending mail
 
-#+begin_src emacs-lisp :tangle yes
+#+name: config/send-email
+#+begin_src emacs-lisp :tangle no
   (defun config/send-email ()
     ;; TODO: Many settings are inherited from ../lisp/config-email.el - move them
     ;; here.
@@ -460,7 +465,8 @@ invoke
      all-mail section. The mail server still shows the message as present in the
      inbox. Removing these statements seems to have fixed it.
 
-     #+begin_src emacs-lisp :results none :tangle yes
+#+name: config/mu4e-indexing
+     #+begin_src emacs-lisp :results none :tangle no
        (defun config/mu4e-indexing ()
          ;; (setq-default
           ;; mu4e-index-cleanup nil
@@ -562,7 +568,8 @@ and deleting. Do not apply this as it doesn't fix anything.
 **** prevent next message upon scroll
      This prevents scrolling to the next message if you scroll down too far.
 
-     #+begin_src emacs-lisp :results none :tangle yes
+#+name: config/mu4e-viewing
+     #+begin_src emacs-lisp :results none :tangle no
        (defun config/mu4e-viewing ()
          (setq-default
           mu4e-view-scroll-to-next nil
@@ -576,7 +583,7 @@ This is the new way to display things with w3m. I have read tickets saying this
 is documented officially but I couldn't find it.
 
 #+name: config/mu4e-html2text-renderer
-#+begin_src emacs-lisp :noweb yes :results none :tangle yes
+#+begin_src emacs-lisp :noweb yes :results none :tangle no
 (setq-default
   mu4e-html2text-command "w3m -dump -T text/html -o display_link_number=true"
   mm-text-html-renderer 'gnus-w3m
@@ -600,7 +607,7 @@ a message. One can jump to these URLs under the standard keybindings, but
 much of that is shadowed by =evil-mode=.
 
 #+name: mu4e-goto-url
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (on-doom
  (map!
   :leader
@@ -640,7 +647,8 @@ much of that is shadowed by =evil-mode=.
        =mu4e-fill-paragraph= since =fill-paragraph= does the opposite of what we
        want, and =mu4e-fill-paragraph= effectively does the "unfill".
 
-     #+begin_src emacs-lisp :results none :tangle yes
+#+name: config/mu4e-unfill-body
+     #+begin_src emacs-lisp :results none :tangle no
        (defun config/mu4e-unfill-body ()
          (let ((fill-column most-positive-fixnum)
                (top ))
@@ -689,7 +697,8 @@ always what I want. More research is required. It would be nice to preserve
 formatting I do myself (such as lists), and =mu4e-compose-format-flowed= as
 =nil= is the way to accomplish that.
 
-       #+begin_src emacs-lisp :results none :tangle yes
+#+name: config/mu4e-prevent-hard-line-wrap-on-export
+       #+begin_src emacs-lisp :results none :tangle no
 
          (defun config/mu4e-prevent-hard-line-wrap-on-export ()
            "Sets `use-hard-newlines' to t for the mu4e buffer."
@@ -749,7 +758,7 @@ seems to be to disable =comment-auto-fill-only-comments= in =mu4e:compose-mode=.
       host dependent (which can change on local network switching, I think).
 
 #+name: config/mu4e-composing
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq-default
  mu4e-compose-dont-reply-to-self t
  )
@@ -757,7 +766,8 @@ seems to be to disable =comment-auto-fill-only-comments= in =mu4e:compose-mode=.
 
 *** evilication
 
-     #+begin_src emacs-lisp :results none :tangle yes
+#+name: config/mu4e-evilify-evil-window-prefix
+     #+begin_src emacs-lisp :results none :tangle no
        (defun config/mu4e-evilify-evil-window-prefix ()
          "Setup window prefixed commands"
          (interactive)
@@ -850,7 +860,7 @@ not always be the case.  For me it is setup via =nix=.  Instead of hardcoding a
 =$HOME/.bash_profile=, which is just =bash_profile= in this repository.
 
 #+name: config/set-mu-path
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq mu4e-mu-binary (executable-find "mu"))
 #+end_src
 
@@ -894,7 +904,7 @@ probably file a bug.
 We'll apply the workaround here.
 
 #+name: config/fix-mu4e-version-mismatch
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 ;; (setq mu4e-mu-version "1.8.5")
   ;; (defalias 'mu4e~start 'mu4e--start)
   ;; (defalias 'mu4e~stop 'mu4e--stop)
@@ -1103,7 +1113,8 @@ to default behaviors.
 
 *** apply mu4e
 
-#+begin_src emacs-lisp :results none :noweb yes :tangle yes
+#+name: config/mu4e-apply
+#+begin_src emacs-lisp :results none :noweb yes :tangle no
   <<config/evil-collection-mu4e-pr-860-fix-key-conflict>>
   (require 'use-package)
   (message "initializing mu4e with use-package...")
@@ -1258,3 +1269,28 @@ to default behaviors.
   - [[https://github.com/cmiles74/spacemacs-notmuch-layer][Spacemacs notmuch layer]] :: =notmuch= for Spacemacs. Use =SPC a n= to activate.
   - [[https://notmuchmail.org/notmuch-emacs/][notmuch-emacs]] :: Official docs on setting up =notmuch= with Emacs.
 * artifacts
+
+* stitch
+
+#+begin_src emacs-lisp :tangle yes :noweb yes
+<<config/maildir-account-dir-create>>
+<<mu4e-line-numbers>>
+<<config/email-mu4e-link-to-message>>
+<<config/mu4e-mail-directory-completion>>
+<<config/mu4e-org-contacts>>
+<<config/mu4e-set-maildir>>
+<<config/mu4e-enable-images>>
+<<config/mu4e-view-plaintext>>
+<<config/mu4e-indexing>>
+<<config/mu4e-viewing>>
+<<config/mu4e-html2text-renderer>>
+<<mu4e-goto-url>>
+<<config/mu4e-unfill-body>>
+<<config/mu4e-prevent-hard-line-wrap-on-export>>
+<<config/mu4e-composing>>
+<<config/mu4e-evilify-evil-window-prefix>>
+<<config/send-email>>
+<<config/set-mu-path>>
+<<config/fix-mu4e-version-mismatch>>
+<<config/mu4e-apply>>
+#+end_src

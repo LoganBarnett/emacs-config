@@ -17,7 +17,7 @@ currently on =aarch64=.
 The path must be expanded before being set.
 
 #+name: config/openscad-command
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq-default scad-command (file-truename "~/bin/openscad"))
 #+end_src
 
@@ -116,7 +116,7 @@ I don't recall if Tomorrow Night was attempted without quotes. But Starnight
 works and flipping the variable doesn't stick without a restart. Alas.
 
 #+name: config/scad-preview-color-scheme
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 (setq-default scad-preview-colorscheme "Starnight")
 #+end_src
 
@@ -169,7 +169,7 @@ We can add =org-babel= support using [[https://github.com/wose/ob-scad][ob-scad]
 
 * stitch
 
-#+begin_src emacs-lisp :results none :noweb yes
+#+begin_src emacs-lisp :results none :noweb yes :tangle yes
 (defun list-of-stringp (xs)
   (--all-p xs #'stringp)
   )

@@ -46,7 +46,8 @@ the front-matter in HTML blocks - I can just use ~org-mode~ metadata instead.
 #+end_src
 
 
-#+begin_src emacs-lisp :results none :exports code :tangle yes
+#+name: config/org-mode-debug-local-variables
+#+begin_src emacs-lisp :results none :exports code :tangle no
 (advice-add 'check-unsafe-local-variable :after
   (lambda (var val result)
     (message "[check-unsafe-local-variable] %s = %S → %s" var val result)))
@@ -94,7 +95,8 @@ vertical splits. I found that 564 (or 594?) seems to be the sweet spot in terms
 of pixels on a window designed to display just a little over 80 columns with all
 the gutter stuff.
 
-#+begin_src emacs-lisp :results none
+#+name: config/iimage-scale-to-fit-width
+#+begin_src emacs-lisp :results none :tangle no
 ;; I don't get why this doesn't seem to be logging, but it seems to be working.
 (defun iimage-scale-to-fit-width ()
   "Scale over-sized images in the buffer to the width of the current window.
@@ -143,7 +145,8 @@ the gutter stuff.
 #+end_src
 
 
-#+begin_src emacs-lisp :results none
+#+name: config/iimage-scale-on-window-configuration-change
+#+begin_src emacs-lisp :results none :tangle no
 (defun iimage-scale-on-window-configuration-change ()
   "Hook function for major mode that display inline images:
 Adapt image size via `iimage-scale-to-fit-width' when the window size changes."
@@ -283,7 +286,7 @@ should fix that. However something keeps overriding it. [[stitch]] also uses
 =add-hook= to deal with this.
 
 #+name: config/open-link-in-new-window
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (add-to-list 'org-link-frame-setup '(file . find-file-other-window))
 #+end_src
 
@@ -307,7 +310,7 @@ This is moved from =config-org-mode.el=. I should break this up and add prose as
 necessary.
 
 #+name: config/org-dirty-config-fns
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 ;; TODO: Setup a keybinding to replace org-clock-report with this function.
 (defun my/org-clock-report ()
   "Run org-clock-report but don't leave a narrowed buffer when done."
@@ -400,7 +403,7 @@ A common form of hidden content is collapsed headings."
 #+end_src
 
 #+name: config/org-dirty-config-run
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (require 'my-utils) ;; Needed for config/disable-visual-line-mode.
 (add-hook 'org-mode-hook #'config/disable-visual-line-mode)
 ;; set default diary location
@@ -625,7 +628,7 @@ Specifically https://emacs.stackexchange.com/a/51734/14851
 Do I actually need this though?
 
 #+name: config/org-babel-passthrough
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (defun config/org-mode-org-babel-execute:passthrough (body params)
   body)
 (defalias 'org-babel-execute:json 'config/org-mode-org-babel-execute:passthrough)
@@ -670,7 +673,7 @@ It works!
 I want to see errors when a =noweb= reference fails to resolve.
 
 #+name: config/org-mode-babel-show-noweb-ref-error
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq org-babel-error-all-langs t)
 #+end_src
 
@@ -683,7 +686,8 @@ inlining, and that is what we will do here to work around the issue.
 
 This doesn't work because =:post= needs an =org-babel= block and not a function.
 Bleh.
-#+begin_src emacs-lisp :results none :tangle yes
+#+name: config/ox-html-inline-svgs-fn
+#+begin_src emacs-lisp :results none :tangle no
 (defun config/ox-html-inline-svgs (text)
   (with-temp-buffer
     (erase-buffer)
@@ -704,7 +708,8 @@ Bleh.
 To use this, add =:post config/ox-html-inline-svgs :exports code :results raw
 drawer=.
 
-#+begin_src emacs-lisp :results none :tangle yes
+#+name: config/org-html-svg-embed
+#+begin_src emacs-lisp :results none :tangle no
 (require 'ox-html)
 (require 'nxml-mode)
 
@@ -745,7 +750,8 @@ Confluence puts a prefix upon every anchor which is the title of the document.
 That name can vary across =org-mode= buffers. Look it up using the custom
 keyword =AUTO_ID_PREFIX=.
 
-#+begin_src emacs-lisp :results none :tangle yes
+#+name: config/auto-id-with-confluence-prefix
+#+begin_src emacs-lisp :results none :tangle no
 (defun config/auto-id-with-confluence-prefix (hierarchy-list)
   (concat
    (org-auto-id/get-org-keyword "AUTO_ID_PREFIX")
@@ -763,7 +769,7 @@ potentially change as we edit our configuration.  This function we will define
 will be used in the snippet.
 
 #+name: config/org-babel-source-block-languages-fn
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (defun auto-mode-alist-pair-to-org-babel-language (auto-mode-pair)
   (replace-regexp-in-string
    "-mode$"
@@ -795,7 +801,7 @@ will be used in the snippet.
 
 Test it!
 
-#+begin_src emacs-lisp :results value list :noweb yes
+#+begin_src emacs-lisp :results value list :noweb yes :tangle no
 <<config/org-babel-source-block-languages-fn>>
 
 (config/org-babel-languages-available)
@@ -955,7 +961,7 @@ adding indentation (and even that isn't very clear).
 at ~nil~.
 
 #+name: config/org-babel-src-indentation
-#+begin_src emacs-lisp :results none :exports code
+#+begin_src emacs-lisp :results none :exports code :tangle no
 (setq-default org-src-preserve-indentation nil)
 (setq-default org-edit-src-content-indentation 0)
 #+end_src
@@ -968,7 +974,7 @@ makes displaying clock usage a little weird when looking across the seam of a
 year. We want to display it up until now.
 
 #+name: config/org-clock-display-until-now
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq org-clock-display-default-range 'untilnow)
 #+end_src
 ** clock out on killing a buffer
@@ -995,7 +1001,8 @@ To remove this infix, we have to redefine the function itself. Perhaps this
 would make a good contribution to =org-html=. At some point I should investigate
 whether or not we can employ semantic HTML for the tags.
 
-#+begin_src emacs-lisp :results none :tangle yes
+#+name: config/org-html-format-headline
+#+begin_src emacs-lisp :results none :tangle no
 (defun org-html-format-headline-default-function
     (todo _todo-type priority text tags info)
   "Default format function for a headline.
@@ -1018,7 +1025,7 @@ See `org-html-format-headline-function' for details."
 When marking a =TODO= as =DONE= we can automatically insert a timestamp.
 
 #+name: config/org-todo-log-done
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq org-log-done 'time)
 #+end_src
 ** default todo states
@@ -1074,7 +1081,7 @@ For the most part, A-C on priorities works great. However Jira tends to use
 around 5 priorities, and we must support these beforehand.
 
 #+name: config/org-mode-set-priorities
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (setq
  org-priority-lowest ?E
  org-priority-faces '(
@@ -1097,7 +1104,7 @@ this [[https://emacs.stackexchange.com/a/69012][Stack Overflow post]], we can ju
 there, and grab the result.
 
 #+name: config/org-time-stamp-string
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (defun org-time-stamp-string (time inactive)
   (with-temp-buffer
     (insert (or time ""))
@@ -1115,14 +1122,14 @@ date parsing mechanisms.
 Here's the regular expression we need:
 
 #+name: config/inactive-timestamp-sans-bracket-regexp
-#+begin_src emacs-lisp :reesults none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (defvar inactive-timestamp-sans-bracket-regexp
   "\\[\\([^]]+\\)\\]"
   )
 #+end_src
 
 #+name: config/org-time-stamp-string-sans-brackets
-#+begin_src emacs-lisp :results none :tangle yes :noweb yes
+#+begin_src emacs-lisp :results none :tangle no :noweb yes
 
 <<config/inactive-timestamp-sans-bracket-regexp>>
 
@@ -1181,7 +1188,7 @@ Later, we can even make it smart enough to look at the heading and default to
 that time.
 
 #+name: config/clock-full-day
-#+begin_src emacs-lisp :results none :tangle yes :noweb yes
+#+begin_src emacs-lisp :results none :tangle no :noweb yes
 
 <<config/inactive-timestamp-sans-bracket-regexp>>
 
@@ -1480,6 +1487,13 @@ This is the region of offending code, I think:
   <<config/org-auto-id>>
   <<config/org-mode-babel-show-noweb-ref-error>>
   <<config/org-mode-set-priorities>>
+  <<config/org-html-format-headline>>
+  <<config/auto-id-with-confluence-prefix>>
+  <<config/org-babel-source-block-languages-fn>>
+  <<config/org-time-stamp-string>>
+  <<config/org-time-stamp-string-sans-brackets>>
+  <<config/clock-full-day>>
+  <<config/org-mode-debug-local-variables>>
   (require 'ob-dsq)
   (org-babel-do-load-languages 'org-babel-load-languages '((dsq . t)))
   (require 'gnuplot)

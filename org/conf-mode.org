@@ -10,19 +10,19 @@
 ** systemd support
 
 #+name: config/systemd-files
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (add-to-list 'auto-mode-alist '("\\.service\\'" . conf-mode))
 #+end_src
 
 ** display line numbers
 
 #+name: config/conf-mode-line-numbers
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (add-hook 'conf-mode-hook 'display-line-numbers-mode)
 #+end_src
 
 ** stitch
-#+begin_src emacs-lisp :results none :noweb yes
+#+begin_src emacs-lisp :results none :noweb yes :tangle yes
   (require 'use-package)
   (use-package conf-mode
     :defer t

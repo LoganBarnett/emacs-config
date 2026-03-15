@@ -21,7 +21,8 @@ that I deleted the file. Saving it in this way will recreate the file. This is a
 huge source of confusion for me. Fortunately, I found [[http://rejeep.github.io/emacs/elisp/2010/11/16/delete-file-and-buffer-in-emacs.html][this post]] that has a
 function that takes care of this for me.
 
-#+BEGIN_SRC emacs-lisp
+#+name: config/buffer-delete-file-and-kill
+#+begin_src emacs-lisp :tangle no
 (defun my/delete-file-and-kill-buffer ()
     "Remove file connected to current buffer and kill buffer."
     (interactive)
@@ -35,12 +36,13 @@ function that takes care of this for me.
           (kill-buffer buffer)
           (projectile-invalidate-cache projectile-project-root)
           (message "File '%s' successfully removed" filename)))))
-#+END_SRC
+#+end_src
 ** copy full path
    Shameless theft from here:
    https://emacsredux.com/blog/2013/03/27/copy-filename-to-the-clipboard/
 
-   #+begin_src emacs-lisp :results none
+#+name: config/buffer-copy-file-path
+   #+begin_src emacs-lisp :results none :tangle no
      (defun my/copy-file-path-to-clipboard ()
        "Copy the current buffer file name (full path) to the clipboard."
        (interactive)
@@ -103,6 +105,8 @@ A separate function is needed to keep the options we need.
 * stitch
 
 #+begin_src emacs-lisp :results none :exports code :tangle yes :noweb yes
+<<config/buffer-delete-file-and-kill>>
+<<config/buffer-copy-file-path>>
 (use-package ibuffer
   :ensure t
   :init

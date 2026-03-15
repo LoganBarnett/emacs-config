@@ -10,14 +10,16 @@
   because resizing the minibuffer is also expensive. To keep =which-key= from
   invoking the minibuffer, open it as a frame instead.
 
-  #+begin_src emacs-lisp :results none
+#+name: config/which-key-use-frame
+  #+begin_src emacs-lisp :results none :tangle no
     (defun config/which-key-use-frame ()
       (setq-default which-key-popup-type 'frame)
       )
   #+end_src
 
 * all together
-  #+begin_src emacs-lisp :tangle yes
+  #+begin_src emacs-lisp :tangle yes :noweb yes
+    <<config/which-key-use-frame>>
     (require 'use-package)
 
     (use-package which-key

@@ -42,7 +42,8 @@ the shell over =ssh=. It doesn't understand custom prompts very well, let alone
 things specific to =zsh=. Generally Tramp expects =bash=. This setting makes
 Tramp use bash regardless of what the remote machine is set to use.
 
-#+begin_src emacs-lisp
+#+name: config/tramp-shell-settings
+#+begin_src emacs-lisp :tangle no
 ;; (setq-default explicit-shell-file-name "/bin/bash")
 #+end_src
 
@@ -52,7 +53,8 @@ Tramp use bash regardless of what the remote machine is set to use.
   reasons. My work repos that I have less control over are the most demanding of
   custom settings though, so let's enable it.
 
-  #+begin_src emacs-lisp
+  #+name: config/enable-remote-dir-locals
+  #+begin_src emacs-lisp :tangle no
   (defun config/enable-remote-dir-locals ()
     (setq-default enable-remote-dir-locals t)
     )
@@ -63,7 +65,8 @@ Tramp use bash regardless of what the remote machine is set to use.
    others. Per this [[https://emacs.stackexchange.com/questions/22304/invalid-base64-data-error-when-using-tramp][SO post]], =scp= is preferred to use always. It fixes a
    problem I have run into where the last message is "Invalid base64 data".
 
-#+begin_src emacs-lisp
+#+name: config/fix-tramp-large-file-issue
+#+begin_src emacs-lisp :tangle no
 (defun config/fix-tramp-large-file-issue ()
   (setq-default tramp-copy-size-limit nil)
 )
@@ -79,7 +82,7 @@ It seems after running org-babel blocks, this gets reset to =1= so it may need
 to be run again.
 
 #+name: config/tramp-log-verbosity
-#+begin_src emacs-lisp :tangle yes :results none
+#+begin_src emacs-lisp :tangle no :results none
 (setq-default tramp-verbose 5)
 #+end_src
 
@@ -88,7 +91,8 @@ to be run again.
 
 https://discourse.doomemacs.org/t/recentf-cleanup-logs-a-lot-of-error-messages/3273/6
 
-#+begin_src emacs-lisp :results none
+#+name: config/fix-tramp-recentf-truename
+#+begin_src emacs-lisp :tangle no :results none
 (after! tramp (advice-add 'doom--recentf-file-truename-fn :override
                           (defun my-recent-truename (file &rest _args)
                             (if (or (not (file-remote-p file)) (equal "sudo" (file-remote-p file 'method)))
@@ -227,7 +231,8 @@ No idea on this one.  I haven't found much online.  I suspect a bug.
 Need to override this function because =cmd= is defined with =ls= first instead
 of =gls= and there are no other means of overriding.
 
-#+begin_src emacs-lisp
+#+name: override-tramp-get-ls-command
+#+begin_src emacs-lisp :tangle no
 (defun override-tramp-get-ls-command ()
   (defun tramp-get-ls-command (vec)
     "Determine remote `ls' command."
@@ -266,7 +271,8 @@ joins the freeze. I've been about to =C-g= out of the =helm= freeze, but I'm
 still stuck in an Emacs instance that's effectively broken. I want a =SPC=
 command control it, as those still work.
 
-#+begin_src emacs-lisp
+#+name: config/tramp-keybindings
+#+begin_src emacs-lisp :tangle no
    (on-spacemacs
     (spacemacs/declare-prefix "aT" "tramp")
     (spacemacs/set-leader-keys (kbd "SPC a T c") 'tramp-cleanup-all-connections)
@@ -282,7 +288,8 @@ command control it, as those still work.
   Since updating packages, this happens when opening any file remotely. A second
   open makes it work, but that's very undesirable.
 
-  #+begin_src emacs-lisp :results none
+  #+name: config/fix-tramp-git-gutter-interaction
+  #+begin_src emacs-lisp :tangle no :results none
     (defun config/fix-tramp-git-gutter-interaction ()
       (interactive)
       (defun git-gutter+-remote-default-directory (dir file)
@@ -301,7 +308,17 @@ command control it, as those still work.
   #+end_src
 * all together
 
-#+begin_src emacs-lisp :results none :noweb yes
+#+begin_src emacs-lisp :tangle yes :results none :noweb yes
+  <<config/fix-tramp-large-file-issue>>
+
+  <<config/enable-remote-dir-locals>>
+
+  <<override-tramp-get-ls-command>>
+
+  <<config/fix-tramp-recentf-truename>>
+
+  <<config/fix-tramp-git-gutter-interaction>>
+
   (require 'use-package)
   (use-package tramp
     :init
@@ -322,6 +339,8 @@ command control it, as those still work.
     (config/enable-remote-dir-locals)
     (config/fix-tramp-git-gutter-interaction)
   )
+
+  <<config/tramp-keybindings>>
 
 #+end_src
 

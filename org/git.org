@@ -216,7 +216,7 @@ This snippet should cause the variable to be read from the =.gitconfig=.
 
 This should point to =emacsclient=:
 
-#+begin_src emacs-lisp :results value
+#+begin_src emacs-lisp :results value :tangle no
 (getenv "EDITOR")
 #+end_src
 
@@ -308,7 +308,7 @@ This is yanked from here:
 https://github.com/doomemacs/doomemacs/blob/master/modules/emacs/vc/config.el
 
 #+name: config/git-tramp-vc-backend-optimize
-#+begin_src emacs-lisp :results none :exports code
+#+begin_src emacs-lisp :results none :exports code :tangle no
 ;; Remove RCS, CVS, SCCS, SRC, and Bzr, because it's a lot less work for vc to
 ;; check them all (especially in TRAMP buffers), and who uses any of these in
 ;; 2021, amirite?

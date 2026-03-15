@@ -13,7 +13,8 @@ where logs are stored.
   In a recent update of Spacemacs, =evil-mode= bindings seem to have been
   truncated. Namely, my normal =C-w= window prefix died. Let's restore it.
 
-  #+begin_src emacs-lisp :results none
+#+name: config/messages-evilify-window-prefix
+  #+begin_src emacs-lisp :results none :tangle no
     (defun config/messages-buffer-evilify-evil-window-prefix ()
       "Setup window prefixed commands"
       (interactive)
@@ -39,7 +40,8 @@ where logs are stored.
 
 * integrate
 
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle yes :noweb yes
+<<config/messages-evilify-window-prefix>>
 (message "Initializing messages-mode...")
 ;; This provides a solid way of configuring our leader key in the `*Messages*'
 ;; buffer:

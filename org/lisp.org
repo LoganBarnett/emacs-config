@@ -15,7 +15,7 @@ Note: I have not seen this always work in all circumstances. Further
 investigation is needed. ~advice-mapc~ was not iterating over all of the advice.
 
 #+name: config/advice-unadvice
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (defun advice-unadvice (sym)
   "Remove all advices from symbol SYM."
   (interactive "aFunction symbol: ")
@@ -100,14 +100,14 @@ into a =src= block.
 #+end_example
 
 Don't actually remove this just yet.
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle no
 ;(advice-remove '+emacs-lisp-truncate-pin #'config/truncate-string-stop)
 #+end_src
 * string manipulation
 ** fill a string
 
 #+name: config/fill-string
-#+begin_src emacs-lisp :results none :tangle yes
+#+begin_src emacs-lisp :results none :tangle no
 (defun fill-string (s)
   "Fill string S (hard line wrap)."
   (with-temp-buffer
@@ -206,7 +206,7 @@ element out of the current form.
 
 * stitch
 
-#+begin_src emacs-lisp :results none :noweb yes
+#+begin_src emacs-lisp :results none :noweb yes :tangle yes
 <<config/advice-unadvice>>
 <<config/fill-string>>
 (use-package lisp-mode

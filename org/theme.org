@@ -6,7 +6,8 @@
 #+file_tags:
 #+tags:
 
-#+begin_src emacs-lisp :results none
+#+name: config/doom-theme-settings
+#+begin_src emacs-lisp :results none :tangle no
 (setq-default doom-acario-dark-brighter-modeline t)
 (setq-default doom-acario-dark-comment-bg t)
 ;; Setting this to `t' hasn't actually made for brighter comments.
@@ -20,7 +21,8 @@ This gives us a hook to run after loading themes. Originally inspired by
 or =mac-win=) would crush the value. This means this file must be loaded before
 =macos.org=.
 
-#+begin_src emacs-lisp :results none
+#+name: config/after-load-theme-hook
+#+begin_src emacs-lisp :results none :tangle no
 (defvar after-load-theme-hook nil
   "Hook run after a color theme is loaded using `load-theme'.")
 (defadvice load-theme (after run-after-load-theme-hook activate)
@@ -41,6 +43,8 @@ or =mac-win=) would crush the value. This means this file must be loaded before
 * select theme
 
 #+begin_src emacs-lisp :results none :tangle yes :noweb yes
+<<config/doom-theme-settings>>
+<<config/after-load-theme-hook>>
 (use-package doom-themes
   :ensure t
   :init
