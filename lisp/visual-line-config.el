@@ -34,6 +34,11 @@
 ;;                              line, e.g. list item continuations stay under
 ;;                              the text rather than the bullet
 ;;
+;; Both visual-fill-column-mode and adaptive-wrap-prefix-mode are hooked to
+;; markdown-mode specifically (not visual-line-mode) to avoid accidentally
+;; activating 80-column clamping in help buffers, compilation buffers, or any
+;; other mode that enables visual-line-mode internally.
+;;
 ;; text-mode-hook (parent of markdown-mode) runs config/disable-visual-line-mode
 ;; first.  The markdown-mode-hook below runs after and re-enables it.
 
@@ -41,14 +46,14 @@
 
 ;; Wrap at fill-column (80) rather than the window edge.
 (use-package visual-fill-column
-  :hook (visual-line-mode . visual-fill-column-mode)
+  :hook (markdown-mode . visual-fill-column-mode)
   :custom
   (visual-fill-column-width 80))
 
 ;; Indent continuation lines to align with the logical line's first
 ;; non-whitespace character.
 (use-package adaptive-wrap
-  :hook (visual-line-mode . adaptive-wrap-prefix-mode))
+  :hook (markdown-mode . adaptive-wrap-prefix-mode))
 
 ;; Raise so-long-mode's trigger threshold.  The default (250) is aggressive
 ;; enough to fire on ordinary prose paragraphs, which would undo visual-line-mode
