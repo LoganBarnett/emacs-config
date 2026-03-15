@@ -52,8 +52,16 @@ globally, we use =defvar= up front to declare it.
 #+name: config/maildir-account-dir-create
 #+begin_src emacs-lisp :results none :tangle yes
 (defcustom maildir-account-dir "unset"
-  "The base mail directory in mu for an account."
-  )
+  "The base mail directory in mu for an account.")
+(defcustom maildir-account-inbox-subdir "unset"
+  "The inbox subdirectory within the maildir for an account.
+Set per-account via mu4e context :vars.")
+(defcustom maildir-account-trash-subdir "unset"
+  "The trash subdirectory within the maildir for an account.
+Set per-account via mu4e context :vars.")
+(defcustom maildir-account-spam-subdir "unset"
+  "The spam subdirectory within the maildir for an account.
+Set per-account via mu4e context :vars.")
 #+end_src
 
 *** capture template
