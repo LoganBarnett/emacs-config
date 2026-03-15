@@ -1,4 +1,4 @@
-# -*- mode: snippet; require-file-newline: nil -*-
+# -*- mode: snippet; require-final-newline: t -*-
 # name: nix-shell
 # key: __shell.nix
 # group: yatemplate

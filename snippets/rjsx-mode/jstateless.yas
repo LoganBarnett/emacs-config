@@ -1,4 +1,4 @@
-# -*- mode: snippet; require-file-newline: nil -*-
+# -*- mode: snippet; require-final-newline: nil -*-
 # name: JavaScript Stateless React Component
 # key: jsstateless
 # condition: t

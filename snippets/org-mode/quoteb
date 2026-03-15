@@ -1,4 +1,4 @@
-# -*- mode: snippet; require-file-newline: nil -*-
+# -*- mode: snippet; require-final-newline: nil -*-
 # name: Create a #+begin_quote block with the language.
 # key: quoteb
 # group: org

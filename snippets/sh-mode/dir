@@ -1,4 +1,4 @@
-# -*- mode: snippet; require-file-newline: nil -*-
+# -*- mode: snippet; require-final-newline: nil -*-
 # name: directory of current script
 # key: dir
 # The best answer I could find, but there are others in the same post:
