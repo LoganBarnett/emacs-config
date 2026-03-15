@@ -209,11 +209,11 @@ setting =evil-snipe-skip-leading-whitespace= to =nil=.
 #+name: config/evil-snipe-mode
 #+begin_src emacs-lisp :results none :noweb yes :tangle no :exports code
 (use-package evil-snipe
-  :init
+  :config
+  ;; Both modes need evil-snipe loaded, so they belong in :config not :init.
   (evil-snipe-override-mode)
   ;; This turns on evil-snipe globally (`evil-snipe-local-mode', specifically).
   (evil-snipe-mode 1)
-  :config
   (map!
    :desc "evil-snipe forward" :nv "s" #'evil-snipe-s
    :desc "evil-snipe backward" :nv "S" #'evil-snipe-S

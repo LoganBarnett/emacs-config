@@ -204,6 +204,8 @@
       epkgs.doom-modeline
       # Doom has some good themes.  Let's use one!
       epkgs.doom-themes
+      # Format Emacs Lisp files so I don't have to.
+      epkgs.elisp-format
       # I want the branch that works with "require" per:
       # https://github.com/restaurant-ide/emacs-eruby-mode/tree/patch-1
       # This package should let us edit ERB templates with good color coding
