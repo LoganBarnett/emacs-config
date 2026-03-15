@@ -15,3 +15,6 @@ org/*.el
 # Ignore log files emitted while troubleshooting (largely from the LLM, and not
 # a formal process in this repo)..
 *.log
+# Ignore Flycheck's temporary syntax-check files (flycheck_<filename>).  These
+# are created when Flycheck checks a buffer and occasionally not cleaned up.
+flycheck_*.el
