@@ -64,7 +64,7 @@
 ;;; Code:
 
 ;; Enable vertico
-(use-package! vertico
+(use-package vertico
   ;; :custom
   ;; (vertico-scroll-margin 0) ;; Different scroll margin
   ;; (vertico-count 20) ;; Show more candidates
