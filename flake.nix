@@ -75,6 +75,9 @@
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+          darwinPackages = if pkgs.stdenv.isDarwin then [
+            (pkgs.callPackage ./nix/derivations/emacs-app.nix {})
+          ] else [];
         in
         {
           default = pkgs.mkShell {
@@ -84,7 +87,7 @@
               # Base Emacs for running the lightweight startup / structure tests
               # without requiring the full Nix build.
               pkgs.emacs
-            ];
+            ] ++ darwinPackages;
           };
         }
       );
