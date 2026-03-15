@@ -6,23 +6,14 @@
 #+file_tags:
 #+tags:
 
-* load from disk
-I don't quite have =dnd.org= published to =elpa= just yet. So I need to load it
-from my filesystem.
+* load package
+
+The =dnd= package is consumed via Nix from the [[https://github.com/LoganBarnett/org-dnd][org-dnd]] repo.
 
 #+name: config/dnd-load
 #+begin_src emacs-lisp :results none :tangle yes
-;; Only load this if running on a personal machine.
-(let ((personal-user "logan"))
-   (if (string= user-login-name "logan")
-       (progn
-         (org-babel-load-file
-          (expand-file-name "~/dev/org-dnd/dnd.org")
-          )
-         (message "D&D loaded!")
-         )
-     (message "D&D load skipped because %s is not %s." user-login-name personal-user)
-     )
+(use-package "dnd"
+  :demand t
   )
 #+end_src
 

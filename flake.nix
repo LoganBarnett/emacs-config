@@ -7,9 +7,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "github:nixos/nixpkgs/25.11";
+    org-dnd = {
+      url = "git+ssh://git@gitea.proton:2222/logan/org-dnd";
+      flake = false;
+    };
   };
 
-  outputs = { self, emacs-overlay, nixpkgs }:
+  # Only name inputs here that we explicitly use in the code below.  Everything
+  # else is expected to be bundled up and offered via flake-inputs, which will
+  # enter the dependency injection for modules.
+  outputs = flake-inputs@{ self, emacs-overlay, nixpkgs, ... }:
     let
       # Systems supported by this flake.
       supportedSystems = [ "aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux" ];
@@ -31,10 +38,12 @@
       nixosModules.default = { ... }: {
         imports = [ ./emacs.nix ];
         nixpkgs.overlays = [ emacs-overlay.overlays.default ];
+        _module.args.flake-inputs = flake-inputs;
       };
       darwinModules.default = { ... }: {
         imports = [ ./emacs.nix ];
         nixpkgs.overlays = [ emacs-overlay.overlays.default ];
+        _module.args.flake-inputs = flake-inputs;
       };
 
       # Export the SSH config module for Emacs.
@@ -52,7 +61,9 @@
           pkgs = nixpkgsFor.${system};
         in
         {
-          default = pkgs.callPackage ./emacs-package.nix {};
+          default = pkgs.callPackage ./emacs-package.nix {
+            inherit flake-inputs;
+          };
         }
       );
 

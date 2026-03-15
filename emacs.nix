@@ -1,11 +1,13 @@
 # The ultimate editor.
 # NixOS / nix-darwin module.  The Emacs derivation itself lives in
 # emacs-package.nix so it can also be built directly via `nix build .#default`.
-{ lib, pkgs, ... }: {
+{ lib, pkgs, flake-inputs, ... }: {
   environment.systemPackages = [
     # For ob-dsq support.
     pkgs.dsq
-    (pkgs.callPackage ./emacs-package.nix {})
+    (pkgs.callPackage ./emacs-package.nix {
+      inherit flake-inputs;
+    })
   ] ++ [(
     if pkgs.stdenv.isDarwin
     then pkgs.pinentry_mac

@@ -1,7 +1,7 @@
 # The Emacs derivation. Callable via pkgs.callPackage for direct builds
 # (e.g. nix build .#default) and imported by emacs.nix for the system
 # packages module.
-{ lib, pkgs, ... }: pkgs.emacsWithPackagesFromUsePackage {
+{ lib, pkgs, flake-inputs, ... }: pkgs.emacsWithPackagesFromUsePackage {
   alwaysTangle = false;
   config = ./lisp/init.el;
   # Use `config` above as the default init file.
@@ -103,6 +103,22 @@
         done
         runHook postBuild
       '';
+    });
+
+    org-dnd = (pkgs.emacs.pkgs.trivialBuild {
+      pname = "dnd";
+      ename = "dnd";
+      version = "0.0.1";
+      src = flake-inputs.org-dnd;
+      packageRequires = [
+        epkgs.dash
+        epkgs.request
+        epkgs.org
+      ];
+      meta = {
+        homepage = "https://github.com/LoganBarnett/org-dnd";
+        license = lib.licenses.gpl3;
+      };
     });
 
     claude-code-ide = (pkgs.emacs.pkgs.trivialBuild {
@@ -497,6 +513,8 @@
       epkgs.org-contacts
       # A smattering of org-mode plugins.
       epkgs.org-contrib
+      # D&D helpers in org-mode.
+      org-dnd
       # Export org-mode documents to Jekyll, a static site generator.
       # It's included locally, actually.  We should see about publishing it.
       # epkgs.org-jekyll

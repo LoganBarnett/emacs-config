@@ -54,10 +54,27 @@
         "type": "github"
       }
     },
+    "org-dnd": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771454919,
+        "narHash": "sha256-pnh5SDj+8owCZcWCQe+NOgT+HujoNpmWU9KGRGkLSYc=",
+        "ref": "refs/heads/main",
+        "rev": "7e941a65a7f7f5b5dc6df40c1665b44d0feac52e",
+        "revCount": 5,
+        "type": "git",
+        "url": "ssh://git@gitea.proton:2222/logan/org-dnd"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@gitea.proton:2222/logan/org-dnd"
+      }
+    },
     "root": {
       "inputs": {
         "emacs-overlay": "emacs-overlay",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "org-dnd": "org-dnd"
       }
     }
   },
