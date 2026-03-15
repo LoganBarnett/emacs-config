@@ -84,15 +84,25 @@
 (defun init-org-file (file)
   "Logs FILE before it loading a file to help with debugging init issues."
   (message "[INIT] %s" file)
-  (org-babel-load-file (expand-file-name (format "org/%s" file) "~/dev/dotfiles"))
+  ;; Get the parent directory of the lisp/ directory (the config root)
+  (let ((base-dir (expand-file-name ".."
+                                    (file-name-directory
+                                     (or load-file-name buffer-file-name)))))
+    (org-babel-load-file (expand-file-name (format "org/%s" file) base-dir)))
   )
 
 (defun config/init-org-file-private (file)
   "Logs private FILE before it loading a file to help with debugging init issues."
   (message "[INIT] private %s" file)
-  (org-babel-load-file
-   (expand-file-name (format "org/%s" file) "~/dev/dotfiles-private")
-   )
+  ;; Look for private files in ../dotfiles-private relative to config root
+  (let* ((base-dir (expand-file-name ".."
+                                     (file-name-directory
+                                      (or load-file-name buffer-file-name))))
+         (private-dir (expand-file-name "../dotfiles-private" base-dir))
+         (file-path (expand-file-name (format "org/%s" file) private-dir)))
+    (if (file-exists-p file-path)
+        (org-babel-load-file file-path)
+      (message "[INIT] Private file %s not found, skipping" file)))
   )
 
 (defun dirty-init ()
@@ -274,9 +284,9 @@
   (message "[DIRTY INIT] INIT DONE!")
   )
 
-;; Because Nix now copies this file where it needs to be, we need to add this
-;; directory to the load path so my scattered .el files can be found.
-(add-to-list 'load-path "~/dev/dotfiles/lisp/")
+;; Add the current lisp directory to load path
+(add-to-list 'load-path
+             (file-name-directory (or load-file-name buffer-file-name)))
 (load-library "init-batteries")
 (batteries-init)
 (toggle-debug-on-quit)
