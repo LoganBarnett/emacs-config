@@ -17,6 +17,112 @@ Somehow this got bumped to 8. Set it back to a sane value.
   )
 #+end_src
 
+* formatting
+
+This configuration sets up automatic code formatting for Emacs Lisp files.
+
+** Option 1: elisp-format (Recommended for simplicity)
+
+This is a pure Elisp formatter that's easy to set up and doesn't require external dependencies.
+
+#+name: config/elisp-format
+#+begin_src emacs-lisp :tangle no :results none
+(use-package elisp-format
+  :ensure t
+  :config
+  ;; Optional: Configure formatting style
+  (setq elisp-format-column 80)
+  (setq elisp-format-indent-comment t)
+
+  ;; Format on save for elisp files
+  :hook ((emacs-lisp-mode . (lambda ()
+                              (add-hook 'before-save-hook
+                                        'elisp-format-buffer nil t)))))
+#+end_src
+
+** Option 2: emacs-elisp-autofmt (More features, requires Python)
+
+This formatter is more comprehensive but requires Python 3.10+.
+
+#+begin_src emacs-lisp :tangle no
+(use-package elisp-autofmt
+  :ensure t
+  :config
+  ;; Set the formatter style (optional)
+  (setq elisp-autofmt-style 'native) ; or 'fixed
+
+  ;; Enable auto-formatting on save
+  :hook (emacs-lisp-mode . elisp-autofmt-mode))
+#+end_src
+
+** Option 3: prettier-elisp (Simple with nice defaults)
+
+A simple formatter with sensible defaults.
+
+#+begin_src emacs-lisp :tangle no
+(use-package prettier-elisp
+  :ensure t
+  :config
+  ;; Format current function on save
+  :hook (emacs-lisp-mode . prettier-elisp-mode)
+  ;; Or format entire buffer on save (choose one)
+  ;; :hook (emacs-lisp-mode . prettier-elisp-buffer-mode)
+  )
+#+end_src
+
+** manual formatting commands
+
+Regardless of which formatter you choose, you can also format manually:
+
+#+name: config/elisp-format-keybindings
+#+begin_src emacs-lisp :tangle no :results none
+;; Keybindings for manual formatting
+(map!
+ :mode emacs-lisp-mode
+ :localleader
+ (:prefix ("=" . "format")
+  :desc "Format buffer" "b" #'elisp-format-buffer
+  :desc "Format region" "r" #'elisp-format-region
+  :desc "Format defun" "f" #'elisp-format-defun))
+#+end_src
+
+** disable formatting for specific files
+
+Sometimes you may want to disable auto-formatting for certain files:
+
+#+name: config/elisp-format-predicate
+#+begin_src emacs-lisp :tangle no :results none
+;; Add to file-local variables or .dir-locals.el:
+;; ((emacs-lisp-mode . ((eval . (remove-hook 'before-save-hook
+;;                                           'elisp-format-buffer t)))))
+
+;; Or use a custom predicate
+(defun my/should-format-elisp-p ()
+  "Return t if current buffer should be auto-formatted."
+  (not (or (string-match-p "init\\.el$" (or buffer-file-name ""))
+           (string-match-p "custom\\.el$" (or buffer-file-name "")))))
+
+;; Then modify the hook:
+;; (add-hook 'emacs-lisp-mode-hook
+;;           (lambda ()
+;;             (when (my/should-format-elisp-p)
+;;               (add-hook 'before-save-hook 'elisp-format-buffer nil t))))
+#+end_src
+
+** additional configuration
+
+Configure fill-column for better formatting:
+
+#+name: config/elisp-fill-column
+#+begin_src emacs-lisp :tangle no :results none
+;; Set fill-column for elisp files
+(add-hook 'emacs-lisp-mode-hook
+          (lambda () (setq-local fill-column 80)))
+
+;; Ensure proper indentation settings
+(setq-default lisp-indent-offset 2)
+#+end_src
+
 * stitch
 
 Beware: The package is =elisp-mode.el= and the mode is =emacs-lisp-mode=.
@@ -26,6 +132,10 @@ Beware: The package is =elisp-mode.el= and the mode is =emacs-lisp-mode=.
   :init
   <<config/elisp-tab-width-set>>
   (add-hook 'emacs-lisp-mode-hook #'config/elisp-tab-width-set)
+  <<config/elisp-fill-column>>
   :config
+  <<config/elisp-format-keybindings>>
   )
+
+<<config/elisp-format>>
 #+end_src
