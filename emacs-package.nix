@@ -50,16 +50,21 @@
         # writes a stub for org files with no :tangle yes blocks, so genuine
         # build failures are the only way a .el ends up empty.
         find . -maxdepth 1 -name "*.el" -empty -delete
+
+        # NOTE: Byte-compiling the org-tangled .el files was attempted but
+        # reverted.  Org config files use macros from runtime packages
+        # (evil-define-operator, multi-line-defhook, on-doom, etc.) that are
+        # not available at compile time without loading the entire package set.
+        # Loading all packages during the Nix build risks circular dependencies
+        # and complex load-order issues.  The .el files load fine as interpreted
+        # code; Emacs native-compiles frequently-used code on demand anyway.
         runHook postBuild
       '';
       installPhase = ''
         runHook preInstall
         mkdir -p $out/share/emacs-config/org
         install -m 444 *.org $out/share/emacs-config/org/
-        for f in *.el; do
-          [ -e "$f" ] && install -m 444 "$f" $out/share/emacs-config/org/ \
-            || true
-        done
+        install -m 444 *.el $out/share/emacs-config/org/
         runHook postInstall
       '';
     };

@@ -119,12 +119,10 @@ produce no output and are silently skipped."
          (org-path (expand-file-name (format "org/%s" file) base-dir))
          (el-path (concat (file-name-sans-extension org-path) ".el")))
     (if (file-exists-p el-path)
-        ;; Pre-tangled .el exists in the store.  Load it directly without
-        ;; going through org-babel-load-file, which would try to retangle if
-        ;; the .el is not strictly newer than the .org -- a condition that
-        ;; can arise when the Nix build install ordering varies -- and would
-        ;; fail with permission-denied on the read-only store.
-        (load-file el-path)
+        ;; Pre-tangled .el exists in the store.  Use `load' (not `load-file')
+        ;; so Emacs automatically prefers the .elc if it was compiled during
+        ;; the build phase, falling back to the .el otherwise.
+        (load (file-name-sans-extension el-path) nil t)
       (if nix-build-p
           ;; In a Nix build all tangle blocks must have been compiled during
           ;; the build phase.  A missing .el means :tangle yes is absent on
