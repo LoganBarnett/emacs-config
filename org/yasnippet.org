@@ -343,7 +343,13 @@ templates]] for more details on things like the =__= files.
     ;; succeeds without snippets.
     (when (seq-some (lambda (d) (file-directory-p (expand-file-name d)))
                     yas-snippet-dirs)
-      (yas-recompile-all)
+      ;; Skip recompilation when snippets live in a read-only directory (e.g.
+      ;; the Nix store, indicated by config/snippets-dir being bound).
+      ;; yas-recompile-all would fail with permission-denied trying to write
+      ;; .yas-compiled-snippets.el files there.  yas-reload-all with NO-JIT=t
+      ;; is sufficient to load everything without pre-compilation.
+      (unless (boundp 'config/snippets-dir)
+        (yas-recompile-all))
       ;; Set NO-JIT to `t' so that it actually reloads everything.  Without
       ;; this, we lose the yatemplates.
       (yas-reload-all t))
