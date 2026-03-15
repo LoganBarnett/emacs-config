@@ -27,8 +27,10 @@ TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
 # Locate the installed default.el (same approach as test-nix-startup.sh).
+# EMACSLOADPATH="" ensures the Nix wrapper builds the load path entirely from
+# the Nix store, with no directories inherited from the calling environment.
 DEFAULTEL_PATH="$TMPDIR/defaultel-path.txt"
-HOME="$TMPDIR" "$EMACS" --batch -Q \
+EMACSLOADPATH="" HOME="$TMPDIR" "$EMACS" --batch -Q \
   --eval "(with-temp-file \"$DEFAULTEL_PATH\" (insert (or (locate-library \"default\") \"\")))" \
   --eval '(kill-emacs 0)' 2>/dev/null || true
 DEFAULT_EL=$(cat "$DEFAULTEL_PATH" 2>/dev/null || echo "")
@@ -44,7 +46,7 @@ echo ""
 # Load the full init, then assert that at least one snippet table exists.
 # yas--tables is a hash table keyed by major-mode symbol; a non-empty hash
 # table means at least one snippet directory was found and loaded.
-HOME="$TMPDIR" timeout 120 "$EMACS" --batch -q \
+EMACSLOADPATH="" HOME="$TMPDIR" timeout 120 "$EMACS" --batch -q \
   --load "$DEFAULT_EL" \
   --eval '(let ((count (hash-table-count yas--tables)))
             (message "[YAS-TEST] yas-snippet-dirs: %s" yas-snippet-dirs)

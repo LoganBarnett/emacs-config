@@ -39,7 +39,9 @@ trap 'rm -rf "$TMPDIR"' EXIT
 # We find it via locate-library, writing to a file to avoid IFS=: quoting
 # issues with the Nix emacs shell wrapper.
 DEFAULTEL_PATH="$TMPDIR/defaultel-path.txt"
-HOME="$TMPDIR" "$EMACS" --batch -Q \
+# EMACSLOADPATH="" ensures the Nix wrapper builds the load path entirely from
+# the Nix store, with no directories inherited from the calling environment.
+EMACSLOADPATH="" HOME="$TMPDIR" "$EMACS" --batch -Q \
   --eval "(with-temp-file \"$DEFAULTEL_PATH\" (insert (or (locate-library \"default\") \"\")))" \
   --eval '(kill-emacs 0)' 2>/dev/null || true
 DEFAULT_EL=$(cat "$DEFAULTEL_PATH" 2>/dev/null || echo "")
@@ -60,7 +62,7 @@ echo ""
 # causes spurious void-function errors that don't occur in interactive mode.
 # --load explicitly loads our Nix-installed init (default.el / init.el).
 # Batch mode sets debug-on-error=t, so any unhandled Lisp error exits 255.
-HOME="$TMPDIR" timeout 120 "$EMACS" --batch -q --load "$DEFAULT_EL" 2>&1 | tee "$LOG"
+EMACSLOADPATH="" HOME="$TMPDIR" timeout 120 "$EMACS" --batch -q --load "$DEFAULT_EL" 2>&1 | tee "$LOG"
 EXIT_CODE=${PIPESTATUS[0]}
 
 echo ""

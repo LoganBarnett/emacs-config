@@ -62,6 +62,13 @@ test-nix-startup:
 test-yasnippet:
   ./test-yasnippet.sh
 
+# Test that leader-key bindings (SPC p, SPC o m, …) are registered after a
+# full startup.  Requires `just build` (./result must exist).
+# Currently expected to FAIL — these bindings are broken and this test tracks
+# the regressions so they are fixed.
+test-keybindings:
+  ./test-keybindings.sh
+
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build test-nix-startup test-yasnippet
+test: test-structure build test-nix-startup test-yasnippet test-keybindings
   @echo "All tests passed!"

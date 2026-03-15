@@ -62,12 +62,10 @@ Doom doesn't bind =mu4e= that I have seen.
 
 #+name: mu4e-open-keybinding
 #+begin_src emacs-lisp :results none :tangle no
-(on-doom
- (map!
-  :leader
-  :prefix "o"
-  "m" #'mu4e
-  )
+(map!
+ :leader
+ :prefix "o"
+ "m" #'mu4e
  )
 #+end_src
 
@@ -215,7 +213,7 @@ I have my own =org-contacts= file I wish to use. I can also add some
 actions with =o= being the keybinding to add an =org-contact= contact per
 the [[http://www.djcbsoftware.nl/code/mu/mu4e/Maintaining-an-address_002dbook-with-org_002dcontacts.html][documentation]].
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp :results none :tangle yes
 (defun config/mu4e-org-contacts ()
   (setq-default mu4e-org-contacts-file "~/notes/contacts.org")
   (add-to-list 'mu4e-headers-actions
@@ -230,7 +228,7 @@ the [[http://www.djcbsoftware.nl/code/mu/mu4e/Maintaining-an-address_002dbook-wi
      By default =mu4e= looks for =~/Maildir= which is not where I have my mail
      synced.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 (defun config/mu4e-set-maildir ()
   (setq-default mu4e-maildir (expand-file-name "~/mail"))
   (setq-default mu4e-change-filenames-when-moving t)
@@ -323,7 +321,7 @@ using email.
 
 *** sending mail
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (defun config/send-email ()
     ;; TODO: Many settings are inherited from ../lisp/config-email.el - move them
     ;; here.
@@ -454,7 +452,7 @@ invoke
      all-mail section. The mail server still shows the message as present in the
      inbox. Removing these statements seems to have fixed it.
 
-     #+begin_src emacs-lisp :results none
+     #+begin_src emacs-lisp :results none :tangle yes
        (defun config/mu4e-indexing ()
          ;; (setq-default
           ;; mu4e-index-cleanup nil
@@ -556,7 +554,7 @@ and deleting. Do not apply this as it doesn't fix anything.
 **** prevent next message upon scroll
      This prevents scrolling to the next message if you scroll down too far.
 
-     #+begin_src emacs-lisp :results none
+     #+begin_src emacs-lisp :results none :tangle yes
        (defun config/mu4e-viewing ()
          (setq-default
           mu4e-view-scroll-to-next nil
@@ -683,7 +681,7 @@ always what I want. More research is required. It would be nice to preserve
 formatting I do myself (such as lists), and =mu4e-compose-format-flowed= as
 =nil= is the way to accomplish that.
 
-       #+begin_src emacs-lisp :results none
+       #+begin_src emacs-lisp :results none :tangle yes
 
          (defun config/mu4e-prevent-hard-line-wrap-on-export ()
            "Sets `use-hard-newlines' to t for the mu4e buffer."
@@ -751,7 +749,7 @@ seems to be to disable =comment-auto-fill-only-comments= in =mu4e:compose-mode=.
 
 *** evilication
 
-     #+begin_src emacs-lisp :results none
+     #+begin_src emacs-lisp :results none :tangle yes
        (defun config/mu4e-evilify-evil-window-prefix ()
          "Setup window prefixed commands"
          (interactive)
@@ -1097,7 +1095,7 @@ to default behaviors.
 
 *** apply mu4e
 
-#+begin_src emacs-lisp :results none :noweb yes
+#+begin_src emacs-lisp :results none :noweb yes :tangle yes
   <<config/evil-collection-mu4e-pr-860-fix-key-conflict>>
   (require 'use-package)
   (message "initializing mu4e with use-package...")

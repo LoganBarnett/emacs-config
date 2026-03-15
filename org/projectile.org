@@ -218,14 +218,13 @@ Files are returned as relative paths to DIRECTORY."
 
 * stitch
 
-#+begin_src emacs-lisp :results none :noweb yes
+#+begin_src emacs-lisp :results none :noweb yes :tangle yes
 (use-package project
   :ensure t
   :init
   ;; We might want this for project.el too, but I haven't tested it yet.
   <<config/projectile-buffers-kill-all>>
   (map!
-    :after projectile
     :leader
     (:prefix ("p" . "project")
       :desc "Discover new projects" :n "D" #'config/project-discover-under-search-paths

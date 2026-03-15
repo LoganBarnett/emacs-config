@@ -13,8 +13,11 @@ echo "  - All org files exist and can be found"
 echo "  - The initialization completes with the hook"
 echo ""
 
-# Run Emacs with a minimal test that only checks structure
-emacs --batch --quick \
+# Run Emacs with a minimal test that only checks structure.
+# EMACSLOADPATH="" prevents any directories from the calling environment
+# (including the current working directory) from leaking into the load path.
+# This test mocks load-library so it does not need any real library paths.
+EMACSLOADPATH="" emacs --batch --quick \
     --eval "(defvar test-mode t)" \
     --eval "(defvar test-org-files nil)" \
     --eval "(defvar test-start-time (current-time))" \
@@ -51,14 +54,14 @@ emacs --batch --quick \
                   (message \"[TEST] ======================================\")
                   (kill-emacs 0))))" \
     --load "${INIT_FILE}" \
-    2>&1 | tee emacs-structure-test.log
+    2>&1 | tee "${SCRIPT_DIR}/emacs-structure-test.log"
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ""
     echo "✓ Structure test passed!"
     echo ""
     echo "Summary:"
-    grep "\[TEST\] Found" emacs-structure-test.log | tail -1
+    grep "\[TEST\] Found" "${SCRIPT_DIR}/emacs-structure-test.log" | tail -1
     echo ""
     echo "This confirms that:"
     echo "  ✓ Your init files use relative paths correctly"
@@ -67,6 +70,6 @@ if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo "  ✓ The configuration can be loaded from any directory"
 else
     echo ""
-    echo "✗ Structure test failed - check emacs-structure-test.log for details"
+    echo "✗ Structure test failed - check "${SCRIPT_DIR}/emacs-structure-test.log" for details"
     exit 1
 fi
