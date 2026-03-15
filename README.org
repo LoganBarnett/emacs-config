@@ -4,10 +4,107 @@
 * Overview
 
 This repository contains Logan's Emacs configuration, including:
-- Emacs Lisp configuration files (~lisp/~)
-- Org-mode configuration files (~org/~)
-- Nix-based package management (~emacs.nix~)
-- Tree-sitter grammar derivations (~nix/derivations/~)
+- Emacs Lisp configuration files (~lisp/~).
+- Org-mode configuration files (~org/~).
+- Nix-based package management (~emacs.nix~).
+- Tree-sitter grammar derivations (~nix/derivations/~).
+
+* Contributing
+** Code Style
+
+We should use a formatter for this.  What exists already?
+
+*** 80 columns
+
+Try to fit all code into 80 columns.  If this restriction prevents you from
+preserving Lisp "structure" in the code, favor [[https://github.com/magnars/dash.el?tab=readme-ov-file#threading-macros][dash threading macros]], or break
+them into smaller, more specialized functions.
+
+From the docs:
+
+#+begin_quote
+Macros that conditionally combine sequential forms for brevity or readability.
+
+-> (x &optional form &rest more)
+->> (x &optional form &rest more)
+--> (x &rest forms)
+-as-> (value variable &rest forms)
+-some-> (x &optional form &rest more)
+-some->> (x &optional form &rest more)
+-some--> (expr &rest forms)
+-doto (init &rest forms)
+#+end_quote
+
+*** Sentences in Comments
+
+All comments should use proper punctuation and grammar.  End sentences with
+punctuation, even if that sentence is in a list.  Use two spaces after a
+sentence punctuation to make it easier to programmatically parse (such as vim's
+sentence object).
+
+
+*** Naming Functions
+
+For functions specific to this configuration (as in, not general purpose, or
+part of some other library), use the ~config--~ prefix.  You'll see a lot of
+examples with ~config/~ but we want to use the community (defacto?) standard.
+
+Any libraries that are being germinated in this repository can use a
+~<lib-name>--~ form instead.
+
+
+
+** Adding MELPA packages
+
+If you need to add a package, you'll have to add it via [[file:./emacs.nix][emacs.nix]].  There are
+sections based on what kind of package it most closely falls under.
+
++ completion-packages :: Anything directly related to (auto) completion.
++ editing :: Things that assist with the act of editing.  This covers vim/evil
+  but also things like changing case, finding text, etc.
++ languages :: Major-modes for languages and syntaxes.
++ programs :: These are full on applications within Emacs.  ~org-agenda~,
+  ~magit~ ~mu4e~, and various terminal emulators fall under this.
++ org-mode-packages :: Things specifically for ~org-mode~, which includes
+  ~org-babel~ languages, ~org-mode~ exporters, and other helpers.
++ tree-sitter :: ~tree-sitter~ packages are so numerous they get their own
+  section.
++ utility-packages :: Kind of a miscellaneous section.
+
+These should be lexicographically sorted by their package name, even if it's a
+Nix expression.
+
+A brief description of what the package is, and, if relevant, why we would want
+it should come before every package.
+
+It's also okay to add commented packages and we leave a reason why we didn't
+want that package.
+
+** Adding Built-in packages
+
+If a built-in package becomes required for something, I'd like ~emacs.nix~ to at
+least document it.  To do this, take the name of the package and assume that is
+the Nix package name for it, and add it just like you would for [[Adding MELPA
+packages]], but comment the package out, and as part of the package's descriptive
+comment, add that it is a built-in package.
+
+This will assist in searching, and also remind us of where we should go looking
+for it (not MELPA).
+
+**
+
+** Trajectory
+
+*** ~org-mode~ vs vanilla Lisp
+I initially started out with just Lisp files for configs, then I started moving
+everything to ~org-mode~.  Then I found there were way too many things I wanted
+bootstrapped before ~org-mode~, so I decided to just go back to Lisp.  While I
+enjoy some light literate programming, ~org-mode~'s benefits do not presently
+outweigh its cost (too much splicing of startup dependencies).  So just make all
+new configs under ~lisp/<name>-config.el~.  Include it in the relevant section
+for ~lisp/init-batteries.el~
+
+
 
 * Usage
 
