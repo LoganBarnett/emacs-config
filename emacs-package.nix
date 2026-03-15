@@ -13,6 +13,15 @@
     # without retangling.  In the Nix store all files share the same epoch
     # timestamp, so org-babel-load-file sees them as equally old and skips
     # retangling (which would fail anyway on the read-only store).
+    # Copy the snippets/ directory into the Nix store so that yasnippet can
+    # load them in any environment (including the isolated test $HOME used by
+    # the CI test scripts).  The resulting path is injected into Emacs via
+    # config/snippets-dir defined in emacs-config-base-dir.el below.
+    emacs-config-snippets = pkgs.runCommand "emacs-config-snippets" {} ''
+      mkdir -p $out/share/emacs-config/snippets
+      cp -r ${./snippets}/. $out/share/emacs-config/snippets/
+    '';
+
     emacs-config-org-sources = pkgs.stdenv.mkDerivation {
       pname = "emacs-config-org-sources";
       version = "0.0.0";
@@ -88,6 +97,11 @@
           "Root directory of the Emacs configuration.
         The org/ subdirectory holds pre-tangled .el files alongside the
         original .org sources so org-babel-load-file loads without retangling.")
+        (defvar config/snippets-dir
+          "${emacs-config-snippets}/share/emacs-config/snippets"
+          "Path to the yasnippet snippets bundled with the Emacs configuration.
+        Set by the Nix build so snippets are found in any environment,
+        including isolated test environments where \\$HOME is a temp directory.")
         (provide 'emacs-config-base-dir)
         ;;; emacs-config-base-dir.el ends here
         HEREDOC

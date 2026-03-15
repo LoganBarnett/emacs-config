@@ -172,7 +172,10 @@ question.
 
 #+name: config/yasnippet-snippet-dirs
 #+begin_src emacs-lisp :results none :tangle no
-(setq-default +snippets-dir "~/dev/dotfiles/yasnippets")
+(setq-default +snippets-dir
+  (if (boundp 'config/snippets-dir)
+      config/snippets-dir
+    (expand-file-name "~/dev/emacs-config/snippets")))
 #+end_src
 
 Since we're using ~yatemplate~ as well, you can find file templates in
@@ -310,8 +313,13 @@ templates]] for more details on things like the =__= files.
     <<config/yasnippets-override-doom-template-dir>>
     <<config/yasnippet-require-file-newline-mark-safe>>
     <<config/yasnippet-snippet-dirs>>
-    ;; This gets crushed by Doom.  Leave for reference.
-    (setq-default yas-snippet-dirs '("~/dev/dotfiles/yasnippets"))
+    ;; Use the Nix-store path when available (set via config/snippets-dir in
+    ;; emacs-config-base-dir.el), otherwise fall back to the repo checkout
+    ;; location for local development.
+    (setq-default yas-snippet-dirs
+      (list (if (boundp 'config/snippets-dir)
+                config/snippets-dir
+              (expand-file-name "~/dev/emacs-config/snippets"))))
     (message "Just set yas-snippet-dirs to %s" yas-snippet-dirs)
     (config/yasnippet-fundamental-mode)
     <<config/auto-insert-mode-fix-emacs-lisp-template>>
@@ -328,10 +336,17 @@ templates]] for more details on things like the =__= files.
     ;; run-down.
     <<config/yatemplate>>
     (yas-global-mode 1)
-    (yas-recompile-all)
-    ;; Set NO-JIT to `t' so that it actually reloads everything.  Without
-    ;; this, we lose the yatemplates.
-    (yas-reload-all t)
+    ;; Only recompile and reload snippets if at least one snippet directory
+    ;; actually exists.  In a test/CI environment $HOME is a temp directory and
+    ;; the dotfiles snippet dir does not exist, which causes yas-recompile-all
+    ;; to throw file-missing.  Guard with an existence check so startup still
+    ;; succeeds without snippets.
+    (when (seq-some (lambda (d) (file-directory-p (expand-file-name d)))
+                    yas-snippet-dirs)
+      (yas-recompile-all)
+      ;; Set NO-JIT to `t' so that it actually reloads everything.  Without
+      ;; this, we lose the yatemplates.
+      (yas-reload-all t))
     )
 
   #+end_src
