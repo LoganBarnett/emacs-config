@@ -112,6 +112,32 @@ like ~30j~ and ~3k~.
 #+end_src
 
 
+** whitespace visibility in diffs
+
+Show end-of-line =​$= markers in Magit diff and status buffers using a
+buffer-local =whitespace-mode= with only the =newline-mark= style.  Trailing
+whitespace is intentionally excluded here because Magit's own
+=magit-diff-paint-whitespace= covers that — keeping the two concerns separate
+avoids double-styling (e.g. red trailing-whitespace face on a green added-line
+background).
+
+The =magit-diff-paint-whitespace= family of variables is set in the =use-package
+magit= block below so the options are co-located with the rest of the Magit
+configuration.
+
+#+name: config/magit-whitespace-setup
+#+begin_src emacs-lisp :results none :exports code :tangle no
+(defun config/magit-whitespace-setup ()
+  "Show EOL markers in Magit buffers without redundant trailing-whitespace faces.
+Trailing whitespace is handled separately by `magit-diff-paint-whitespace'."
+  (setq-local whitespace-style '(face newline newline-mark))
+  (whitespace-mode 1))
+
+(add-hook 'magit-diff-mode-hook   #'config/magit-whitespace-setup)
+(add-hook 'magit-status-mode-hook #'config/magit-whitespace-setup)
+(add-hook 'magit-revision-mode-hook #'config/magit-whitespace-setup)
+#+end_src
+
 ** syncing git-gutter and magit
   =git-gutter= shows "fringe" indicators for adds, edits, and removals of lines
   for a given buffer. This is different than =magit= which serves as a general
@@ -372,6 +398,11 @@ of things.
   :config
   <<config/git-commit-message-evil-insert-state>>
   <<config/magit-line-numbers>>
+  <<config/magit-whitespace-setup>>
+  ;; Let Magit handle trailing whitespace in diffs natively. `all' includes
+  ;; context lines in addition to added/removed lines.
+  (setq magit-diff-paint-whitespace t)
+  (setq magit-diff-paint-whitespace-lines 'all)
   (config/connect-git-gutter-and-magit)
   )
 
