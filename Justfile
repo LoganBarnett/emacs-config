@@ -48,6 +48,13 @@ test-structure:
 build:
   nix build .#default
 
+# Test that the Nix-built Emacs can actually start without runtime errors.
+# Requires `just build` to have run first (./result must exist).
+# Catches errors that the structure test cannot: real package loading, macro
+# expansion at load time, evil-define-operator forms, etc.
+test-nix-startup:
+  ./test-nix-startup.sh
+
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build
+test: test-structure build test-nix-startup
   @echo "All tests passed!"
