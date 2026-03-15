@@ -573,6 +573,9 @@ library is already loaded.
   :after evil
   :config
   (evil-collection-init
+   'dired
+   )
+  (evil-collection-init
    'eshell
    )
   (evil-collection-init
