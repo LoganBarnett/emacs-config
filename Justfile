@@ -55,6 +55,13 @@ build:
 test-nix-startup:
   ./test-nix-startup.sh
 
+# Test that yasnippet has at least one snippet table loaded after startup.
+# Requires `just build` (./result must exist).
+# Fails if yas-snippet-dirs points to a non-existent location (e.g. a
+# dotfiles-relative path not present in the Nix build or test $HOME).
+test-yasnippet:
+  ./test-yasnippet.sh
+
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build test-nix-startup
+test: test-structure build test-nix-startup test-yasnippet
   @echo "All tests passed!"
