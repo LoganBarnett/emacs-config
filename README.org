@@ -95,34 +95,84 @@ for it (not MELPA).
 
 ** Editing ~org/~ Configuration Files
 
-Org-based configs follow a literate programming pattern:
+Org-based configs follow a literate programming pattern.  Every ~org/~ file
+uses the /noweb stitch/ pattern, which has two parts:
 
-1. Each logical setting or feature lives in a named source block:
+*** Part 1: Named blocks with ~:tangle no~
+
+Each logical setting or feature lives in its own named source block.  All
+individual blocks use ~:tangle no~ — they are /never/ tangled directly.
+
+#+begin_src org
+,#+name: config/my-feature
+,#+begin_src emacs-lisp :results none :tangle no
+(setq my-feature-variable t)
+,#+end_src
+#+end_src
+
+*** Part 2: A ~* stitch~ block with ~:tangle yes :noweb yes~
+
+A single ~* stitch~ (or ~* all together~) section at the bottom of the file
+assembles every named block into the final output via noweb references.  This
+is the /only/ block in the file with ~:tangle yes~.
+
+#+begin_src org
+,* stitch
+,#+begin_src emacs-lisp :results none :tangle yes :noweb yes
+<<config/my-feature>>
+(use-package my-package
+  :init
+  <<config/my-other-feature>>
+  ...)
+,#+end_src
+#+end_src
+
+*** Why this pattern matters
+
+The build system (~nix/tangle-group.el~) uses a two-pass strategy:
+
+- Pass 1 :: Tangles only ~:tangle yes~ blocks.
+- Pass 2 :: Tangles bare blocks (no ~:tangle~ keyword), but /only/ when Pass 1
+  produced no output.
+
+A file that mixes ~:tangle yes~ content blocks with bare blocks is "MIXED":
+Pass 1 runs (finding the ~:tangle yes~ blocks) and Pass 2 is silently skipped,
+so the bare blocks are lost.  The stitch pattern avoids this entirely — exactly
+one ~:tangle yes~ block (the stitch) collects everything.
+
+*** Exception: ~org-agenda.org~
+
+~org-agenda.org~ is intentionally MIXED.  Some blocks use ~:tangle yes~ for
+settings safe to include in the Nix build.  Bare blocks contain user-specific
+paths (e.g. ~~/notes~) that must /not/ be tangled during a Nix build because
+the paths don't exist at build time.  Do not convert this file to the stitch
+pattern.
+
+*** Adding a new configuration block
+
+1. Write the block with a ~#+name:~ and ~:tangle no~:
 
    #+begin_src org
-   ,#+name: config/my-feature
+   ,#+name: config/my-new-thing
    ,#+begin_src emacs-lisp :results none :tangle no
-   (setq my-feature-variable t)
+   (setq my-new-thing t)
    ,#+end_src
    #+end_src
 
-2. A ~* stitch~ section at the bottom of the file assembles named blocks into
-   the final ~use-package~ (or other) form via noweb references:
+2. Reference it from the ~* stitch~ block:
 
    #+begin_src org
-   ,#+begin_src emacs-lisp :results none :noweb yes
-   (use-package my-package
-     :init
-     <<config/my-feature>>
-     ...)
+   ,#+begin_src emacs-lisp :results none :tangle yes :noweb yes
+   <<config/my-new-thing>>
+   ...
    ,#+end_src
    #+end_src
 
 Within a ~use-package~ form, ~:init~ is for variable settings that must precede
 the package load, and ~:config~ is for everything that runs after.  Named blocks
 containing function definitions should be expanded at the top level of the
-~* all together~ / ~* stitch~ section, before any ~use-package~ form, so that
-the functions exist by the time ~use-package~ references them.
+stitch block, before any ~use-package~ form, so that the functions exist by the
+time ~use-package~ references them.
 
 ** Trajectory
 
