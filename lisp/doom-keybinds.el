@@ -8,6 +8,16 @@
 ;;
 ;;; Code:
 
+;; doom-lib.el defines cmd!, add-hook!, setq-hook!, and other macros used
+;; throughout this file.  doom-use-package.el defines use-package! (used at
+;; line ~237).  Load both at compile time so macros are available during
+;; byte/native compilation — without this, (use-package! which-key :hook
+;; (doom-first-input . which-key-mode) ...) is compiled as a function call and
+;; the dotted pair causes a native-compiler proper-list-p error.
+(eval-when-compile
+  (require 'doom-lib)
+  (require 'doom-use-package))
+
 (defvar doom-leader-key "SPC"
   "The leader prefix key for Evil users.")
 

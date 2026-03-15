@@ -8,6 +8,13 @@
 ;;
 ;;; Code:
 
+;; doom-lib.el defines add-transient-hook! used at the top level below.
+;; Load it at compile time so the macro is available during byte-compilation
+;; (otherwise the compiled .elc calls add-transient-hook! as a function, which
+;; causes invalid-function when the .elc is loaded and add-transient-hook! is a
+;; macro object).
+(eval-when-compile (require 'doom-lib))
+
 (defvar doom--deferred-packages-alist '(t))
 (autoload 'use-package "use-package-core" nil nil t)
 
@@ -130,7 +137,8 @@
 ;;
 ;;; Macros
 
-(defvar doom-disabled-packages)
+(defvar doom-disabled-packages nil
+  "List of packages disabled in this Doom profile.")
 (defmacro use-package! (name &rest plist)
   "Declares and configures a package.
 
@@ -194,4 +202,5 @@ WARNINGS:
                (lambda () ,@body)
                'append)))
 
-;;; init.el ends here
+(provide 'doom-use-package)
+;;; doom-use-package.el ends here

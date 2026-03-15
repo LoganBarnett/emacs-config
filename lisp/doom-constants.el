@@ -16,3 +16,6 @@
 (defconst doom--system-windows-p (eq 'windows doom-system))
 (defconst doom--system-macos-p   (eq 'macos doom-system))
 (defconst doom--system-linux-p   (eq 'linux doom-system))
+
+(provide 'doom-constants)
+;;; doom-constants.el ends here

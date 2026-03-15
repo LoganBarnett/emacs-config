@@ -286,16 +286,17 @@ configdepth. See `doom-module-set' for details."
                                     :depth 1)))
           (hash-table-keys doom-modules))
         (let ((idx (if initorder? 1 2)))
-          (lambda! ((groupa . namea) (groupb . nameb))
-            (let ((a (get groupa namea))
-                  (b (get groupb nameb)))
-              (or (null b)
-                  (and
-                   a (let ((adepth (aref a idx))
-                           (bdepth (aref b idx)))
-                       (if (= adepth bdepth)
-                           (< (aref a 0) (aref b 0))
-                         (< adepth bdepth))))))))))
+          (cl-function
+           (lambda ((groupa . namea) (groupb . nameb))
+             (let ((a (get groupa namea))
+                   (b (get groupb nameb)))
+               (or (null b)
+                   (and
+                    a (let ((adepth (aref a idx))
+                            (bdepth (aref b idx)))
+                        (if (= adepth bdepth)
+                            (< (aref a 0) (aref b 0))
+                          (< adepth bdepth)))))))))))
 
 (defun doom-module-expand-path (category module &optional file)
   "Expands a path to FILE relative to CATEGORY and MODULE.

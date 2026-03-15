@@ -43,6 +43,11 @@ test-minimal:
 test-structure:
   ./test-init-structure.sh
 
+# Build the full Nix Emacs package (runs byte-compilation, org tangling, etc.)
+# This is the most comprehensive test of the configuration.
+build:
+  nix build .#default
+
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure
-  @echo "Basic initialization test passed!"
+test: test-structure build
+  @echo "All tests passed!"

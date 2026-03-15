@@ -4,3 +4,8 @@
 ;; Keywords: lisp,
 
 ;; Commentary:
+
+;;; Code:
+
+(provide 'predicates)
+;;; predicates.el ends here

@@ -17,7 +17,7 @@
       # Helper function to generate an attribute set for all systems.
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-      # Nixpkgs instantiated for each system.
+      # Nixpkgs instantiated for each system with the emacs-overlay applied.
       nixpkgsFor = forAllSystems (system:
         import nixpkgs {
           inherit system;
@@ -45,14 +45,32 @@
       # Provide emacs-overlay as a passthrough for convenience.
       overlays.default = emacs-overlay.overlays.default;
 
-      # Package the Emacs configuration for each system (useful for testing).
+      # Build the Emacs derivation directly.  Used for `nix build .#default`
+      # and by `just build` in CI / iteration loops.
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
         in
         {
-          default = pkgs.callPackage ./emacs.nix {
-            flake-inputs = { inherit emacs-overlay; };
+          default = pkgs.callPackage ./emacs-package.nix {};
+        }
+      );
+
+      # Development shell with the tooling needed to work on this repo.
+      # Enter with `nix develop` (or direnv if .envrc is configured).
+      devShells = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor.${system};
+        in
+        {
+          default = pkgs.mkShell {
+            name = "emacs-config-dev";
+            packages = [
+              pkgs.just
+              # Base Emacs for running the lightweight startup / structure tests
+              # without requiring the full Nix build.
+              pkgs.emacs
+            ];
           };
         }
       );

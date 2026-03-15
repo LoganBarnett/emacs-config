@@ -91,12 +91,13 @@ list is returned as-is."
 
 (define-obsolete-function-alias 'doom-enlist 'ensure-list "3.0.0")
 
-(defun doom-unquote (exp)
-  "Return EXP unquoted."
-  (declare (pure t) (side-effect-free t))
-  (while (memq (car-safe exp) '(quote function))
-    (setq exp (cadr exp)))
-  exp)
+(eval-and-compile
+  (defun doom-unquote (exp)
+    "Return EXP unquoted."
+    (declare (pure t) (side-effect-free t))
+    (while (memq (car-safe exp) '(quote function))
+      (setq exp (cadr exp)))
+    exp))
 
 (defun doom-keyword-intern (str)
   "Converts STR (a string) into a keyword (`keywordp')."

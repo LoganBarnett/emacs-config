@@ -8,3 +8,5 @@
 
 # Ignore org-babel tangled Emacs Lisp files.
 org/*.el
+# Ignore any compiled lisp files that might make their way in due to tests.
+*.elc
