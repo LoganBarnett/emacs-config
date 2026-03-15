@@ -58,9 +58,14 @@ of =prog-mode= as well.
 
 #+begin_src emacs-lisp :results none :noweb yes
 (use-package "flyspell"
+  :demand t
   :init
   :config
   (require 'flyspell-correct)
+  ;; Use the ido interface for a popup-like correction menu that shows
+  ;; suggestions and actions (save to dict, accept for session/buffer, etc.).
+  ;; flyspell-correct-ido is bundled with flyspell-correct.
+  (require 'flyspell-correct-ido)
   <<config/flyspell-mute>>
   <<config/flyspell-keybindings>>
   <<flyspell-add-to-modes>>
