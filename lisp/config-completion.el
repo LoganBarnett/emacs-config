@@ -70,7 +70,11 @@
   ;; (vertico-count 20) ;; Show more candidates
   ;; (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
   ;; (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
-  :init
+  :config
+  ;; Use :config (not :init) so vertico is loaded before vertico-mode is called.
+  ;; In the Nix emacsWithPackagesFromUsePackage setup, package autoloads are not
+  ;; pre-registered, so calling vertico-mode in :init (before (require 'vertico))
+  ;; would fail with void-function.
   (vertico-mode)
   )
 
@@ -175,12 +179,10 @@
   :bind (:map minibuffer-local-map
          ("M-A" . marginalia-cycle))
 
-  ;; The :init section is always executed.
-  :init
-
-  ;; Marginalia must be activated in the :init section of use-package such that
-  ;; the mode gets enabled right away. Note that this forces loading the
-  ;; package.
+  ;; Use :config so marginalia is loaded before marginalia-mode is called.
+  ;; The marginalia README suggests :init, relying on autoloads, but in the
+  ;; Nix emacsWithPackagesFromUsePackage setup autoloads are not pre-registered.
+  :config
   (marginalia-mode))
 
 (use-package consult
@@ -226,29 +228,44 @@
   )
 
 (with-eval-after-load 'evil
-  (evil-define-operator config/wgrep-mark-deletion-operator (beg end type)
-    "Mark lines for deletion in wgrep, or use normal delete for single-line edits,
+  ;; Use `eval' to prevent the native compiler from miscompiling the
+  ;; evil-define-operator macro expansion.  The macro generates
+  ;; (let ((func #'config/wgrep-mark-deletion-operator)) ...) and the native
+  ;; compiler emits a VAR-REF (variable lookup) instead of SYMFUNCTION
+  ;; (function lookup) for #'config/wgrep-mark-deletion-operator because the
+  ;; name is unknown at compile time (defined via defalias, not defun).
+  ;; Wrapping in eval defers expansion and execution to runtime where the
+  ;; function is available.
+  (eval
+   '(evil-define-operator config/wgrep-mark-deletion-operator (beg end type)
+      "Mark lines for deletion in wgrep, or use normal delete for single-line edits,
 all between BEG, END, respecting evil's TYPE."
-    :motion evil-line
-    (interactive "<R>")
-    (if (and (eq type 'inclusive)
-             (= (line-number-at-pos beg) (line-number-at-pos end)))
-        ;; Single-line motion, use normal delete
-        (evil-delete beg end type ?_)
-      ;; Multi-line motion, mark for wgrep deletion
-      (save-excursion
-        (goto-char beg)
-        (let ((line-end (save-excursion (goto-char end) (line-number-at-pos))))
-          (while (<= (line-number-at-pos) line-end)
-            (wgrep-mark-deletion)
-            (forward-line 1)))))))
+      :motion evil-line
+      (interactive "<R>")
+      (if (and (eq type 'inclusive)
+               (= (line-number-at-pos beg) (line-number-at-pos end)))
+          ;; Single-line motion, use normal delete
+          (evil-delete beg end type ?_)
+        ;; Multi-line motion, mark for wgrep deletion
+        (save-excursion
+          (goto-char beg)
+          (let ((line-end (save-excursion (goto-char end) (line-number-at-pos))))
+            (while (<= (line-number-at-pos) line-end)
+              (wgrep-mark-deletion)
+              (forward-line 1))))))
+   t))
 
 (use-package wgrep
   :config
-  (map!
-   :map wgrep-mode-map
-   :nv "d" #'config/wgrep-mark-deletion-operator
-   )
+  ;; Use evil-define-key instead of map! because map! is a Doom macro that
+  ;; may not be available when config-completion.el is byte/native-compiled by
+  ;; the Nix builder.  Calling a macro as a function at runtime gives
+  ;; invalid-function.  evil-define-key is also a macro, so wrap in eval to
+  ;; defer expansion to runtime where evil is loaded.
+  (eval
+   '(evil-define-key '(normal visual) wgrep-mode-map
+      (kbd "d") #'config/wgrep-mark-deletion-operator)
+   t)
   )
 
 (provide 'config-completion)

@@ -20,29 +20,25 @@
       nativeBuildInputs = [ pkgs.emacs ];
       buildPhase = ''
         runHook preBuild
-        mkdir -p tangled
         for f in *.org; do
           echo "[build] Tangling $f"
           emacs --batch \
             --load org \
             --eval "(setq org-confirm-babel-evaluate nil)" \
-            --eval "(org-babel-tangle-file \
-                       \"$(pwd)/$f\" \
-                       \"$(pwd)/tangled/$(basename $f .org).el\" \
-                       \"emacs-lisp\")" \
+            --eval "(org-babel-tangle-file \"$(pwd)/$f\" nil \"emacs-lisp\")" \
             2>&1 \
             || echo "[build] No emacs-lisp tangle output for $f"
         done
         # Discard empty output files - org files where all blocks are
         # :tangle no produce zero bytes.
-        find tangled -maxdepth 1 -name "*.el" -empty -delete
+        find . -maxdepth 1 -name "*.el" -empty -delete
         runHook postBuild
       '';
       installPhase = ''
         runHook preInstall
         mkdir -p $out/share/emacs-config/org
         install -m 444 *.org $out/share/emacs-config/org/
-        for f in tangled/*.el; do
+        for f in *.el; do
           [ -e "$f" ] && install -m 444 "$f" $out/share/emacs-config/org/ \
             || true
         done

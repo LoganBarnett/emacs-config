@@ -89,7 +89,11 @@
     ;; leave it off. For now it's disabled.
     ;; (init-org-file "rainbow-identifiers.org")
     (init-org-file "avy.org")
-    (on-spacemacs (init-org-file "helm.org"))
+    ;; on-spacemacs is a compile-time macro defined in init.el.  When
+    ;; init-batteries.el is native-compiled by Nix, init.el is not loaded, so
+    ;; the compiler cannot expand the macro and emits a function call.  At
+    ;; runtime that causes invalid-function.  Use a plain runtime check instead.
+    (when (boundp 'spacemacs-version) (init-org-file "helm.org"))
     (init-org-file "flyspell.org")
     (init-org-file "messages.org")
     (init-org-file "flycheck.org")

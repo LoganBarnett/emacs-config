@@ -92,21 +92,53 @@
   "Load the pre-tangled elisp for the org FILE.
 Uses `config/base-dir' (set by site-start.el in the Nix package) to
 locate the org/ directory in the Nix store, where both the .org sources
-and the tangled .el files live.  Because both files share an epoch
-timestamp in the store, org-babel-load-file loads the .el directly
-without retangling.
+and the tangled .el files live.
+
+When the pre-tangled .el exists alongside the .org in the store, it is
+loaded directly with `load-file' -- bypassing `org-babel-load-file''s
+freshness check, which would otherwise attempt to retangle and fail with
+a permission-denied error on the read-only Nix store.
+
+When no pre-tangled .el is found (e.g. the Nix build tangle step did not
+produce one for this file), the org file is tangled at startup into
+`temporary-file-directory' and the result is loaded from there.  Org
+files with no emacs-lisp tangle blocks produce no output and are silently
+skipped.
 
 Falls back to computing the path relative to the current file's directory
 when `config/base-dir' is not set, which preserves behavior when running
 from a local checkout outside of Nix."
   (message "[INIT] %s" file)
-  (let ((base-dir (if (boundp 'config/base-dir)
-                      config/base-dir
-                    ;; Fallback: go up from lisp/ to the config root.
-                    (expand-file-name ".."
-                                      (file-name-directory
-                                       (or load-file-name buffer-file-name))))))
-    (org-babel-load-file (expand-file-name (format "org/%s" file) base-dir))))
+  (let* ((base-dir (if (boundp 'config/base-dir)
+                       config/base-dir
+                     ;; Fallback: go up from lisp/ to the config root.
+                     (expand-file-name ".."
+                                       (file-name-directory
+                                        (or load-file-name buffer-file-name)))))
+         (org-path (expand-file-name (format "org/%s" file) base-dir))
+         (el-path (concat (file-name-sans-extension org-path) ".el")))
+    (if (file-exists-p el-path)
+        ;; Pre-tangled .el exists in the store.  Load it directly without
+        ;; going through org-babel-load-file, which would try to retangle if
+        ;; the .el is not strictly newer than the .org -- a condition that
+        ;; can arise when the Nix build install ordering varies -- and would
+        ;; fail with permission-denied on the read-only store.
+        (load-file el-path)
+      ;; .el not pre-tangled (e.g. the Nix build tangle step skipped it or
+      ;; produced an empty result for an all-:tangle-no org file).  Tangle
+      ;; into a writable temp directory and load from there.  If no blocks
+      ;; produce output (no-code org file), org-babel-tangle-file writes
+      ;; nothing and we skip the load gracefully.
+      (let ((temp-el (expand-file-name
+                      (concat (file-name-base org-path) ".el")
+                      temporary-file-directory))
+            (org-confirm-babel-evaluate nil))
+        ;; org-babel-tangle-file lives in ob.el which isn't loaded at
+        ;; startup.  Require it explicitly so the function is available.
+        (require 'ob)
+        (org-babel-tangle-file org-path temp-el "emacs-lisp")
+        (when (file-exists-p temp-el)
+          (load-file temp-el))))))
 
 (defun config/init-org-file-private (file)
   "Load private FILE from a sibling dotfiles-private directory.

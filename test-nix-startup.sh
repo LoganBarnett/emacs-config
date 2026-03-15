@@ -2,10 +2,17 @@
 # Test that the Nix-built Emacs can start with our configuration without
 # runtime errors.  Must be run after `nix build .#default` (i.e. `just build`).
 #
-# This test catches errors that the structure test cannot, because it runs the
-# actual compiled and installed packages rather than mocking them.  In batch
-# mode, any unhandled Lisp error causes Emacs to print the backtrace and exit
-# with code 255, making this an effective smoke test for runtime init failures.
+# In batch mode, any unhandled Lisp error causes Emacs to exit non-zero,
+# making this an effective smoke test for runtime init failures.
+#
+# NOTE: --batch sets debug-on-error=t, which means errors caught by
+# condition-case in use-package :init blocks are still fatal here (those same
+# errors would be warnings/continuable in interactive mode).  This is
+# intentional: we want a clean init with no errors at all.
+#
+# We use -q (not -Q) in step 2 so that site-start.el runs and package autoloads
+# are available.  -Q would also skip site-start.el, causing spurious
+# void-function errors for third-party modes that rely on autoloads.
 
 set -euo pipefail
 
@@ -23,18 +30,37 @@ echo "Testing Nix-built Emacs startup..."
 echo "Emacs: $EMACS"
 echo ""
 
-# Use a temporary HOME directory so Emacs does not find any local user init
-# files.  Without a user init file, Emacs falls back to default.el, which is
-# where emacsWithPackagesFromUsePackage (defaultInitFile = true) installs our
-# init.el.
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
-# Run the built Emacs in batch mode with a 120-second timeout.
-# - No -q/-Q so site-start.el and default.el (our init.el) are loaded.
-# - Batch mode + unhandled Lisp error = exit 255 → test fails.
-# - Batch mode + clean completion = exit 0 → test passes.
-HOME="$TMPDIR" timeout 120 "$EMACS" --batch 2>&1 | tee "$LOG"
+# Step 1: Locate the installed init file.
+# emacsWithPackagesFromUsePackage with defaultInitFile=true installs our
+# init.el as default.el in the emacs-packages-deps site-lisp directory.
+# We find it via locate-library, writing to a file to avoid IFS=: quoting
+# issues with the Nix emacs shell wrapper.
+DEFAULTEL_PATH="$TMPDIR/defaultel-path.txt"
+HOME="$TMPDIR" "$EMACS" --batch -Q \
+  --eval "(with-temp-file \"$DEFAULTEL_PATH\" (insert (or (locate-library \"default\") \"\")))" \
+  --eval '(kill-emacs 0)' 2>/dev/null || true
+DEFAULT_EL=$(cat "$DEFAULTEL_PATH" 2>/dev/null || echo "")
+
+if [ -z "$DEFAULT_EL" ]; then
+  echo "Error: Could not locate default.el (our init.el) in the Nix-built Emacs load path."
+  echo "Check that 'nix build .#default' completed successfully."
+  exit 1
+fi
+echo "Found init (default.el): $DEFAULT_EL"
+echo ""
+
+# Step 2: Load the init file in batch mode.
+# -q (--no-init-file) skips the user's init file but keeps site-start.el,
+# which loads package autoloads.  We need autoloads so that third-party mode
+# functions (e.g. vertico-mode called in :init blocks) are resolvable.
+# -Q would also skip site-start.el, making autoloads unavailable, which
+# causes spurious void-function errors that don't occur in interactive mode.
+# --load explicitly loads our Nix-installed init (default.el / init.el).
+# Batch mode sets debug-on-error=t, so any unhandled Lisp error exits 255.
+HOME="$TMPDIR" timeout 120 "$EMACS" --batch -q --load "$DEFAULT_EL" 2>&1 | tee "$LOG"
 EXIT_CODE=${PIPESTATUS[0]}
 
 echo ""
@@ -49,8 +75,5 @@ elif [ "$EXIT_CODE" -eq 124 ]; then
 else
   echo "✗ Nix startup test FAILED (exit code: $EXIT_CODE)"
   echo "  Check: $LOG"
-  echo ""
-  echo "Last 30 lines of output:"
-  tail -30 "$LOG"
   exit 1
 fi
