@@ -28,6 +28,8 @@ The =dnd= package is consumed via Nix from the [[https://github.com/LoganBarnett
   (:prefix ("D" . "dnd-tools")
     :map org-mode-map
     :ne "n" #'dnd/next-round
+    :ne "c" #'dnd/create-combat-table
+    :ne "p" #'dnd-table-populate
    )
  )
 #+end_src
