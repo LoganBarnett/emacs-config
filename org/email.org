@@ -32,8 +32,9 @@ Expand [[mu4e]] to see the current configuration.
 * tools used
 ** isync
 
-   =isync= is a library/tool that syncs with an IMAP account (Gmail speaks
-   IMAP). =isync= isn't the name of the executable itself. Instead this is
+   =isync= is a library/tool that syncs with an IMAP account (mail for a
+   notable ad company speaks IMAP). =isync= isn't the name of the executable
+   itself. Instead this is
    =mbsync=, and generally I use it with =mbsync -a=. I've found a few blog
    posts to help get me started.
 
@@ -88,11 +89,12 @@ I need my line numbers.
 
 *** archiving
 Archiving in =mu4e='s vernacular is "refile". We can set the folder to go
-to the "all mail" folder and then it will work like it should for =gmail=.
+to the "all mail" folder and then it will work like it should for mail for a
+notable ad company.
 
 That said, this fixed directory doesn't work. We need to set this in contexts
 (see private dotfiles for this configuration).
-#+name: config/mu4e-gmail-refile-to-archives
+#+name: config/mu4e-mail-for-ad-company-refile-to-archives
 #+begin_example emacs-lisp
 ;; (setq-default mu4e-refile-folder "/personal-gmail/[Gmail]/.All Mail")
 #+end_example
@@ -292,7 +294,7 @@ http://pragmaticemacs.com/emacs/master-your-inbox-with-mu4e-and-org-mode/
 *** TODO encryption and GPG key
 *** deleting mail
 
-#+name: config/mu4e-gmail-messages-delete
+#+name: config/mu4e-mail-for-ad-company-messages-delete
 #+begin_src emacs-lisp :results none :tangle no
 (defun config/mu4e-trash (*args)
   (concat
@@ -353,6 +355,101 @@ using email.
     (add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode)
   )
 #+end_src
+*** contexts
+
+The match function used as =:match-func= in each context.
+
+#+name: config/mu4e-match-email
+#+begin_src emacs-lisp :tangle no
+(defun config/mu4e-match-email (msg)
+  (when msg
+    (mu4e-message-contact-field-matches msg :to user-mail-address)))
+#+end_src
+
+Addresses are built via =concat= so that naive scrapers and formatters can't
+trivially extract them as literal strings.
+
+#+name: config/mu4e-addresses
+#+begin_src emacs-lisp :tangle no
+(defvar ad-company-mail
+  ;; Letters reversed, assembled at runtime.
+  (nreverse (concat "l" "i" "a" "m" "g")))
+
+(defvar bootcamp-mail
+  ;; Letters reversed, assembled at runtime.
+  (nreverse (concat "b" "a" "l" "e" "d" "o" "c" "y" "m" "e" "h" "c" "l" "a")))
+
+(defvar config/mu4e-personal-mail-for-ad-company
+  (concat "logustus@" ad-company-mail ".com"))
+
+(defvar config/mu4e-lcbh-mail-for-ad-company
+  (concat "logancassandrabarnetthoy@" ad-company-mail ".com"))
+
+(defvar config/mu4e-alchemy
+  (concat "logan@" bootcamp-mail ".com"))
+#+end_src
+
+#+name: config/mu4e-contexts-setup
+#+begin_src emacs-lisp :tangle no
+;; maildir-account-dir must be set via setq for reasons I don't understand.
+;; Buffers will show the value to be correct, but the functions using the
+;; variable will always be wrong. Instead it is set with enter-func.
+(setq-default
+ mu4e-contexts
+ (list
+  (make-mu4e-context
+   :name "personal-mail-for-ad-company"
+   :vars `((user-mail-address              . ,config/mu4e-personal-mail-for-ad-company)
+           (smtpmail-smtp-user             . ,config/mu4e-personal-mail-for-ad-company)
+           (user-full-name                 . "Logan Barnett")
+           (maildir-account-inbox-subdir   . "/Inbox")
+           (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
+           (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
+           (mu4e-compose-signature         . "")
+           (mu4e-refile-folder             . "/personal-gmail/[Gmail]/.All Mail")
+           (mu4e-user-mail-address-list    . ,(list config/mu4e-personal-mail-for-ad-company))
+           (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
+                                                          config/mu4e-personal-mail-for-ad-company
+                                                          nil))))
+   :enter-func (lambda () (setq maildir-account-dir "/personal-gmail"))
+   :match-func #'config/mu4e-match-email)
+
+  (make-mu4e-context
+   :name "lcbh-mail-for-ad-company"
+   :vars `((user-mail-address              . ,config/mu4e-lcbh-mail-for-ad-company)
+           (smtpmail-smtp-user             . ,config/mu4e-lcbh-mail-for-ad-company)
+           (user-full-name                 . "Cassandra and Logan Barnett")
+           (maildir-account-inbox-subdir   . "/Inbox")
+           (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
+           (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
+           (mu4e-compose-signature         . "")
+           (mu4e-refile-folder             . "/lcbh-gmail/[Gmail]/.All Mail")
+           (mu4e-user-mail-address-list    . ,(list config/mu4e-lcbh-mail-for-ad-company))
+           (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
+                                                          config/mu4e-lcbh-mail-for-ad-company
+                                                          nil))))
+   :enter-func (lambda () (setq maildir-account-dir "/lcbh-gmail"))
+   :match-func #'config/mu4e-match-email)
+
+  (make-mu4e-context
+   :name "alchemy"
+   :vars `((user-mail-address              . ,config/mu4e-alchemy)
+           (smtpmail-smtp-user             . ,config/mu4e-alchemy)
+           (user-full-name                 . "Logan Barnett")
+           (maildir-account-inbox-subdir   . "/Inbox")
+           (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
+           (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
+           (mu4e-compose-signature         . ,(concat "Logan Barnett (he/him)\n"
+                                                      "Principal Instructor\n"))
+           (mu4e-refile-folder             . "/alchemy-gmail/[Gmail]/.All Mail")
+           (mu4e-user-mail-address-list    . ,(list config/mu4e-alchemy))
+           (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
+                                                          config/mu4e-alchemy
+                                                          nil))))
+   :enter-func (lambda () (setq maildir-account-dir "/alchemy-gmail"))
+   :match-func #'config/mu4e-match-email)))
+#+end_src
+
 *** bookmarks
 
 Bookmarks are the initial =b= shortcuts that quickly let me jump to certain
@@ -629,14 +726,15 @@ much of that is shadowed by =evil-mode=.
 **** line wrapping
       Wrapping at 80 columns is king, but it's not without some management to
       make happen. By default =mu4e= seems to respect single line breaks when
-      exporting to the email. This means email readers (such as gmail) will
-      break the email at about 78 columns or so, which makes for very poor
-      looking, jagged paragraphs. This is partly due to GMail's interaction with
-      =format=flowed= for plain text emails, and the RFC governing it.
+      exporting to the email. This means email readers (such as mail for a
+      notable ad company) will break the email at about 78 columns or so,
+      which makes for very poor looking, jagged paragraphs. This is partly
+      due to mail for a notable ad company's interaction with =format=flowed=
+      for plain text emails, and the RFC governing it.
 
       Some additional reading:
       + [[https://www.djcbsoftware.nl/code/mu/mu4e/Writing-messages.html][mu4e docs on writing messages]]
-      + [[https://mathiasbynens.be/notes/gmail-plain-text][GMail plain text and line wrapping]]
+      + [[https://mathiasbynens.be/notes/gmail-plain-text][Mail for a notable ad company plain text and line wrapping]]
       + [[https://github.com/djcb/mu/issues/569][mu#569]] Support format=flowed on outgoing mails
 
 ***** unfill
@@ -947,7 +1045,7 @@ that direction.  That's fine by me, but this is a good hint that I should just
 capture the settings I want, and then I'm future proof against further changes
 to default behaviors.
 
-#+name config/evil-collection-mu4e-pr-860-fix-key-conflict
+#+name: config/evil-collection-mu4e-pr-860-fix-key-conflict
 #+begin_src emacs-lisp :results none :exports code :tangle no
 
   ;; Workaround until https://github.com/emacs-evil/evil-collection/pull/860 is
@@ -1131,10 +1229,10 @@ to default behaviors.
       )
     <<config/email-mu4e-link-to-message>>
     <<config/mu4e-auto-fill-comments-disable>>
-    <<config/mu4e-gmail-messages-delete>>
+    <<config/mu4e-mail-for-ad-company-messages-delete>>
     <<config/mu4e-mail-directory-completion>>
     <<config/set-mu-path>>
-    <<config/force-mu4e-mu-version>>
+    <<config/fix-mu4e-version-mismatch>>
     <<config/email-get-mail-command>>
     <<config/mu4e-html2text-renderer>>
     <<config/mu4e-composing>>
@@ -1168,7 +1266,7 @@ to default behaviors.
     mml2015-sign-with-sender t
     gnus-select-method
     ;; TODO: Should this be context driven?
-    '(nnimap "personal-gmail"
+    '(nnimap "personal-mail-for-ad-company"
               (nnimap-address "imap.gmail.com")
               (nnimap-server-port 993)
               (nnimap-stream ssl)
@@ -1176,7 +1274,7 @@ to default behaviors.
     smtpmail-smtp-server "smtp.gmail.com"
     smtpmail-smtp-service 587
     message-send-mail-function 'smtpmail-send-it
-    ;; Gmail system labels have the prefix [Gmail], which matches the default
+    ;; Mail for a notable ad company system labels have the prefix [Gmail], which matches the default
     ;; value of gnus-ignored-newsgroups. That's why we redefine it.
     ;; gnus-ignored-newsgroups "^to\\.\\|^[0-9. 	]+\\( \\|$\\)\\|^[\"][\"#'()]"
     gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]"
@@ -1241,25 +1339,27 @@ to default behaviors.
   - [[http://www.ict4g.net/adolfo/notes/2014/12/27/emacs-imap.html][Adolfo Villafiorita's IMAP in Emacs + MacOS setup]] :: This has been a rich
        trove of information about a setup similar to =IceDane='s. It includes a
        little bit alternatives and also different approaches with additional
-       passes on existing configs (such as adding oauth support via Gmail).
+       passes on existing configs (such as adding oauth support via mail for a
+       notable ad company).
   - [[https://www.reddit.com/r/emacs/comments/7me0vn/help_configuring_mbsyncrc_for_gmail_on_osx/][isync "unknown section keyword" problem]] :: I ran into this problem. The fix
        is that sections are grouped together by a lack of an extra line break.
        Extra linebreak (two in a row) means there's a new section.
   - [[https://docwhat.org/el-capitan-and-the-evils-of-openssl/][OpenSSL and CertificateFile]] :: Homebrew provides a pem file that can be used
        in the =CertificateFile= field for =.mbsyncrc= (=isync='s config file).
        This gives us the root certificate authority needed to establish a chain
-       of trust with gmail's certificates.
+       of trust with mail for a notable ad company's certificates.
 
 * alternative tools
 
 *** gnus
 
-    I have tried =gnus= which is built into Spacemacs as a layer. =gnus= is
-    meant as more of an RSS aggregator than anything else. I had a lot of
-    trouble syncing with Gmail, writing emails, and reading them. The
-    documentation for evilication is sparse at best, and I just get the feel
-    that while using =gnus= for email is clever, it just feels like stretching a
-    tool to be something it isn't.
+I have tried =gnus= which is built into Spacemacs as a layer. =gnus= is meant as
+more of an RSS aggregator than anything else. I had a lot of trouble syncing
+with mail for a notable ad company, writing emails, and reading them. The
+documentation for evilication is sparse at best, and I just get the feel that
+while using =gnus= for email is clever, it just feels like stretching a tool to
+be something it isn't.
+
 * reference
 
   - [[https://www.emacswiki.org/emacs/NotMuch][Emacs Wiki - NotMuch]] :: Has some scripts that might be helpful later, and
@@ -1289,6 +1389,9 @@ to default behaviors.
 <<config/mu4e-prevent-hard-line-wrap-on-export>>
 <<config/mu4e-composing>>
 <<config/mu4e-evilify-evil-window-prefix>>
+<<config/mu4e-match-email>>
+<<config/mu4e-addresses>>
+<<config/mu4e-contexts-setup>>
 <<config/send-email>>
 <<config/set-mu-path>>
 <<config/fix-mu4e-version-mismatch>>
