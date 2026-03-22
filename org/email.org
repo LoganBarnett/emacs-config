@@ -391,63 +391,64 @@ trivially extract them as literal strings.
 
 #+name: config/mu4e-contexts-setup
 #+begin_src emacs-lisp :tangle no
-;; maildir-account-dir must be set via setq for reasons I don't understand.
-;; Buffers will show the value to be correct, but the functions using the
-;; variable will always be wrong. Instead it is set with enter-func.
-(setq-default
- mu4e-contexts
- (list
-  (make-mu4e-context
-   :name "personal-mail-for-ad-company"
-   :vars `((user-mail-address              . ,config/mu4e-personal-mail-for-ad-company)
-           (smtpmail-smtp-user             . ,config/mu4e-personal-mail-for-ad-company)
-           (user-full-name                 . "Logan Barnett")
-           (maildir-account-inbox-subdir   . "/Inbox")
-           (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
-           (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
-           (mu4e-compose-signature         . "")
-           (mu4e-refile-folder             . "/personal-gmail/[Gmail]/.All Mail")
-           (mu4e-user-mail-address-list    . ,(list config/mu4e-personal-mail-for-ad-company))
-           (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
-                                                          config/mu4e-personal-mail-for-ad-company
-                                                          nil))))
-   :enter-func (lambda () (setq maildir-account-dir "/personal-gmail"))
-   :match-func #'config/mu4e-match-email)
+(with-eval-after-load 'mu4e
+  ;; maildir-account-dir must be set via setq for reasons I don't understand.
+  ;; Buffers will show the value to be correct, but the functions using the
+  ;; variable will always be wrong. Instead it is set with enter-func.
+  (setq-default
+   mu4e-contexts
+   (list
+    (make-mu4e-context
+     :name "personal-mail-for-ad-company"
+     :vars `((user-mail-address              . ,config/mu4e-personal-mail-for-ad-company)
+             (smtpmail-smtp-user             . ,config/mu4e-personal-mail-for-ad-company)
+             (user-full-name                 . "Logan Barnett")
+             (maildir-account-inbox-subdir   . "/Inbox")
+             (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
+             (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
+             (mu4e-compose-signature         . "")
+             (mu4e-refile-folder             . "/personal-gmail/[Gmail]/.All Mail")
+             (mu4e-user-mail-address-list    . ,(list config/mu4e-personal-mail-for-ad-company))
+             (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
+                                                            config/mu4e-personal-mail-for-ad-company
+                                                            nil))))
+     :enter-func (lambda () (setq maildir-account-dir "/personal-gmail"))
+     :match-func #'config/mu4e-match-email)
 
-  (make-mu4e-context
-   :name "lcbh-mail-for-ad-company"
-   :vars `((user-mail-address              . ,config/mu4e-lcbh-mail-for-ad-company)
-           (smtpmail-smtp-user             . ,config/mu4e-lcbh-mail-for-ad-company)
-           (user-full-name                 . "Cassandra and Logan Barnett")
-           (maildir-account-inbox-subdir   . "/Inbox")
-           (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
-           (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
-           (mu4e-compose-signature         . "")
-           (mu4e-refile-folder             . "/lcbh-gmail/[Gmail]/.All Mail")
-           (mu4e-user-mail-address-list    . ,(list config/mu4e-lcbh-mail-for-ad-company))
-           (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
-                                                          config/mu4e-lcbh-mail-for-ad-company
-                                                          nil))))
-   :enter-func (lambda () (setq maildir-account-dir "/lcbh-gmail"))
-   :match-func #'config/mu4e-match-email)
+    (make-mu4e-context
+     :name "lcbh-mail-for-ad-company"
+     :vars `((user-mail-address              . ,config/mu4e-lcbh-mail-for-ad-company)
+             (smtpmail-smtp-user             . ,config/mu4e-lcbh-mail-for-ad-company)
+             (user-full-name                 . "Cassandra and Logan Barnett")
+             (maildir-account-inbox-subdir   . "/Inbox")
+             (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
+             (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
+             (mu4e-compose-signature         . "")
+             (mu4e-refile-folder             . "/lcbh-gmail/[Gmail]/.All Mail")
+             (mu4e-user-mail-address-list    . ,(list config/mu4e-lcbh-mail-for-ad-company))
+             (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
+                                                            config/mu4e-lcbh-mail-for-ad-company
+                                                            nil))))
+     :enter-func (lambda () (setq maildir-account-dir "/lcbh-gmail"))
+     :match-func #'config/mu4e-match-email)
 
-  (make-mu4e-context
-   :name "alchemy"
-   :vars `((user-mail-address              . ,config/mu4e-alchemy)
-           (smtpmail-smtp-user             . ,config/mu4e-alchemy)
-           (user-full-name                 . "Logan Barnett")
-           (maildir-account-inbox-subdir   . "/Inbox")
-           (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
-           (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
-           (mu4e-compose-signature         . ,(concat "Logan Barnett (he/him)\n"
-                                                      "Principal Instructor\n"))
-           (mu4e-refile-folder             . "/alchemy-gmail/[Gmail]/.All Mail")
-           (mu4e-user-mail-address-list    . ,(list config/mu4e-alchemy))
-           (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
-                                                          config/mu4e-alchemy
-                                                          nil))))
-   :enter-func (lambda () (setq maildir-account-dir "/alchemy-gmail"))
-   :match-func #'config/mu4e-match-email)))
+    (make-mu4e-context
+     :name "alchemy"
+     :vars `((user-mail-address              . ,config/mu4e-alchemy)
+             (smtpmail-smtp-user             . ,config/mu4e-alchemy)
+             (user-full-name                 . "Logan Barnett")
+             (maildir-account-inbox-subdir   . "/Inbox")
+             (maildir-account-trash-subdir   . "/[Gmail]/.Trash")
+             (maildir-account-spam-subdir    . "/[Gmail]/.Spam")
+             (mu4e-compose-signature         . ,(concat "Logan Barnett (he/him)\n"
+                                                        "Principal Instructor\n"))
+             (mu4e-refile-folder             . "/alchemy-gmail/[Gmail]/.All Mail")
+             (mu4e-user-mail-address-list    . ,(list config/mu4e-alchemy))
+             (smtpmail-auth-credentials      . ,(list (list "smtp.gmail.com" 587
+                                                            config/mu4e-alchemy
+                                                            nil))))
+     :enter-func (lambda () (setq maildir-account-dir "/alchemy-gmail"))
+     :match-func #'config/mu4e-match-email))))
 #+end_src
 
 *** bookmarks
@@ -1203,8 +1204,7 @@ to default behaviors.
       ,(kbd "C--") mu4e-headers-split-view-shrink
       ,(kbd "C-+") mu4e-headers-split-view-grow
       ,@(when evil-want-C-u-scroll
-          '("\C-u" evil-scroll-up))))
-   "All evil-mu4e bindings for evil normal mode.")
+          '("\C-u" evil-scroll-up)))))
 
 #+end_src
 
