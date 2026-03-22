@@ -74,4 +74,5 @@ test-flyspell:
 
 # Quick test to verify Emacs can start (recommended for CI)
 test: test-structure build test-nix-startup test-yasnippet test-keybindings test-flyspell
+  nix flake check
   @echo "All tests passed!"
