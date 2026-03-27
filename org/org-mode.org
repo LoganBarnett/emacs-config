@@ -1435,6 +1435,7 @@ This is the region of offending code, I think:
    (:prefix ("h" . "heading")
       :desc "archive" "a" #'org-archive-subtree
      )
+   :desc "refile" "r" #'org-refile
    ;; I'm not sure how swiper gets pulled in, nor how it should be pulled in,
    ;; but it is available after Emacs starts.
    (:prefix ("s" . "search")
