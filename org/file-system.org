@@ -28,7 +28,19 @@ overwrite the destination file if it exists, without confirmation."
                                    (file-name-directory old-path)
                                    nil nil
                                    (file-name-nondirectory old-path))))
-    (vc-rename-file old-path new-path)
+    (if (vc-backend old-path)
+        (vc-rename-file old-path new-path)
+      (rename-file old-path new-path 1))
+    (set-visited-file-name new-path t t)))
+
+(defun config/rename-current-buffer-file-no-vc ()
+  (interactive)
+  (let* ((old-path (buffer-file-name))
+         (new-path (read-file-name "Rename file to: "
+                                   (file-name-directory old-path)
+                                   nil nil
+                                   (file-name-nondirectory old-path))))
+    (rename-file old-path new-path 1)
     (set-visited-file-name new-path t t)))
 
 ;; TODO: Move this into something generic.  We neeed a library for this stuff!
@@ -80,14 +92,43 @@ If FORCE-P, overwrite the destination file if it exists, without confirmation."
 (defun config/current-buffer-file-delete-vc ()
   (interactive)
   (let ((file (buffer-file-name)))
-    (vc-delete-file file)
-    (kill-buffer)))
+    (if (vc-backend file)
+        (progn (vc-delete-file file) (kill-buffer))
+      (when (yes-or-no-p (format "%s is not under version control. Delete permanently? "
+                                 (file-name-nondirectory file)))
+        (delete-file file)
+        (kill-buffer)))))
 
 (defun config/current-buffer-file-delete-no-vc ()
   (interactive)
   (let ((file (buffer-file-name)))
-    (delete-file file)
-    (kill-buffer)))
+    (when (yes-or-no-p (format "Permanently delete %s? " (file-name-nondirectory file)))
+      (delete-file file)
+      (kill-buffer))))
+
+(defun config/chmod-current-buffer-file ()
+  "Change permissions of the current buffer's file.
+Accepts octal (e.g. 755) or symbolic chmod expressions (e.g. u+x, o-w, a=r).
+Shows current permissions in the prompt; offers common modes as completion candidates."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (_ (unless file (user-error "Buffer is not visiting a file")))
+         (current-mode (file-modes file))
+         (current-octal (format "%o" current-mode))
+         (current-symbolic (file-modes-number-to-symbolic current-mode))
+         (candidates '("644" "755" "600" "700" "664" "775" "440" "444" "400"
+                       "u+x" "u-x" "a+x" "a-x" "o+w" "o-w" "g+w" "g-w"))
+         (input (completing-read
+                 (format "chmod [now: %s %s]: " current-octal current-symbolic)
+                 candidates nil nil nil nil current-octal))
+         (new-mode (if (string-match-p "^[0-7]+$" input)
+                       (string-to-number input 8)
+                     (file-modes-symbolic-to-number input current-mode))))
+    (set-file-modes file new-mode)
+    (message "Permissions of %s set to %s (%s)"
+             (file-name-nondirectory file)
+             (format "%o" new-mode)
+             (file-modes-number-to-symbolic new-mode))))
 
 ;; Path yanking functions
 (defun config/yank-filename ()
@@ -108,19 +149,51 @@ If FORCE-P, overwrite the destination file if it exists, without confirmation."
         (message "Copied absolute path: %s" filename))
     (user-error "Buffer is not visiting a file")))
 
-(defun config/yank-relative-path ()
-  "Copy the current buffer's relative file path to the kill ring.
-Relative to project root if in a project, otherwise to `default-directory'."
+(defun config/yank-home-relative-path ()
+  "Copy the current buffer's path with ~ substituted for home to the kill ring."
   (interactive)
   (if-let ((filename (buffer-file-name)))
-      (let* ((root (or (and (fboundp 'projectile-project-root)
-                            (projectile-project-root))
-                       (and (fboundp 'doom-project-root)
-                            (doom-project-root))
-                       default-directory))
-             (relative (file-relative-name filename root)))
+      (let ((path (abbreviate-file-name filename)))
+        (kill-new path)
+        (message "Copied home-relative path: %s" path))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/yank-relative-path ()
+  "Copy the current buffer's path relative to `default-directory' to the kill ring."
+  (interactive)
+  (if-let ((filename (buffer-file-name)))
+      (let ((relative (file-relative-name filename default-directory)))
         (kill-new relative)
         (message "Copied relative path: %s" relative))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/--project-root ()
+  "Return the current project root, or nil if not in a project."
+  (or (when-let (proj (and (fboundp 'project-current) (project-current)))
+        (project-root proj))
+      (when (fboundp 'projectile-project-root)
+        (ignore-errors (projectile-project-root)))))
+
+(defun config/yank-project-relative-path ()
+  "Copy the current buffer's path relative to the project root to the kill ring.
+Errors if the buffer is not in a project."
+  (interactive)
+  (if-let ((filename (buffer-file-name)))
+      (let ((root (or (config/--project-root)
+                      (user-error "Not in a project"))))
+        (let ((relative (file-relative-name filename root)))
+          (kill-new relative)
+          (message "Copied project-relative path: %s" relative)))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/yank-dwim-path ()
+  "Copy the current buffer's project-relative path, falling back to `default-directory'."
+  (interactive)
+  (if-let ((filename (buffer-file-name)))
+      (let* ((root (or (config/--project-root) default-directory))
+             (relative (file-relative-name filename root)))
+        (kill-new relative)
+        (message "Copied path: %s" relative))
     (user-error "Buffer is not visiting a file")))
 
 (defun config/yank-relative-directory ()
@@ -148,6 +221,62 @@ Relative to project root if in a project, otherwise to `default-directory'."
         (message "Copied absolute directory: %s" dir))
     (user-error "Buffer is not visiting a file")))
 
+(defun config/copy-current-buffer-file (new-path &optional stay)
+  "Copy current buffer's file to NEW-PATH.
+If STAY is non-nil, keep the current buffer open; otherwise switch to the copy."
+  (let* ((old-path (buffer-file-name))
+         (_ (unless old-path (user-error "Buffer is not visiting a file")))
+         (new-path (expand-file-name new-path)))
+    (when (directory-name-p new-path)
+      (setq new-path (concat new-path (file-name-nondirectory old-path))))
+    (copy-file old-path new-path 1)
+    (if stay
+        (message "Copied to %s" (abbreviate-file-name new-path))
+      (find-file new-path))))
+
+(defun config/copy-current-buffer-file-and-switch ()
+  "Copy current buffer's file to a new path and switch to the copy."
+  (interactive)
+  (let* ((old-path (buffer-file-name))
+         (_ (unless old-path (user-error "Buffer is not visiting a file")))
+         (new-path (read-file-name "Copy file to: "
+                                   (file-name-directory old-path)
+                                   nil nil
+                                   (file-name-nondirectory old-path))))
+    (config/copy-current-buffer-file new-path nil)))
+
+(defun config/copy-current-buffer-file-keep-original ()
+  "Copy current buffer's file to a new path, staying on the original."
+  (interactive)
+  (let* ((old-path (buffer-file-name))
+         (_ (unless old-path (user-error "Buffer is not visiting a file")))
+         (new-path (read-file-name "Copy file to: "
+                                   (file-name-directory old-path)
+                                   nil nil
+                                   (file-name-nondirectory old-path))))
+    (config/copy-current-buffer-file new-path t)))
+
+(defun config/open-current-buffer-file-externally ()
+  "Open the current buffer's file with its default macOS application."
+  (interactive)
+  (if-let ((file (buffer-file-name)))
+      (shell-command (concat "open " (shell-quote-argument file)))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/reveal-current-buffer-file-in-finder ()
+  "Reveal the current buffer's file in macOS Finder."
+  (interactive)
+  (if-let ((file (buffer-file-name)))
+      (shell-command (concat "open -R " (shell-quote-argument file)))
+    (user-error "Buffer is not visiting a file")))
+
+(defun config/sudo-edit-current-buffer-file ()
+  "Reopen the current buffer's file with sudo via TRAMP."
+  (interactive)
+  (if-let ((file (buffer-file-name)))
+      (find-file (concat "/sudo::" (expand-file-name file)))
+    (user-error "Buffer is not visiting a file")))
+
 (eval-after-load "evil"
   (progn
     (map!
@@ -155,14 +284,21 @@ Relative to project root if in a project, otherwise to `default-directory'."
      :prefix ("f" . "files")
      :desc "File rename" "r" #'config/rename-current-buffer-file-vc
      :desc "File rename (no-vc)" "R" #'config/rename-current-buffer-file-no-vc
+     :desc "File copy (switch)" "c" #'config/copy-current-buffer-file-and-switch
+     :desc "File copy (keep)" "C" #'config/copy-current-buffer-file-keep-original
+     :desc "File chmod" "m" #'config/chmod-current-buffer-file
      :desc "File delete" "d" #'config/current-buffer-file-delete-vc
      :desc "File delete (no VC)" "D" #'config/current-buffer-file-delete-no-vc
-     (:prefix ("p" . "path")
-      :desc "Yank filename" "n" #'config/yank-filename
+     :desc "Open externally" "o" #'config/open-current-buffer-file-externally
+     :desc "Reveal in Finder" "O" #'config/reveal-current-buffer-file-in-finder
+     :desc "Sudo edit" "s" #'config/sudo-edit-current-buffer-file
+     (:prefix ("y" . "yank path")
+      :desc "Yank path (DWIM)" "y" #'config/yank-dwim-path
       :desc "Yank absolute path" "a" #'config/yank-absolute-path
+      :desc "Yank home-relative path" "h" #'config/yank-home-relative-path
       :desc "Yank relative path" "r" #'config/yank-relative-path
-      :desc "Yank relative directory" "d" #'config/yank-relative-directory
-      :desc "Yank absolute directory" "D" #'config/yank-absolute-directory)
+      :desc "Yank project-relative path" "p" #'config/yank-project-relative-path
+      :desc "Yank filename" "n" #'config/yank-filename)
      )
     ;; This keeps eval-after-load from calling the last thing evaluated (which
     ;; would be the function passed to `map!').
