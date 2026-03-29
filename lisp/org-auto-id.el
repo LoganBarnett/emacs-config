@@ -13,23 +13,19 @@
 (require 'org)
 
 (defmacro org-auto-id/without-undo (&rest body)
-  "Disable undo for BODY.
+  "Execute BODY without recording undo information.
 
-`org-auto-id' can potentially write a lot of changes to the buffer.  Storing
-each of these changes as an undo point clutters the undo buffer and undoing each
-edit is not a desired behavior."
-    ;; This seems to cause an error that can't be seen and the body is never
-    ;; executed.
-    ;; (undo-boundary)
-    `(progn
-       (setq undo-inhibit-record-point t)
-       (with-demoted-errors "Error during org-auto-id: %s" ,@body)
-       (setq undo-inhibit-record-point nil)
-      )
-    ;; This seems to cause an error that can't be seen and the body is never
-    ;; executed, even though it comes after the body.
-    ;; (undo-boundary)
-  )
+`org-auto-id' can potentially write a lot of changes to the buffer.  These
+changes are mechanical and re-computed on every save, so recording them in the
+undo history is not useful.  We temporarily set `buffer-undo-list' to t to
+suppress all undo recording, then restore the original undo list.  This
+preserves the user's undo history completely."
+  (let ((saved-undo (make-symbol "saved-undo")))
+    `(let ((,saved-undo buffer-undo-list))
+       (setq buffer-undo-list t)
+       (unwind-protect
+           (progn ,@body)
+         (setq buffer-undo-list ,saved-undo)))))
 
 (defun org-auto-id/id-as-extra-kebab (hierarchy-list)
   "Convert HIERARCHY-LIST to kebab-case, with extra \"-\" between headings.
@@ -73,37 +69,24 @@ If CUSTOM_ID is already set for a given heading then it will be overwritten."
   (require 'org-id)
   (require 'org-element-ast)
   (setq-local org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-  (message "disabling undo")
   (org-auto-id/without-undo
-   (message "undo disabled")
    (save-excursion
      (widen)
-     ;; (beginning-of-buffer)
      (goto-char (point-min))
      (let ((format-to-id (or (intern-soft
                               (org-auto-id/get-org-keyword "AUTO_ID_FN"))
-                             'org-auto-id/id-as-extra-kebab
-                             )))
-       ;; (message "format-to-id %s" format-to-id)
-       (org-element-map
-           (org-element-parse-buffer 'headline)
-           'headline
-         (lambda (el)
-           (let ((id (org-element-property :raw-value el)))
-             (outline-next-heading)
-             (let ((custom-id (org-auto-id/id-generate format-to-id id el)))
-               (if (not (eq custom-id (org-entry-get (point) "CUSTOM_ID")))
-                   (org-entry-put (point) "CUSTOM_ID" custom-id)
-                 nil
-                 )
-               )
-             )
-           )
-         )
-       )
-     )
-   )
-  )
+                             'org-auto-id/id-as-extra-kebab))
+           (inhibit-modification-hooks t))
+       (combine-after-change-calls
+         (org-element-map
+             (org-element-parse-buffer 'headline)
+             'headline
+           (lambda (el)
+             (let ((id (org-element-property :raw-value el)))
+               (outline-next-heading)
+               (let ((custom-id (org-auto-id/id-generate format-to-id id el)))
+                 (unless (string= custom-id (org-entry-get (point) "CUSTOM_ID"))
+                   (org-entry-put (point) "CUSTOM_ID" custom-id)))))))))))
 
 (defun org-auto-id/heading-hierarchy-list (child hierarchy)
   "Recurse from CHILD to build a parent-first HIERARCHY list of headline titles."
@@ -128,32 +111,16 @@ This is kebob case, with no quotes, spaces, or punctuation marks."
    )
   )
 
-;; Lifted from
-;; http://kitchingroup.cheme.cmu.edu/blog/2013/05/05/Getting-keyword-options-in-org-files/
-;; TODO: It would be great to get these locally from the hierarachy and work our
-;; way up.
-(defun org-auto-id/get-org-keywords ()
-  "Parse the buffer and return a cons list of (property . value)
-from lines like:
-#+PROPERTY: value
-
-Property names are always lowercase in the returned structure."
-  (org-element-map (org-element-parse-buffer 'element) 'keyword
-    (lambda (keyword) (cons (org-element-property :key keyword)
-                            (org-element-property :value keyword))))
-  )
-
 (defun org-auto-id/get-org-keyword (keyword)
-  "Get the value of a KEYWORD from the `org-mode' buffer.
-KEYWORD is uppercase regardless of the document's value.
-Given this in the document:
+  "Get the value of KEYWORD from the org-mode buffer.
+Uses `org-collect-keywords' to query org's own keyword handling.
+KEYWORD should be uppercase.  Given this in the document:
 #+FOO: bar
 This code:
-\(org-auto-id-get-org-keyword \"foo\"\)
+\(org-auto-id/get-org-keyword \"FOO\"\)
 Will yield:
 \"bar\""
-  (cdr (assoc keyword (org-auto-id/get-org-keywords)))
-  )
+  (cadr (assoc keyword (org-collect-keywords (list keyword)))))
 
 (defun org-auto-id/save-auto-id ()
   "Save CUSTOM_IDs for Org headlines if AUTO_ID is non-nil."

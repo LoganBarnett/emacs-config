@@ -72,7 +72,11 @@ test-keybindings:
 test-flyspell:
   ./test-flyspell.sh
 
+# ERT test suite for org-auto-id.el (standalone, no Nix build needed)
+test-org-auto-id:
+  ./test/org-auto-id-tests.sh
+
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build test-nix-startup test-yasnippet test-keybindings test-flyspell
+test: test-structure build test-nix-startup test-yasnippet test-keybindings test-flyspell test-org-auto-id
   nix flake check
   @echo "All tests passed!"
