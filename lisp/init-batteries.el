@@ -77,6 +77,7 @@
 (init-org-file "keybindings.org")
 (init-org-file "modeline.org")
 (init-org-file "ui.org")
+(init-org-file "window.org")
 (init-org-file "color.org")
 (init-org-file "printer2d.org")
     ;; This looks a little too much like clown barf right now. I need to fix it or
