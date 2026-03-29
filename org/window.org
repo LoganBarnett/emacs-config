@@ -1,0 +1,44 @@
+#+title:     Window Management
+#+author:    Logan Barnett
+#+email:     logustus@gmail.com
+#+date:      <2026-03-28 Sat>
+#+language:  en
+#+file_tags:
+#+tags:
+
+* stitch
+
+#+begin_src emacs-lisp :results none :exports code :tangle yes
+
+;; winner-mode: rolling undo/redo history of window configurations.
+(use-package winner
+  :config
+  (winner-mode 1))
+
+;; desktop-save-mode: auto-save session on exit for manual restore.
+;; We disable auto-restore so a restart gives a clean slate by default.
+;; Use SPC w R (desktop-read) to restore the saved session.
+(use-package desktop
+  :config
+  (setq desktop-save t              ; always save on exit without prompting
+        desktop-auto-save-timeout 60 ; also auto-save every 60s in case of crash
+        desktop-restore-eager 0      ; don't auto-restore buffers
+        desktop-save-buffer nil      ; don't save buffer-local variables
+        desktop-globals-to-save nil  ; don't save global variables
+        desktop-restore-frames t)    ; do save/restore frame and window layout
+  (desktop-save-mode 1)
+  ;; Prevent auto-restore on startup: remove the after-init hook that
+  ;; desktop-save-mode installs, so the saved state is only loaded on
+  ;; demand via desktop-read.
+  (remove-hook 'after-init-hook #'desktop-read))
+
+(eval-after-load "evil"
+  (progn
+    (map!
+     :leader
+     (:prefix ("w" . "window")
+      :desc "Winner undo" "u" #'winner-undo
+      :desc "Winner redo" "r" #'winner-redo
+      :desc "Desktop restore" "R" #'desktop-read))
+    nil))
+#+end_src

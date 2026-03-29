@@ -404,7 +404,7 @@ manually.
 I just straight up stole Doom's ~fonts.el~ to get the ~doom-big-font-mode~
 enabled.  We need some key bindings to be able to toggle them.
 
-#+name: config/evil-toggle-keymaps
+#+name: config/doom-big-font-setup
 #+begin_src emacs-lisp :results none :exports code :tangle no
 (load-library "doom-fonts.el")
 ;; Required for doom-big-font-mode.
@@ -536,6 +536,10 @@ These are platform-specific fallbacks for internal use. If you
 want to change your symbol font, use `doom-symbol-font'.")
 
 
+#+end_src
+
+#+name: config/evil-toggle-keymaps
+#+begin_src emacs-lisp :results none :exports code :tangle no
 (map!
  :leader
  :desc "toggle"
@@ -567,7 +571,6 @@ library is already loaded.
   (message "required evil-mode")
   <<config/evil-mode-symbol-star-expansion>>
   :config
-  <<config/evil-toggle-keymaps>>
   <<config/evil-backslash-fix>>
   <<config/evil-esc-fix>>
   <<config/evil-leader-set>>
@@ -580,6 +583,8 @@ library is already loaded.
   (load-library "doom-crutch")
   (evil-select-search-module 'evil-search-module 'isearch)
   <<config/evil-comment-yanks>>
+  <<config/doom-big-font-setup>>
+  <<config/evil-toggle-keymaps>>
   )
 
 (use-package evil-collection

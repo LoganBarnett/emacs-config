@@ -49,6 +49,26 @@
  "SPC o m is bound to mu4e in doom-leader-map"
  (eq (test-kb/lookup "o m") #'mu4e))
 
+;; SPC t b — toggle big fonts (evil.org)
+(test-kb/check
+ "SPC t b is bound to doom-big-font-mode in doom-leader-map"
+ (eq (test-kb/lookup "t b") #'doom-big-font-mode))
+
+;; SPC w u — winner undo (window.org)
+(test-kb/check
+ "SPC w u is bound to winner-undo in doom-leader-map"
+ (eq (test-kb/lookup "w u") #'winner-undo))
+
+;; SPC w r — winner redo (window.org)
+(test-kb/check
+ "SPC w r is bound to winner-redo in doom-leader-map"
+ (eq (test-kb/lookup "w r") #'winner-redo))
+
+;; SPC w R — desktop restore (window.org)
+(test-kb/check
+ "SPC w R is bound to desktop-read in doom-leader-map"
+ (eq (test-kb/lookup "w R") #'desktop-read))
+
 ;;
 ;; ── Report ────────────────────────────────────────────────────────────────────
 
