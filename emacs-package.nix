@@ -167,6 +167,17 @@
         license = lib.licenses.gpl3;
       };
     });
+    hyuqueue = (pkgs.emacs.pkgs.trivialBuild {
+      pname = "hyuqueue";
+      ename = "hyuqueue";
+      version = "0.1.0";
+      src = "${emacs-flake-inputs.hyuqueue}/emacs";
+      packageRequires = [ epkgs.transient ];
+      meta = {
+        homepage = "https://gitea.proton/logan/hyuqueue";
+        license = lib.licenses.gpl3;
+      };
+    });
     completion-packages = [
       # In-buffer completion.  Helpful for suggesting symbols in programming
       # languages, and words that have been used before in the same buffer
@@ -619,6 +630,7 @@
           license = lib.licenses.gpl3;
         };
       })
+      hyuqueue
       # Git collaboration server integration into Magit (GitHub, GitLab,
       # Gitea, etc).
       epkgs.forge

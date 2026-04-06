@@ -1,0 +1,39 @@
+#+title:     Hyuqueue
+#+author:    Logan Barnett
+#+email:     logustus@gmail.com
+#+date:      <2026-04-06 Mon>
+#+language:  en
+#+file_tags:
+#+tags:
+
+* load package
+
+The =hyuqueue= package is consumed via Nix from the [[https://gitea.proton/logan/hyuqueue][hyuqueue]] repo.
+
+#+name: config/hyuqueue-load
+#+begin_src emacs-lisp :results none :tangle no
+(use-package hyuqueue
+  :commands (hyuqueue)
+  )
+#+end_src
+
+* key bindings
+
+Bind =SPC o q= under the "standalone apps" prefix (same prefix used by mu4e at
+=SPC o m= and org-agenda at =SPC o a=).
+
+#+name: config/hyuqueue-keybindings
+#+begin_src emacs-lisp :results none :tangle no
+(map!
+  :leader
+  :desc "hyuqueue"
+  :ne "o q" #'hyuqueue
+  )
+#+end_src
+
+* stitch
+
+#+begin_src emacs-lisp :results none :noweb yes :tangle yes
+<<config/hyuqueue-load>>
+<<config/hyuqueue-keybindings>>
+#+end_src

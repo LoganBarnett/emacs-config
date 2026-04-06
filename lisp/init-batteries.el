@@ -168,6 +168,7 @@
 (init-org-file "transportation-circle.org")
 (init-org-file "dnd.org")
 (init-org-file "jira.org")
+(init-org-file "hyuqueue.org")
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; End Emacs "apps".
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

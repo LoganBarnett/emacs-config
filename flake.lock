@@ -22,6 +22,22 @@
         "type": "github"
       }
     },
+    "hyuqueue": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775514696,
+        "narHash": "sha256-bTjkAK0PIuWHCnLRF1AY3YbsS6hy8jK7YXK8eMqA4FI=",
+        "ref": "refs/heads/main",
+        "rev": "f0279c1533135244147c224345b58e39634f7080",
+        "revCount": 3,
+        "type": "git",
+        "url": "ssh://git@gitea.proton:2222/logan/hyuqueue"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@gitea.proton:2222/logan/hyuqueue"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1764521362,
@@ -73,6 +89,7 @@
     "root": {
       "inputs": {
         "emacs-overlay": "emacs-overlay",
+        "hyuqueue": "hyuqueue",
         "nixpkgs": "nixpkgs",
         "org-dnd": "org-dnd"
       }

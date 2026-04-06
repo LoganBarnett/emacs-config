@@ -7,6 +7,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "github:nixos/nixpkgs/25.11";
+    hyuqueue = {
+      url = "git+ssh://git@gitea.proton:2222/logan/hyuqueue";
+      flake = false;
+    };
     org-dnd = {
       url = "git+ssh://git@gitea.proton:2222/logan/org-dnd";
       flake = false;
