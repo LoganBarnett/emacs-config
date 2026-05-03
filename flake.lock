@@ -44,11 +44,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1775514696,
-        "narHash": "sha256-bTjkAK0PIuWHCnLRF1AY3YbsS6hy8jK7YXK8eMqA4FI=",
+        "lastModified": 1775519836,
+        "narHash": "sha256-ZmR4pTYz92/btIVdIz3Cxxks/uaO5Aqpl8SdZXmLfqw=",
         "ref": "refs/heads/main",
-        "rev": "f0279c1533135244147c224345b58e39634f7080",
-        "revCount": 3,
+        "rev": "f99d7da805ae3e19fb1bff711915765d43d76210",
+        "revCount": 5,
         "type": "git",
         "url": "ssh://git@gitea.proton:2222/logan/hyuqueue"
       },
