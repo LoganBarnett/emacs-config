@@ -624,6 +624,9 @@ library is already loaded.
   (evil-collection-init
    'eshell
    )
+  (evil-collection-init
+   'eat
+   )
   <<config/evil-collection-magit-options>>
   (evil-collection-init
    'magit
