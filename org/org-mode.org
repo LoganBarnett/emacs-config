@@ -74,7 +74,7 @@ symbol.
 #+begin_src emacs-lisp :results none :exports code :tangle no
 (defun config/org-noweb-wrap-delimiter-safe-p (val)
   "Return non-nil if VAL is a noweb wrap delimiter we have blessed."
-  (member val '("<<" ">>" "<<<" ">>>" "<%" "%>")))
+  (member val '("<<" ">>" "<<<" ">>>" "<%" "%>" "%<" ">%")))
 (put 'org-babel-noweb-wrap-start
      'safe-local-variable
      #'config/org-noweb-wrap-delimiter-safe-p)
