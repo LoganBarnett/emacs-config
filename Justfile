@@ -62,6 +62,12 @@ test-nix-startup:
 test-yasnippet:
   ./test-yasnippet.sh
 
+# Test that yasnippet TAB expansion works end-to-end on a real snippet.
+# Independent of which in-buffer completion popup is configured.
+# Requires `just build` (./result must exist).
+test-yasnippet-expand:
+  ./test-yasnippet-expand.sh
+
 # Test that leader-key bindings (SPC p, SPC o m, …) are registered after a
 # full startup.  Requires `just build` (./result must exist).
 test-keybindings:
@@ -77,6 +83,6 @@ test-org-auto-id:
   ./test/org-auto-id-tests.sh
 
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build test-nix-startup test-yasnippet test-keybindings test-flyspell test-org-auto-id
+test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-org-auto-id
   nix flake check
   @echo "All tests passed!"
