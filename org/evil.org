@@ -88,6 +88,34 @@ first line.
    use =evil-collection= and instead wire up my own bindings by hand. I've found
    a way to do this that seems to work consistently enough.
 
+*** magit options
+
+By default =evil-collection-magit-use-z-for-folds= is =nil=, which leaves =z=
+bound to the stash transient and doesn't expose the vim-style fold prefix.
+Flip it on so =Z= is stash and =z1=/=z2=/=za=/=zo=/=zc=/=zr= operate on
+section folding.  This must be set before =(evil-collection-init 'magit)=
+runs, because the magit binding table is built at module load with a =when=
+on the defcustom value.
+
+Additionally, =magit-section-mode-map= binds =1= through =4= directly to
+=magit-section-show-level-N= (the levels here are section-tree nesting
+depth — magit's API tops out at level 4).  Those bindings shadow evil's
+=digit-argument=, so motions like =5j= or =3G= silently turn into
+fold-level commands.  Once =use-z-for-folds= moves the level commands under
+=z=, we unbind the bare digits in the section map so digits flow through
+to evil as count prefixes.  We unbind the full =0=–=9= range rather than
+just =1=–=4= in case a third-party magit extension binds further digits or
+magit ever adds another level; =keymap-unset= with =REMOVE=t= is a no-op
+on unbound keys.
+
+#+name: config/evil-collection-magit-options
+#+begin_src emacs-lisp :results none :exports code :tangle no
+(setq evil-collection-magit-use-z-for-folds t)
+(with-eval-after-load 'magit-section
+  (dolist (key '("0" "1" "2" "3" "4" "5" "6" "7" "8" "9"))
+    (keymap-unset magit-section-mode-map key t)))
+#+end_src
+
 ** visual line mode
 
 When =visual-line-mode= is active, make all evil motions and operators work on
@@ -596,6 +624,7 @@ library is already loaded.
   (evil-collection-init
    'eshell
    )
+  <<config/evil-collection-magit-options>>
   (evil-collection-init
    'magit
    )
