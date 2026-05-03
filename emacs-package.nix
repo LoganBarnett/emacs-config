@@ -167,17 +167,7 @@
         license = lib.licenses.gpl3;
       };
     });
-    hyuqueue = (pkgs.emacs.pkgs.trivialBuild {
-      pname = "hyuqueue";
-      ename = "hyuqueue";
-      version = "0.1.0";
-      src = "${emacs-flake-inputs.hyuqueue}/emacs";
-      packageRequires = [ epkgs.transient ];
-      meta = {
-        homepage = "https://gitea.proton/logan/hyuqueue";
-        license = lib.licenses.gpl3;
-      };
-    });
+    hyuqueue = emacs-flake-inputs.hyuqueue.packages.${pkgs.stdenv.hostPlatform.system}.emacs;
     completion-packages = [
       # In-buffer completion.  Helpful for suggesting symbols in programming
       # languages, and words that have been used before in the same buffer
