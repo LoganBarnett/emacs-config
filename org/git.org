@@ -279,6 +279,33 @@ the home page value but that's not as useful as linking to the file itself.
     (kill-new url)
     (message "Copied to clipboard: %S" url)))
 
+(defun +vc/call-with-remote (fn)
+  "Call FN with an interactively selected git remote for browse-at-remote.
+Temporarily overrides remote resolution so the chosen remote is used
+instead of the branch's tracking remote."
+  (require 'browse-at-remote)
+  (let* ((remote (completing-read "Remote: " (browse-at-remote--get-remotes) nil t))
+         (orig (symbol-function 'browse-at-remote--remote-ref)))
+    (cl-letf (((symbol-function 'browse-at-remote--remote-ref)
+               (lambda (&optional f)
+                 (cons remote (cdr (funcall orig f))))))
+      (funcall fn))))
+
+(defun +vc/browse-at-remote-for-remote ()
+  "Browse file at point on a chosen remote."
+  (interactive)
+  (+vc/call-with-remote #'browse-at-remote))
+
+(defun +vc/browse-at-remote-kill-for-remote ()
+  "Kill file+lines URL for a chosen remote."
+  (interactive)
+  (+vc/call-with-remote #'browse-at-remote-kill))
+
+(defun +vc/browse-at-remote-kill-homepage-for-remote ()
+  "Kill homepage URL for a chosen remote."
+  (interactive)
+  (+vc/call-with-remote #'+vc/browse-at-remote-kill-homepage))
+
 (use-package browse-at-remote
   :demand t
   :init
@@ -297,7 +324,25 @@ the home page value but that's not as useful as linking to the file itself.
    :desc "kill git rev" "r" #'config/git-rev-kill
    :desc "kill git mirror lines" "y" #'browse-at-remote-kill
    )
+  (map!
+   :leader
+   :prefix ("g y M" . "remote url")
+   :nv
+   :desc "open in browser" "H" #'+vc/browse-at-remote-for-remote
+   :desc "kill homepage" "h" #'+vc/browse-at-remote-kill-homepage-for-remote
+   :desc "kill lines" "y" #'+vc/browse-at-remote-kill-for-remote
+   )
   :config
+  ;; Vague hostname matchers for self-hosted forges (e.g., gitea.example.com).
+  ;; These prepend to browse-at-remote-remote-type-regexps and take priority
+  ;; over the stricter defaults.  Per-repo git-config browseAtRemote.type
+  ;; still wins over everything.
+  (dolist (entry '((:host "^gitea\\."     :type "gitea")
+                   (:host "^gitlab\\."    :type "gitlab")
+                   (:host "^github\\."    :type "github")
+                   (:host "^bitbucket\\." :type "bitbucket")
+                   (:host "^sourcehut\\." :type "sourcehut")))
+    (add-to-list 'browse-at-remote-remote-type-regexps entry))
   (config/init-org-file-private "git-private.org")
   )
 #+end_src
