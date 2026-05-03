@@ -93,7 +93,6 @@
 (init-org-file "flyspell.org")
 (init-org-file "messages.org")
 (init-org-file "flycheck.org")
-(init-org-file "company.org")
     ;; Themes must be loaded before macos, so we can add a hook and fix emoji
     ;; display.
     ;; (init-org-file "theme.org")

@@ -20,46 +20,44 @@
 
 ;;; Commentary:
 
-;; Completion doesn't come completely free in Emacs, and there are a lot of
-;; options.  I've opted to try to follow Doom's completion choices, which
-;; includes Vertico and its recommended, associated libraries.  That being said,
-;; Doom has a lot of magic here, and this is where Doom makes some aggressive
-;; assumptions.  Like many things in Doom, there's also things that seem like
-;; they could easily be their own module but aren't, or things that appear to
-;; belong in the upstream libraries, but aren't.  I also have no idea how it's
-;; put together because it kind of is a big configuration that's been made
-;; configurable (because of Doom's distribution status).  My configuration has
-;; no such requirements, and I need to better understand these things so I will
-;; build it myself.  Vertico's documentation seems to be rich with examples and
-;; explanations.
+;; Completion in Emacs splits into two surfaces that this file configures
+;; together as one coherent stack:
 ;;
-;; Near as I can tell, corfu and vertico are mutually exclusive to each other.
-;; That's fine though.  It's probably better to have all completions in the same
-;; spot.  I imagine Doom et al have done lots of work to separate them in the
-;; right places, but I'd rather just take the easy/simple route for this one.
-;; So far this includes the following completions I have noticed.  I have not
-;; gone back through the documentation below to remove corfu, as I have decided
-;; to remain with vertico.
+;;   1. *Minibuffer* completion (`M-x', `C-x b', `find-file', anything
+;;      `completing-read'-y) -- driven by vertico, with marginalia for
+;;      annotations, consult for richer commands, embark for actions
+;;      on candidates, and orderless for the matching style.
 ;;
-;; Spell checking, triggered via C-; :
-;; 1. Dictionary/spelling suggestions.
-;; Code completions, managed by corfu and triggered via TAB :
-;; 1. Code completions (in `prog-mode').
+;;   2. *In-buffer* popup (typing in a normal buffer) -- driven by
+;;      corfu, with cape for additional capf sources (file paths,
+;;      dabbrev, keywords) and yasnippet-capf for surfacing snippet
+;;      candidates in the popup.
 ;;
-;; There are other things available I have not experimented with:
-;; 1. corfu-echo - displays brief documentation on a selection candidate.
-;; 2. corfu-info - access to location and documentation of candidates.
-;; 3. cofru-popupinfo - Display documentation in a secondary pop-up.
-;; 4. corfu-quick - Selection using Avy-style "quick keys", whatever those are.
-;; 5. cape - Additional capf backends.  Example: file suggestions (`cape-file'),
-;;    and dabbrev (`cape-dabbrev').
+;; vertico and corfu are *complementary*, not mutually exclusive: they
+;; cover different surfaces and never compete.  Both honor
+;; `completion-styles' (orderless), so fuzzy/initialism matching like
+;; "gui" -> "get_user_id" works in both the minibuffer and the popup.
 ;;
-;; Minibuffer completions, managed by vertico and triggered via TAB :
-;; 1. I don't actually know if veritco is working here.
+;; Yasnippet expansion has two paths, both preserved:
 ;;
-;; If I wanted to consolidate these into the same place, I could use
-;; `consult-completion-in-region'.  This is documented in the corfu README:
-;; https://github.com/minad/corfu?tab=readme-ov-file#alternatives
+;;   - Direct `trigger<TAB>' expansion: handled by `yas-minor-mode-map'
+;;     before `completion-at-point' is consulted.  No popup involved.
+;;   - Snippet candidates inside the corfu popup: provided by
+;;     yasnippet-capf as a regular capf.  Selecting a snippet candidate
+;;     triggers expansion via yasnippet.
+;;
+;; LSP completions flow through `completion-at-point-functions' via
+;; `lsp-completion-at-point' (registered automatically by
+;; `lsp-completion-mode' when lsp-mode attaches to a buffer).  No
+;; separate corfu/company-LSP backend is required.
+;;
+;; Future enhancements that are deliberately out of scope here:
+;;   - corfu-popupinfo: docstring panel beside the popup.
+;;   - corfu-history-mode: MRU sorting of candidates.
+;;   - corfu-terminal: TTY popup support (we run GUI Emacs).
+;;   - cape-capf-super to merge LSP + snippets into a single sorted
+;;     candidate list (the layered capfs below are simpler to reason
+;;     about; revisit if the per-source ordering becomes a problem).
 
 ;;; Code:
 
@@ -125,26 +123,50 @@
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
 
-;; (use-package corfu
-;;   ;; Optional customizations
-;;   ;; :custom
-;;   ;; (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-;;   ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-;;   ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-;;   ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-;;   ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-;;   ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+(use-package corfu
+  :custom
+  ;; Auto-show the popup as you type (vs. on-demand via TAB only).
+  (corfu-auto t)
+  ;; Delay before the popup appears.  Corfu's default of 0.2s is much
+  ;; snappier than company's old 1s; tune up if it feels noisy.
+  (corfu-auto-delay 0.2)
+  ;; Mirror the old `company-minimum-prefix-length' so we don't pop
+  ;; immediately on every keystroke.
+  (corfu-auto-prefix 2)
+  ;; Wrap around when navigating candidates with C-n / C-p.
+  (corfu-cycle t)
+  ;; Quit on a separator (e.g. SPC) when no candidate matches; allows
+  ;; orderless multi-word patterns without the popup steamrolling them.
+  (corfu-quit-no-match (quote separator))
+  ;; Don't preview the highlighted candidate inline -- noisy with
+  ;; orderless matching.
+  (corfu-preview-current nil)
+  :config
+  ;; Use :config (not :init) so corfu is loaded before global-corfu-mode
+  ;; is called.  In the Nix emacsWithPackagesFromUsePackage setup,
+  ;; package autoloads are not pre-registered, so calling
+  ;; global-corfu-mode in :init (before (require 'corfu)) would fail
+  ;; with void-function.  Same pattern as vertico/marginalia above.
+  (global-corfu-mode))
 
-;;   ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
-;;   ;; :hook ((prog-mode . corfu-mode)
-;;   ;;        (shell-mode . corfu-mode)
-;;   ;;        (eshell-mode . corfu-mode))
+(use-package cape
+  :init
+  ;; Register cape's general-purpose capfs on the global
+  ;; `completion-at-point-functions'.  Order matters -- earlier capfs
+  ;; win when their prefix matches.  cape-file is at the front so
+  ;; paths like ./foo or ~/bar always trigger file completion
+  ;; regardless of major-mode capfs.
+  (add-hook (quote completion-at-point-functions) (function cape-file))
+  (add-hook (quote completion-at-point-functions) (function cape-dabbrev))
+  (add-hook (quote completion-at-point-functions) (function cape-keyword)))
 
-;;   ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
-;;   ;; be used globally (M-/).  See also the customization variable
-;;   ;; `global-corfu-modes' to exclude certain modes.
-;;   :init
-;;   (global-corfu-mode))
+(use-package yasnippet-capf
+  :after (cape yasnippet)
+  :init
+  ;; Surface snippet trigger candidates in the corfu popup.  Direct
+  ;; trigger<TAB> expansion still runs through `yas-minor-mode-map' and
+  ;; bypasses corfu entirely; this hook only affects the popup.
+  (add-hook (quote completion-at-point-functions) (function yasnippet-capf)))
 
 ;; A few more useful configurations...
 (use-package emacs

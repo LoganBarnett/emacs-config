@@ -13,14 +13,6 @@ communicates with the IDE. The IDE only needs to know how to speak LSP.
 https://github.com/emacs-lsp/lsp-ui
 
 
-* company
-  #+begin_src emacs-lisp :results none
-(defun config/company-lsp ()
-  (require 'company-lsp)
-  (push 'company-lsp company-backends)
-)
-  #+end_src
-
 * flycheck
 
   Flycheck support arrives automatically as part of configuring =lsp-ui=.
@@ -57,13 +49,6 @@ https://github.com/emacs-lsp/lsp-ui
 * combined
 
   #+begin_src emacs-lisp :results none
-    ;; (use-package lsp-mode
-    ;;   :defer t
-    ;;   :init
-    ;;   :config
-    ;;   (config/company-lsp)
-    ;;   (config/flycheck-lsp)
-    ;;   )
     (require 'use-package)
 
     (use-package lsp-mode

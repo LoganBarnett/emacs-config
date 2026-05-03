@@ -172,6 +172,90 @@ Must be called after ~evil~ is loaded.
 ;; (global-undo-tree-mode 1)
 #+end_src
 
+** join honors sentence-end-double-space (abandoned)
+
+Kept as plumbing in case we want to revisit.  *Not* wired into the
+~use-package~ form below — there is no noweb reference to
+~config/evil-join-double-space~, so the ~defun~ is not loaded and the
+~advice-add~ does not run.
+
+** Background
+
+Vim's ~'joinspaces'~ option (on by default in Vi-compat, off in Vim 9)
+makes ~J~ insert two spaces after sentence-terminal punctuation (~.~,
+~!~, ~?~) when joining lines.  Evil-mode does not replicate this:
+~evil-join~ delegates to ~delete-indentation~, which calls
+~fixup-whitespace~ — and ~fixup-whitespace~ in Emacs is hard-coded to
+insert exactly one space, ignoring ~sentence-end-double-space~.  This
+is an inconsistency in Emacs itself: filling (~gq~) honors
+~sentence-end-double-space~, but joining and ~just-one-space~ do not.
+
+There is no upstream evil-mode issue or PR tracking this, and no
+~defcustom~ on the relevant Emacs functions.
+
+** Why it was abandoned
+
+The advice below is a faithful port of vim's ~'joinspaces'~ semantics:
+it inserts a second space whenever the preceding char is
+~.~/~!~/~?~.  But that rule is *dumb* — it cannot distinguish a real
+sentence boundary from an abbreviation like "Mr.\nSmith", and so
+joining will produce "Mr.  Smith" (wrong).  Vim has the same flaw;
+this is why Vim 9 flipped the default to off.
+
+There is no perfect fix at *insertion* time.  At *recognition* time
+Emacs uses the existing single-vs-double space to disambiguate, but
+at join time that signal is gone.  The realistic options are:
+
+- Accept vim-compatible dumb behavior (false positives on
+  abbreviations).
+- Maintain an abbreviation skip-list (Mr., Mrs., Dr., Jr., e.g., i.e.,
+  etc.) — fragile, never complete.
+- Heuristics based on token length / capitalization — false positives
+  and negatives in both directions.
+
+This is an artifact of hard-wrapped text: the moment you allow a
+sentence to span a newline, you lose the structural information that
+would let a join command reliably reconstruct the spacing.  In
+practice ~gq~ (the evil fill operator, which calls ~fill-paragraph~)
+is the better tool — it does honor ~sentence-end-double-space~ via
+the fill engine's bespoke sentence-aware logic, and it operates on
+whole paragraphs so abbreviations remain on the same line as their
+preceding token.  ~J~ is reserved for one-off line-joining where the
+user is in a position to eyeball the result.
+
+** The advice (not loaded)
+
+#+name: config/evil-join-double-space
+#+begin_src emacs-lisp :results none :exports code :tangle no
+(defun config/evil-join-double-space-advice (orig-fun &rest args)
+  "Around advice: make `evil-join' double the space after
+sentence-terminal punctuation, mirroring vim's `joinspaces'.
+Imperfect — false-positives on abbreviations like \"Mr. Smith\"."
+  (let ((orig-fixup (symbol-function 'fixup-whitespace)))
+    (cl-letf
+        (((symbol-function 'fixup-whitespace)
+          (lambda ()
+            (funcall orig-fixup)
+            (when sentence-end-double-space
+              (save-excursion
+                ;; `fixup-whitespace' uses `save-excursion' internally,
+                ;; so point sits at the join boundary.  The inserted
+                ;; single space may be immediately before or after
+                ;; point depending on the caller's prior position.
+                (cond
+                 ((and (eq (char-before) ?\s)
+                       (memq (char-before (1- (point))) '(?. ?! ??)))
+                  (insert ?\s))
+                 ((and (eq (char-after) ?\s)
+                       (memq (char-before) '(?. ?! ??)))
+                  (forward-char 1)
+                  (insert ?\s))))))))
+      (apply orig-fun args))))
+
+;; To activate, uncomment and add a noweb ref to the use-package form.
+;; (advice-add 'evil-join :around #'config/evil-join-double-space-advice)
+#+end_src
+
 
 * evil-mode add-ons
 ** evil-exchange
@@ -650,6 +734,7 @@ library is already loaded.
      ;; Completion UI stack.
      vertico
      consult
+     corfu
      embark
      which-key
      ;; Shells / terminals.

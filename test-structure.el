@@ -30,7 +30,7 @@
 (defun vertico-mode (&rest args) (message "[TEST] Mock: vertico-mode"))
 (defun marginalia-mode (&rest args) (message "[TEST] Mock: marginalia-mode"))
 (defun orderless-define-completion-style (&rest args) (message "[TEST] Mock: orderless-define-completion-style"))
-(defun corfu-global-mode (&rest args) (message "[TEST] Mock: corfu-global-mode"))
+(defun global-corfu-mode (&rest args) (message "[TEST] Mock: global-corfu-mode"))
 (defun doom-themes-org-config (&rest args) (message "[TEST] Mock: doom-themes-org-config"))
 (defun evil-mode (&rest args) (message "[TEST] Mock: evil-mode"))
 (defun evil-collection-init (&rest args) (message "[TEST] Mock: evil-collection-init"))
@@ -60,10 +60,6 @@
 (defun projectile-purge-file-from-cache (&rest args) nil)
 (defun recentf-remove-if-non-kept (&rest args) nil)
 (defun save-place-forget-unreadable-files (&rest args) nil)
-
-;; Mock company
-(defun global-company-mode (&rest args) (message "[TEST] Mock: global-company-mode"))
-(defvar company-active-map (make-sparse-keymap))
 
 ;; Mock evil functions
 (defun evil-declare-change-repeat (&rest args) (message "[TEST] Mock: evil-declare-change-repeat"))

@@ -169,14 +169,23 @@
     });
     hyuqueue = emacs-flake-inputs.hyuqueue.packages.${pkgs.stdenv.hostPlatform.system}.emacs;
     completion-packages = [
-      # In-buffer completion.  Helpful for suggesting symbols in programming
-      # languages, and words that have been used before in the same buffer
-      # or project.  I have elected to consolidate everything into vertico
-      # since, without at least major lifting, corfu and vertico seem to be
-      # mutually exclusive to each other.  Or at least I have a hard time
-      # pulling the two apart.  Doom probably does this properly with a
-      # mountain of hacks, but I don't care enough to investigate.
-      # epkgs.corfu
+      # In-buffer completion popup.  Complementary to vertico, not in
+      # competition: vertico drives the *minibuffer*, corfu drives the
+      # in-buffer popup.  They share the orderless completion-style and
+      # together form a coherent completion stack (same author, same
+      # philosophy, both built on Emacs' completion-at-point pipeline).
+      epkgs.corfu
+      # Cape: "Completion At Point Extensions".  Provides additional
+      # capf functions (cape-file for path completion, cape-dabbrev for
+      # in-buffer words, cape-keyword for major-mode keyword lists).
+      # These get added to completion-at-point-functions so they show
+      # up in the corfu popup alongside LSP and other capfs.
+      epkgs.cape
+      # Bridges yasnippet into the capf pipeline so snippet trigger
+      # candidates appear in the corfu popup alongside other
+      # completions.  Direct trigger<TAB> expansion is unaffected --
+      # that path goes through yas-minor-mode-map and bypasses corfu.
+      epkgs.yasnippet-capf
       # Consult is a completing read system.  It basically comes up with
       # contextual suggestions (like files, spellings, snippets, and more).
       epkgs.consult
@@ -199,7 +208,7 @@
       # Give us colorful icons in auto-complete, which could help us
       # visually identify certain kinds of completion information (such as
       # structs vs. enums in Rust).
-      # epkgs.nerd-icons-corfu
+      epkgs.nerd-icons-corfu
       # Give us colorful icons in auto-complete, which could help us
       # visually identify certain kinds of completion information (such as
       # structs vs. enums in Rust).
@@ -638,8 +647,6 @@
       # snake_case, kebob-case, etc).  How does this vary from
       # string-inflection?
       epkgs.caseformat
-      # A generalized auto-complete library.
-      epkgs.company
       # Emacs is the best vim implementation I've found.
       epkgs.evil
       # Add evil mode to just about everything.
