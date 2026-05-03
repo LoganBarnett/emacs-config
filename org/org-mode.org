@@ -57,6 +57,33 @@ the front-matter in HTML blocks - I can just use ~org-mode~ metadata instead.
 #+end_src
 
 
+** safe noweb delimiters
+
+I sometimes override the noweb wrap delimiters per-file (via ~Local
+Variables:~) so they don't collide with shift operators (=<<= / =>>=) in
+languages like C++, Rust, or Java.  The handful of replacements I actually
+use are innocuous, so bless them up front to skip the prompt on every load.
+
+A predicate registered via ~put~ is idempotent: re-evaluating the block
+overwrites the symbol property with the same (or updated) predicate, and it
+composes cleanly with other ~safe-local-variable~ registrations elsewhere
+(such as the block in =org/lisp.org=) because each call targets a different
+symbol.
+
+#+name: config/org-mode-safe-noweb-delimiters
+#+begin_src emacs-lisp :results none :exports code :tangle no
+(defun config/org-noweb-wrap-delimiter-safe-p (val)
+  "Return non-nil if VAL is a noweb wrap delimiter we have blessed."
+  (member val '("<<" ">>" "<<<" ">>>" "<%" "%>")))
+(put 'org-babel-noweb-wrap-start
+     'safe-local-variable
+     #'config/org-noweb-wrap-delimiter-safe-p)
+(put 'org-babel-noweb-wrap-end
+     'safe-local-variable
+     #'config/org-noweb-wrap-delimiter-safe-p)
+#+end_src
+
+
 ** org-reveal
 
 * evil
@@ -1377,6 +1404,7 @@ This is the region of offending code, I think:
 #+begin_src emacs-lisp :results none :noweb yes :tangle yes
 (use-package org
   :init
+  <<config/org-mode-safe-noweb-delimiters>>
   <<config/org-mode-insert-inactive-time-stamp-with-time-fn>>
   ;; Alphabetical list items must be set before `org-mode' loads.
   <<config/org-mode-list-item-alphabetical>>
