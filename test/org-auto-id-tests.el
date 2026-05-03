@@ -46,6 +46,52 @@ causes `org-entry-get' to return nil at headline positions."
   (should (equal "hello"
                  (org-auto-id/anchorize-headline-title "\"hello\""))))
 
+(ert-deftest org-auto-id-test/anchorize-apostrophes ()
+  "Straight and curly apostrophes are removed.
+Leaving them in produces IDs like `didn't' which Goldmark's heading
+attribute parser rejects, leaking the literal `{#...}' into rendered
+HTML."
+  (should (equal "didnt"
+                 (org-auto-id/anchorize-headline-title "didn't")))
+  (should (equal "didnt"
+                 (org-auto-id/anchorize-headline-title "didn\u2019t")))
+  (should (equal "you-cant-stop-me"
+                 (org-auto-id/anchorize-headline-title "You can't stop me"))))
+
+(ert-deftest org-auto-id-test/anchorize-transliterates-accents ()
+  "Accented Latin characters lose their accents via NFD decomposition.
+Without this, `Résumé' would strip to `rsum' (the bare `é' is
+non-ASCII so the [a-z0-9-] filter removes it entirely)."
+  (should (equal "resume"
+                 (org-auto-id/anchorize-headline-title "Résumé")))
+  (should (equal "resume-match"
+                 (org-auto-id/anchorize-headline-title "Résumé Match")))
+  (should (equal "naive"
+                 (org-auto-id/anchorize-headline-title "naïve")))
+  (should (equal "creme-brulee"
+                 (org-auto-id/anchorize-headline-title "crème brûlée")))
+  (should (equal "uber"
+                 (org-auto-id/anchorize-headline-title "Über"))))
+
+(ert-deftest org-auto-id-test/anchorize-strips-non-latin ()
+  "Non-Latin scripts that NFD can't transliterate get stripped.
+This is the conservative fallback — better to lose the heading text
+than to emit invalid markdown attribute syntax."
+  (should (equal ""
+                 (org-auto-id/anchorize-headline-title "日本語")))
+  (should (equal "test"
+                 (org-auto-id/anchorize-headline-title "test Ω"))))
+
+(ert-deftest org-auto-id-test/anchorize-strips-all-punctuation ()
+  "Any character outside [a-z0-9-] is removed, not just a curated list.
+This matches the docstring: \"no quotes, spaces, or punctuation marks\"."
+  (should (equal "abc"
+                 (org-auto-id/anchorize-headline-title "a:b;c!")))
+  (should (equal "foobar"
+                 (org-auto-id/anchorize-headline-title "foo.bar")))
+  (should (equal "100-of-the-time"
+                 (org-auto-id/anchorize-headline-title "100% of the time"))))
+
 (ert-deftest org-auto-id-test/anchorize-idempotent ()
   "Already-kebab input is unchanged."
   (should (equal "already-kebab"
@@ -212,6 +258,68 @@ causes `org-entry-get' to return nil at headline positions."
     (goto-char (point-min))
     (org-next-visible-heading 1)
     (should (equal "HELLO WORLD" (org-entry-get (point) "CUSTOM_ID")))))
+
+;;; 7. Global minor mode (export-time advice)
+
+(ert-deftest org-auto-id-test/mode-enable-adds-advice ()
+  "Enabling the mode wraps `org-export-get-reference'."
+  (require 'ox)
+  (unwind-protect
+      (progn
+        (org-auto-id-mode 1)
+        (should (advice-member-p
+                 #'org-auto-id/headline-anchor 'org-export-get-reference)))
+    (org-auto-id-mode -1)))
+
+(ert-deftest org-auto-id-test/mode-disable-removes-advice ()
+  "Disabling the mode removes the advice."
+  (require 'ox)
+  (org-auto-id-mode 1)
+  (org-auto-id-mode -1)
+  (should-not (advice-member-p
+               #'org-auto-id/headline-anchor 'org-export-get-reference)))
+
+(ert-deftest org-auto-id-test/mode-toggle-idempotent ()
+  "Enabling twice leaves only one advice in place."
+  (require 'ox)
+  (unwind-protect
+      (progn
+        (org-auto-id-mode 1)
+        (org-auto-id-mode 1)
+        (should (advice-member-p
+                 #'org-auto-id/headline-anchor 'org-export-get-reference)))
+    (org-auto-id-mode -1)))
+
+;;; 8. Headline-anchor advice function
+
+(ert-deftest org-auto-id-test/advice-returns-deterministic-anchor ()
+  "Advice returns kebab-case anchor for a headline without CUSTOM_ID."
+  (org-auto-id-test/with-org-buffer "* Hello World\n"
+    (let* ((tree (org-element-parse-buffer))
+           (headline (org-element-map tree 'headline #'identity nil 'first-match))
+           (orig-fn (lambda (&rest _) "wrong-fallback")))
+      (should (equal "hello-world"
+                     (org-auto-id/headline-anchor orig-fn headline nil))))))
+
+(ert-deftest org-auto-id-test/advice-respects-custom-id ()
+  "Advice falls through when headline already has :CUSTOM_ID:."
+  (org-auto-id-test/with-org-buffer
+      "* Hello\n:PROPERTIES:\n:CUSTOM_ID: hand-set\n:END:\n"
+    (let* ((tree (org-element-parse-buffer))
+           (headline (org-element-map tree 'headline #'identity nil 'first-match))
+           (orig-fn (lambda (&rest _) "from-orig")))
+      (should (equal "from-orig"
+                     (org-auto-id/headline-anchor orig-fn headline nil))))))
+
+(ert-deftest org-auto-id-test/advice-falls-through-for-non-headlines ()
+  "Advice calls original function for non-headline elements."
+  (org-auto-id-test/with-org-buffer
+      "* H\nSome [[https://example.com][link]] text.\n"
+    (let* ((tree (org-element-parse-buffer))
+           (link (org-element-map tree 'link #'identity nil 'first-match))
+           (orig-fn (lambda (&rest _) "from-orig")))
+      (should (equal "from-orig"
+                     (org-auto-id/headline-anchor orig-fn link nil))))))
 
 (provide 'org-auto-id-tests)
 

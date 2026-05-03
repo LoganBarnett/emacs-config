@@ -589,6 +589,7 @@ reasons.
 (load-library "org-auto-id")
 (require 'org-auto-id)
 (org-auto-id/on-save-auto-id)
+(org-auto-id-mode 1)
 #+end_src
 
 

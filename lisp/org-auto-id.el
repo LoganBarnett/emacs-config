@@ -11,6 +11,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'ucs-normalize)
 
 (defmacro org-auto-id/without-undo (&rest body)
   "Execute BODY without recording undo information.
@@ -104,12 +105,23 @@ If CUSTOM_ID is already set for a given heading then it will be overwritten."
 
 (defun org-auto-id/anchorize-headline-title (title)
   "Convert TITLE to an HTML anchor-worthy name.
-This is kebob case, with no quotes, spaces, or punctuation marks."
+This is kebab case: lowercase ASCII alphanumerics and dashes only.
+Spaces become dashes.  Accented Latin characters lose their accents
+via Unicode NFD decomposition (e.g. \"Résumé\" → \"resume\"), so the
+ID stays human-readable instead of being stripped to nothing.  Every
+remaining non-ASCII or punctuation character is removed.
+
+This keeps the result safe to use in Markdown heading attribute syntax
+\(`{#id}'), which Goldmark's parser rejects on apostrophes and other
+punctuation."
   (replace-regexp-in-string
-   "\"\\|)\\|(\\|,\\|?" ""
-   (downcase (replace-regexp-in-string " " "-" title))
-   )
-  )
+   "^-+\\|-+$" ""
+   (replace-regexp-in-string
+    "[^a-z0-9-]" ""
+    (replace-regexp-in-string
+     "[\u0300-\u036f]" ""
+     (ucs-normalize-NFD-string
+      (downcase (replace-regexp-in-string " " "-" title)))))))
 
 (defun org-auto-id/get-org-keyword (keyword)
   "Get the value of KEYWORD from the org-mode buffer.
@@ -135,13 +147,64 @@ Will yield:
   )
 
 (defun org-auto-id/on-save-auto-id ()
-  "When saving an `org-mode' buffer, add CUSTOM_IDs to all headlines.
+  "Register `org-auto-id/save-auto-id' on `before-save-hook'.
 
-See `org-auto-id/buffer-custom-id-populate' for details and
-customization options."
+The hook itself short-circuits in any buffer without `#+AUTO_ID: t',
+so it is safe to register globally and opt in per file via the
+keyword.  Use this when you want CUSTOM_IDs persisted into the
+source (so `[[#anchor]]' cross-references resolve, and so IDs are
+visible in git).  For the export-time, no-source-churn alternative,
+see `org-auto-id-mode'."
   (interactive)
-  (add-hook 'before-save-hook #'org-auto-id/save-auto-id)
-  )
+  (add-hook 'before-save-hook #'org-auto-id/save-auto-id))
+
+(defun org-auto-id/headline-anchor (orig-fun &rest args)
+  "Around-advice for `org-export-get-reference'.
+
+Return a deterministic kebab-case anchor for headline elements that
+have no `:CUSTOM_ID:' set.  Falls back to ORIG-FUN with ARGS for any
+other element (links, footnotes, internal targets) so we don't
+override Org's whole reference machinery.
+
+Headlines with an explicit `:CUSTOM_ID:' fall through too — the
+persist-on-save flow (`#+AUTO_ID: t') is the per-buffer escape
+hatch when you need stable, hand-linkable anchors via
+`[[#anchor]]'."
+  (let ((datum (car args)))
+    (if (and (eq (org-element-type datum) 'headline)
+             (not (org-element-property :CUSTOM_ID datum)))
+        (org-auto-id/id-as-extra-kebab
+         (org-auto-id/heading-hierarchy-list
+          datum (list (org-element-property :raw-value datum))))
+      (apply orig-fun args))))
+
+(define-minor-mode org-auto-id-mode
+  "Toggle export-time deterministic anchor generation via advice.
+
+When enabled, `org-export-get-reference' is wrapped so that
+headlines without an explicit `:CUSTOM_ID:' get a deterministic
+kebab-case anchor derived from heading text and hierarchy, instead
+of Org's default random ID.  Other element types (links, footnotes,
+internal targets) are unaffected.
+
+The mode is global; the advice is a single piece of state.  No
+source files are modified — IDs only exist during export.  This
+trades off the ability to write `[[#anchor]]' cross-references in
+the source (those need a real `:CUSTOM_ID:' to resolve).  For files
+that need cross-references, add `#+AUTO_ID: t' to the buffer header
+and persist IDs into the source via `org-auto-id/on-save-auto-id'.
+
+To customize how IDs are generated, see
+`org-auto-id/buffer-custom-id-populate' and the `#+AUTO_ID_FN'
+keyword."
+  :global t
+  :group 'org
+  (require 'ox)
+  (if org-auto-id-mode
+      (advice-add 'org-export-get-reference :around
+                  #'org-auto-id/headline-anchor)
+    (advice-remove 'org-export-get-reference
+                   #'org-auto-id/headline-anchor)))
 
 (provide 'org-auto-id)
 
