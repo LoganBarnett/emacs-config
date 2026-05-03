@@ -618,22 +618,52 @@ library is already loaded.
 (use-package evil-collection
   :after evil
   :config
-  (evil-collection-init
-   'dired
-   )
-  (evil-collection-init
-   'eshell
-   )
-  (evil-collection-init
-   'eat
-   )
+  ;; Magit-specific defcustoms must be set before evil-collection-magit
+  ;; loads (see notes under ** evil-collection > *** magit options).
+  ;; Each `evil-collection-init' call registers a `with-eval-after-load'
+  ;; hook against the target package, so ordering of the inits relative
+  ;; to one another doesn't matter -- only that the magit defcustom is
+  ;; set before magit itself is loaded by the user.
   <<config/evil-collection-magit-options>>
   (evil-collection-init
-   'magit
-   )
-  (evil-collection-init
-   'mu4e
-   )
+   '(;; Buffers / lists we navigate constantly.
+     dired
+     wdired
+     ibuffer
+     package-menu
+     ;; Read-only documentation.
+     help
+     helpful
+     info
+     ;; Tooling result buffers.
+     compile
+     grep
+     ripgrep
+     wgrep
+     xref
+     flycheck
+     replace
+     ;; Diff / merge / patch UIs.
+     diff-mode
+     smerge-mode
+     ediff
+     ;; Completion UI stack.
+     vertico
+     consult
+     embark
+     which-key
+     ;; Shells / terminals.
+     eshell
+     eat
+     ;; Git.
+     magit
+     forge
+     ;; Major modes.
+     markdown-mode
+     org
+     ;; Mail.
+     mu4e
+     ))
   )
 
 <<config/evil-surround>>
