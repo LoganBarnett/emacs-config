@@ -279,6 +279,36 @@ We want the equivalent of =\usepackage{circuitikz}=.
 Seek ~org-evil-mode~ settings in [[evil]] - it provides the ~g h~ binding and
 more.  Doom doesn't have it.
 
+** reveal after jump
+
+Evil's count-prefixed line motions (~76zz~, ~42gg~, etc.) can land point inside
+a folded subtree.  Without intervention org leaves the surrounding content
+collapsed, so the cursor appears to "stick" on the parent heading.
+
+Emacs core has no general "cursor jumped here" hook, and ~reveal-mode~ is quirky
+with org's fold system.  Evil tags jump motions with a ~:jump~ command property
+(it uses this to populate its jumplist), so we can lean on ~post-command-hook~
+and let evil classify which commands count as jumps.
+
+We use ~org-fold-show-context~ rather than ~org-fold-show-set-visibility~
+because the former only unfolds — the latter normalizes the buffer to a
+canonical visibility, which would re-collapse subtrees the user had already
+expanded.
+
+#+name: config/org-reveal-after-jump
+#+begin_src emacs-lisp :results none :exports code :tangle no
+(defun config/org-reveal-after-jump-maybe ()
+  "Reveal context around point if an evil jump landed inside a fold."
+  (when (and (evil-get-command-property this-command :jump)
+             (org-invisible-p))
+    (org-fold-show-context 'mark-goto)))
+
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'post-command-hook
+                      #'config/org-reveal-after-jump-maybe nil t)))
+#+end_src
+
 * headings
 ** folding
 Starting up with everything folded is generally preferable.
@@ -1501,6 +1531,7 @@ This is the region of offending code, I think:
   ;; Can't use require because it doesn't use `provide'.
   (load-library "doom-autoload-org")
   <<config/evil-org-mode>>
+  <<config/org-reveal-after-jump>>
   ;; Provide org-reveal's interactive functions.
   (require 'ox-reveal)
   <<config/markdown-export-fill-paragraph>>
