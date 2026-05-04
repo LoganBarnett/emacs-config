@@ -25,36 +25,25 @@
 ;;; Code:
 
 (defun eat-config--disable-blink ()
-  "Disable `eat-blink-mode' to avoid whole-frame flicker in TTY Emacs.
+  "Disable `eat-blink-mode' to reduce eat-driven periodic redraws.
 
 `eat-blink-mode' runs a timer that toggles a face remapping each
-tick to animate blink-attribute text and the very-visible cursor.
-Face remapping dirties the entire window, and TTY Emacs has no
-off-screen/double buffer -- unlike GUI redisplay, which blits an
-off-screen pixmap atomically (the X11 double-buffer work landed
-after the 2016 emacs-devel RFC).  In TTY mode each tick therefore
-visibly repaints cells one at a time, producing a frame-wide
-flash in time with the cursor blink.  Setting non-blinking
-`eat-default-cursor-type'/`eat-very-visible-cursor-type' is not
-sufficient -- the timer is the driver, not the cursor shape.
-
-The structural fix would be for Emacs's TTY backend to wrap
-redraws in BSU/ESU sequences (DEC private mode 2026,
-\"synchronized output\").  Ghostty and most modern terminals
-buffer output between those sequences and flush the update
-atomically, eliminating tearing.  As of Emacs 31.1 master the
-NEWS file mentions no synchronized-output support, and a search
-of debbugs/emacs-devel did not surface an active patch.  If/when
-that support lands, this workaround can likely be removed.
+tick to animate blink-attribute text.  Face remapping dirties
+the entire window every tick, which on slower redisplay paths
+(notably TTY frames, which have no off-screen buffer to absorb
+the change) produces visible frame-wide flicker.  On the macOS
+NS port this contributes to flicker as well, though the dominant
+driver of \"all of Emacs flashes ~2 Hz\" is eat's separate
+cursor-animation timer (see `eat-very-visible-cursor-type' and
+`eat-default-cursor-type', whose BLINKING-FREQUENCY field drives
+a per-buffer timer independent of `blink-cursor-mode' and of
+this mode).  Both are pinned to nil-blink in the `use-package'
+form below; this hook handles the text-attribute side.
 
 References:
-- DEC mode 2026 spec (Christian Parpart):
-  https://gist.github.com/christianparpart/d8a62cc1ab659194337d73e399004036
-- emacs-devel 2016 RFC, flicker-free double-buffered Emacs (X11):
-  https://lists.gnu.org/archive/html/emacs-devel/2016-10/msg00626.html
 - bug#13727 (long-standing TTY redraw flicker):
   https://lists.gnu.org/archive/html/bug-gnu-emacs/2013-02/msg00816.html
-- bug#57434 (more recent macOS TTY flicker report):
+- bug#57434 (macOS TTY flicker report):
   https://lists.gnu.org/archive/html/bug-gnu-emacs/2022-09/msg00010.html
 - Eat manual on `eat-blink-mode' and blinking text/cursor:
   https://elpa.nongnu.org/nongnu-devel/doc/eat.html"
@@ -65,6 +54,27 @@ References:
   ;; If you have trouble with Tramp, see about changing this.  We may need to
   ;; advise the `eat' function to use an `eat' specific variable..
   (setq explicit-shell-file-name "zsh")
+  :custom
+  ;; Pin BLINKING-FREQUENCY (second element) to nil on every cursor-type
+  ;; variant eat exposes.  The internal `eat--cursor-blink-mode' activates
+  ;; whenever the *currently applied* cursor type has a non-nil blink
+  ;; frequency, and drives a per-buffer timer that mutates `cursor-type'
+  ;; at that frequency.  On the macOS NS port the resulting redraw
+  ;; cascades into a whole-frame repaint -- visible as ~2 Hz flicker
+  ;; matching the default frequency of `2'.  Independent of
+  ;; `blink-cursor-mode' and of `eat-blink-mode' (which animates the
+  ;; *text* blink attribute, not the cursor).
+  ;;
+  ;; Which variant eat selects depends on the DECSCUSR escape sequence
+  ;; the shell sends -- code 1/2 picks block, 3/4 underline, 5/6 bar;
+  ;; the odd codes request blink, which routes to the very-visible
+  ;; variant.  Override all four very-visible variants so no shell-side
+  ;; sequence can route us back into a blinking spec.  The non-very-visible
+  ;; bar/hbar variants already default to nil-blink.
+  (eat-default-cursor-type (list (default-value 'cursor-type) nil nil))
+  (eat-very-visible-cursor-type (list (default-value 'cursor-type) nil nil))
+  (eat-very-visible-vertical-bar-cursor-type '(bar nil nil))
+  (eat-very-visible-horizontal-bar-cursor-type '(hbar nil nil))
   :hook
   (eat-mode . eat-config--disable-blink)
   )
