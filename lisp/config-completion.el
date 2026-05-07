@@ -141,6 +141,14 @@
   ;; Don't preview the highlighted candidate inline -- noisy with
   ;; orderless matching.
   (corfu-preview-current nil)
+  ;; Keep corfu out of the minibuffer.  Vertico already owns that surface,
+  ;; and `evil-ex-setup' makes `completion-at-point-functions' buffer-local
+  ;; -- which is exactly the trigger `corfu--minibuffer-on' watches for.
+  ;; If corfu activates there, it overrides `completion-in-region-function'
+  ;; buffer-locally and bypasses `consult-completion-in-region', so `:e re'
+  ;; (with multiple candidates) silently commits the first one instead of
+  ;; popping a vertico prompt.
+  (global-corfu-minibuffer nil)
   :config
   ;; Use :config (not :init) so corfu is loaded before global-corfu-mode
   ;; is called.  In the Nix emacsWithPackagesFromUsePackage setup,
