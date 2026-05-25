@@ -7,13 +7,30 @@
   # Use `config` above as the default init file.
   defaultInitFile = true;
   extraEmacsPackages = (epkgsOrig: let
-    # Override org-mode's source with our fork carrying the org-lint
-    # no-side-effects fix.  overrideScope propagates so transitive
-    # consumers (org-contrib, org-dnd, ox-hugo, ...) see the same
-    # patched org rather than getting both versions on the load-path.
+    # Patch our fork's `org-lint.el' onto the released org package.
+    # epkgs.org is built by `elpa2nix' which expects a `.tar' src, so
+    # the more obvious `overrideAttrs (_: { src = ... })' won't work
+    # (unlike scad-mode/yatemplate above, which use `melpaBuild' and
+    # accept a source directory).  Instead, let the original tar
+    # install normally, then copy our single patched file over the
+    # installed one and drop the stale .elc / .eln so they regenerate
+    # against the new source.  `overrideScope' propagates the patched
+    # org to transitive consumers (org-contrib, org-dnd, ox-hugo,
+    # ...) so we don't end up with two copies on the load-path.
     epkgs = epkgsOrig.overrideScope (efinal: eprev: {
-      org = eprev.org.overrideAttrs (_: {
-        src = emacs-flake-inputs.org-mode-fork;
+      org = eprev.org.overrideAttrs (old: {
+        postInstall = (old.postInstall or "") + ''
+          target=$(find "$out/share/emacs/site-lisp/elpa" \
+            -name 'org-lint.el' -path '*/org-*/org-lint.el')
+          install -m 444 \
+            ${emacs-flake-inputs.org-mode-fork}/lisp/org-lint.el \
+            "$target"
+          # Drop stale byte- and native-compiled artifacts so they
+          # regenerate against our patched source on first load.
+          rm -f "''${target%.el}.elc"
+          find "$out/share/emacs/native-lisp" \
+            -name 'org-lint-*.eln' -delete 2>/dev/null || true
+        '';
       });
     });
     # Tangle all org/*.org files into .el files using a batch Emacs process.
