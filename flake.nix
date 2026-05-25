@@ -14,6 +14,15 @@
       url = "git+ssh://git@gitea.proton:2222/logan/org-dnd";
       flake = false;
     };
+    # Personal fork of org-mode carrying a fix to org-lint that avoids
+    # side-effecting includes via find-file-noselect.  Override in
+    # nix-config-private to point at the gitea mirror for local deploys.
+    # When the fix lands upstream, drop this input and the overrideAttrs
+    # in emacs-package.nix.
+    org-mode-fork = {
+      url = "github:LoganBarnett/org-mode/fix/org-lint-include-no-side-effects";
+      flake = false;
+    };
   };
 
   # Only name inputs here that we explicitly use in the code below.  Everything

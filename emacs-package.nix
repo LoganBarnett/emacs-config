@@ -6,7 +6,16 @@
   config = ./lisp/init.el;
   # Use `config` above as the default init file.
   defaultInitFile = true;
-  extraEmacsPackages = (epkgs: let
+  extraEmacsPackages = (epkgsOrig: let
+    # Override org-mode's source with our fork carrying the org-lint
+    # no-side-effects fix.  overrideScope propagates so transitive
+    # consumers (org-contrib, org-dnd, ox-hugo, ...) see the same
+    # patched org rather than getting both versions on the load-path.
+    epkgs = epkgsOrig.overrideScope (efinal: eprev: {
+      org = eprev.org.overrideAttrs (_: {
+        src = emacs-flake-inputs.org-mode-fork;
+      });
+    });
     # Tangle all org/*.org files into .el files using a batch Emacs process.
     # Both .org sources and the tangled .el files are installed together under
     # share/emacs-config/org/ so that org-babel-load-file can load the .el

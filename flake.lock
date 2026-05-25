@@ -137,12 +137,30 @@
         "url": "ssh://git@gitea.proton:2222/logan/org-dnd"
       }
     },
+    "org-mode-fork": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779668985,
+        "narHash": "sha256-V7PDDBYCqusuobfEX0PylFAEhGFxVw9xA/uq4xAhHVw=",
+        "owner": "LoganBarnett",
+        "repo": "org-mode",
+        "rev": "a1b4ca765eedee4b5b236cebd56b2f79c81b4702",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LoganBarnett",
+        "ref": "fix/org-lint-include-no-side-effects",
+        "repo": "org-mode",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "emacs-overlay": "emacs-overlay",
         "hyuqueue": "hyuqueue",
         "nixpkgs": "nixpkgs_3",
-        "org-dnd": "org-dnd"
+        "org-dnd": "org-dnd",
+        "org-mode-fork": "org-mode-fork"
       }
     },
     "rust-overlay": {
