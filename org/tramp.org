@@ -83,7 +83,11 @@ to be run again.
 
 #+name: config/tramp-log-verbosity
 #+begin_src emacs-lisp :tangle no :results none
-(setq-default tramp-verbose 5)
+;; 1 = quiet.  Verbosity 5 logs and formats *every* remote round-trip into the
+;; debug buffer, which is a real per-command tax — magit staging a hunk is
+;; dozens of small git commands, so it multiplies.  Bump to 6 via the commented
+;; line in lisp/init.el when you actually need to debug a connection.
+(setq-default tramp-verbose 1)
 #+end_src
 
 * troubleshooting
@@ -329,11 +333,12 @@ command control it, as those still work.
     ;; (setq-default insert-directory-program "/usr/local/bin/gls")
     (setq-default dired-use-ls-dired t)
     (setq-default dired-listing-switches "-al")
-    ;; This should fix issues with stalling when bringing up helm while tramp is
-    ;; connected. See
-    ;; https://github.com/syl20bnr/spacemacs/blob/master/doc/FAQ.org#why-is-spacemacs-hanging-on-startup
-    (setq-default tramp-ssh-controlmaster-options
-    "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
+    ;; Defer entirely to ~/.ssh/config's ControlMaster/ControlPath/ControlPersist
+    ;; (see nix/home-configs/ssh-config-emacs.nix) so Tramp reuses a *persistent*,
+    ;; warm master.  The previous inline value forced ControlPersist=no, which
+    ;; tore the master down on every disconnect — the opposite of what we want,
+    ;; and it also used a separate socket path from the rest of our ssh usage.
+    (setq-default tramp-use-ssh-controlmaster-options nil)
     ;; (override-tramp-get-ls-command)
     (config/fix-tramp-large-file-issue)
     (config/enable-remote-dir-locals)
