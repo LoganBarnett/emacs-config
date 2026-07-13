@@ -32,6 +32,36 @@
             -name 'org-lint-*.eln' -delete 2>/dev/null || true
         '';
       });
+
+      # Bump Tramp to a GNU-devel ELPA build (2.8.2.0): tramp-rpc requires Tramp
+      # >= 2.8.1.4, but Emacs 30.2 bundles 2.7.3 and stable ELPA is still only
+      # 2.8.0.3.  Tramp is depended-ON with a stable public API and declares
+      # ZERO elisp dependencies, so bumping it in isolation is safe -- this is
+      # deliberately NOT a MELPA-wide sweep, and it reverts trivially.
+      #
+      # Source caveat: the dated GNU-devel tarball URL is garbage-collected
+      # upstream (the hash still pins it in-store / a binary cache, so existing
+      # builds keep working).  When stable ELPA crosses 2.8.1.4, switch to the
+      # stable tarball; or pin a Savannah git-rev build for full reproducibility.
+      tramp = eprev.tramp.overrideAttrs (old: rec {
+        version = "2.8.2.0.20260629.0";
+        src = pkgs.fetchurl {
+          url = "https://elpa.gnu.org/devel/tramp-${version}.tar";
+          hash = "sha256-bLiBoHqbfNHHI9H75HL35+pcdK07aCOPP00Di1DoNto=";
+        };
+      });
+
+      # Carry NO server binaries in the Emacs package.  The tramp-rpc server is
+      # provisioned declaratively on each host by nix-config (its darwin.nix /
+      # linux-host.nix install emacs-config.packages.<system>.tramp-rpc-server),
+      # and the client is set to `tramp-rpc-deploy-never-deploy' (see
+      # lisp/init-batteries.el).  So nothing is pushed over Tramp and there is
+      # no ambiguity about which binary a host runs -- it is always the host's
+      # own nix-store binary, version-locked to this client via the shared
+      # emacs-tramp-rpc flake rev.
+      tramp-rpc = eprev.tramp-rpc.override {
+        archs = [ ];
+      };
     });
     # Tangle all org/*.org files into .el files using a batch Emacs process.
     # Both .org sources and the tangled .el files are installed together under
@@ -799,6 +829,13 @@
     ];
   in
     [ emacs-config-lisp ]
+    # Include the bumped Tramp (2.8.2.0, see overrideScope above) so it lands in
+    # site-lisp and shadows Emacs 30.2's built-in 2.7.3 on load-path.  tramp-rpc
+    # rides in beside it: its autoloads register the `rpc' method lazily (the
+    # heavy tramp-rpc.el only loads on first /rpc: access), so no config,
+    # require, or toggle is needed -- you opt in simply by using a /rpc: path,
+    # and fall back by using /ssh:.  msgpack comes in transitively.
+    ++ [ epkgs.tramp epkgs.tramp-rpc ]
     ++ completion-packages
     ++ editing
     ++ languages

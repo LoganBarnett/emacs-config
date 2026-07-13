@@ -134,6 +134,19 @@
     (init-org-file "hipchat.org")
 (init-org-file "keychain.org")
 (init-org-file "tramp.org")
+;; Make the tramp-rpc `rpc' method available.  This loads only the autoloads;
+;; the heavy tramp-rpc.el defers to first /rpc: access, so it stays inert until
+;; you opt in per-connection with a /rpc:host: path (/ssh: remains the default).
+;; `load' (not `require') avoids a byte-compile-time dependency on tramp-rpc.
+(load "tramp-rpc-autoloads" t t)
+;; The server binary is provisioned declaratively on each host by nix-config
+;; (darwin.nix / linux-host.nix install tramp-rpc-server into the system
+;; profile at /run/current-system/sw/bin), so never copy it over Tramp -- run
+;; the host's own binary.  These setq's take effect before tramp-rpc-deploy.el's
+;; defcustoms load, and a defcustom does not overwrite an already-set value, so
+;; they persist.
+(setq tramp-rpc-deploy-never-deploy t)
+(setq tramp-rpc-deploy-remote-binary-path "/run/current-system/sw/bin/tramp-rpc-server")
 (init-org-file "time.org")
 (init-org-file "diagram.org")
 (init-org-file "yasnippet.org")

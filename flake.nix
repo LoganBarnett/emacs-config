@@ -23,6 +23,15 @@
       url = "github:LoganBarnett/org-mode/fix/org-lint-include-no-side-effects";
       flake = false;
     };
+    # tramp-rpc: a Rust + JSON-RPC Tramp backend that services remote file ops
+    # over a small server binary instead of Tramp's shell-parse protocol.  Its
+    # overlay adds epkgs.tramp-rpc.  It requires Tramp >= 2.8.1.4 but does NOT
+    # pin one itself -- that requirement is met by the devel-Tramp overrideScope
+    # in emacs-package.nix.
+    emacs-tramp-rpc = {
+      url = "github:ArthurHeymans/emacs-tramp-rpc";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   # Only name inputs here that we explicitly use in the code below.  Everything
@@ -30,7 +39,7 @@
   # which will enter the dependency injection for modules.
   # The `emacs-flake-inputs` naming is to avoid collisions when consumed via
   # other flakes (after all, there's only one dependency injection layer).
-  outputs = emacs-flake-inputs@{ self, emacs-overlay, nixpkgs, ... }:
+  outputs = emacs-flake-inputs@{ self, emacs-overlay, emacs-tramp-rpc, nixpkgs, ... }:
     let
       # Systems supported by this flake.
       supportedSystems = [ "aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux" ];
@@ -42,7 +51,7 @@
       nixpkgsFor = forAllSystems (system:
         import nixpkgs {
           inherit system;
-          overlays = [ emacs-overlay.overlays.default ];
+          overlays = [ emacs-overlay.overlays.default emacs-tramp-rpc.overlays.default ];
         }
       );
     in
@@ -51,12 +60,12 @@
       # hosts.  We apply the emacs-overlay here.
       nixosModules.default = { ... }: {
         imports = [ ./emacs.nix ];
-        nixpkgs.overlays = [ emacs-overlay.overlays.default ];
+        nixpkgs.overlays = [ emacs-overlay.overlays.default emacs-tramp-rpc.overlays.default ];
         _module.args.emacs-flake-inputs = emacs-flake-inputs;
       };
       darwinModules.default = { ... }: {
         imports = [ ./emacs.nix ];
-        nixpkgs.overlays = [ emacs-overlay.overlays.default ];
+        nixpkgs.overlays = [ emacs-overlay.overlays.default emacs-tramp-rpc.overlays.default ];
         _module.args.emacs-flake-inputs = emacs-flake-inputs;
       };
 
@@ -82,6 +91,13 @@
           emacs-app = pkgs.callPackage ./nix/derivations/emacs-app.nix {
             emacs = configuredEmacs;
           };
+          # The tramp-rpc server binary, exposed so nix-config can install it
+          # declaratively on hosts (its darwin.nix / linux-host.nix), rather
+          # than the client pushing it over Tramp at runtime.  Pinned to the
+          # same emacs-tramp-rpc rev as the client Emacs, so client and server
+          # versions stay in lockstep.  Native (non-static) build -- fine for a
+          # nix-store-resident binary on the host.
+          tramp-rpc-server = pkgs.emacs-tramp-rpc-server;
         }
       );
 
