@@ -226,17 +226,6 @@ to be turned on deliberately though - something I took for granted in Doom.
 
 
 * latex
-** executables
-To get LaTeX working, we need to ensure that =latex= is on the =PATH=. My
-attempts to address this have failed using normal =bash= and =zsh= shell
-settings. Though
-
-#+name: config/latex-setup-exec
-#+begin_src emacs-lisp :results none :tangle no
-(add-to-list 'exec-path "/Library/TeX/texbin/")
-(setenv "PATH" (concat ":/Library/TeX/texbin/" (getenv "PATH")))
-#+end_src
-
 ** formatting
 I like the scale to be at 1.0. It was 1.5 from Doom Emacs as far as I can tell.
 The rest of the settings seemed fine by me, so they are a duplicate here.
@@ -1541,7 +1530,6 @@ This is the region of offending code, I think:
   (org-set-startup-visibility)
   <<config/org-dirty-config-fns>>
   <<config/org-dirty-config-run>>
-  <<config/latex-setup-exec>>
   <<config/latex-format>>
   <<config/org-mode-latex-use-imagemagick>>
   <<config/org-mode-latex-add-tikz-packages>>

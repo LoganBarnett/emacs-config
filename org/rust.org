@@ -131,11 +131,6 @@ reminding me it might be needed.
 #+begin_src emacs-lisp :results none :noweb yes
 (use-package rustic
   :init
-  (message "add rust to path manually...")
-  (add-to-list 'exec-path (expand-file-name "/run/current-system/sw/bin"))
-  ;; This path no longer exists, but maybe keep for pure home-manager configs if
-  ;; we ever are forced to use them.
-  (add-to-list 'exec-path (expand-file-name "~/.nix-profile/bin"))
   <<config/smartparens-disable>>
   <<config/rust-redshift>>
   <<config/rust-indentation>>

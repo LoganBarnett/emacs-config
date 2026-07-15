@@ -14,6 +14,19 @@
 ;; computed from load-file-name in `init-org-file'.
 (load "emacs-config-base-dir" t t)
 
+;; Put the nix profiles on exec-path AND PATH early -- before anything shells
+;; out (git, direnv, lsp, tramp...).  A GUI/launchd launch starts with only
+;; /usr/bin:/bin, and Emacs does not source a shell rc, so build PATH up
+;; explicitly here.  Both lists matter: exec-path is how Emacs finds a program
+;; to run; PATH is what it hands to child processes, so a subprocess (git) can
+;; find its own (ssh).  Fixing only exec-path -- as we did before -- left git
+;; unable to find ssh from a GUI launch.
+(dolist (config/path-dir (list "/run/current-system/sw/bin"
+                               (expand-file-name "~/.nix-profile/bin")))
+  (when (file-directory-p config/path-dir)
+    (add-to-list 'exec-path config/path-dir)
+    (setenv "PATH" (concat config/path-dir ":" (getenv "PATH")))))
+
 ;; Show messages while we start up.
 ;;(view-echo-area-messages)
 (toggle-debug-on-quit)
