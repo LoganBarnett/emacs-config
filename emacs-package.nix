@@ -62,6 +62,22 @@
       tramp-rpc = eprev.tramp-rpc.override {
         archs = [ ];
       };
+
+      # tramp-rpc 0.12.0 calls (msgpack-read :map-type 'alist ...) -- the
+      # keyword-arg API from the 2026 msgpack.el revival.  The pinned overlay
+      # ships the 2020 release, whose `msgpack-read' takes zero args, so the
+      # tramp-rpc client cannot decode server responses ("wrong number of
+      # arguments" in the process filter, then a spurious "server not found").
+      # Bump msgpack in isolation to the rev that has the new API.
+      msgpack = eprev.msgpack.overrideAttrs (old: {
+        version = "20260706.1555";
+        src = pkgs.fetchFromGitHub {
+          owner = "xuchunyang";
+          repo = "msgpack.el";
+          rev = "5353a7b2da854c843cbec4536996242001f63471";
+          sha256 = "08pr8ijvfpnzx4bxbj8cjmibk2mlx0ksjwm3dv3lzp3i6cg5mhsw";
+        };
+      });
     });
     # Tangle all org/*.org files into .el files using a batch Emacs process.
     # Both .org sources and the tangled .el files are installed together under
