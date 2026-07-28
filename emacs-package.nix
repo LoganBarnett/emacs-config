@@ -33,23 +33,11 @@
         '';
       });
 
-      # Bump Tramp to a GNU-devel ELPA build (2.8.2.0): tramp-rpc requires Tramp
-      # >= 2.8.1.4, but Emacs 30.2 bundles 2.7.3 and stable ELPA is still only
-      # 2.8.0.3.  Tramp is depended-ON with a stable public API and declares
-      # ZERO elisp dependencies, so bumping it in isolation is safe -- this is
-      # deliberately NOT a MELPA-wide sweep, and it reverts trivially.
-      #
-      # Source caveat: the dated GNU-devel tarball URL is garbage-collected
-      # upstream (the hash still pins it in-store / a binary cache, so existing
-      # builds keep working).  When stable ELPA crosses 2.8.1.4, switch to the
-      # stable tarball; or pin a Savannah git-rev build for full reproducibility.
-      tramp = eprev.tramp.overrideAttrs (old: rec {
-        version = "2.8.2.0.20260629.0";
-        src = pkgs.fetchurl {
-          url = "https://elpa.gnu.org/devel/tramp-${version}.tar";
-          hash = "sha256-bLiBoHqbfNHHI9H75HL35+pcdK07aCOPP00Di1DoNto=";
-        };
-      });
+      # `trivialBuild' is threaded in from this scope so Tramp compiles against
+      # this config's Emacs.
+      tramp = pkgs.callPackage ./nix/emacs-packages/tramp.nix {
+        inherit (efinal) trivialBuild;
+      };
 
       # Carry NO server binaries in the Emacs package.  The tramp-rpc server is
       # provisioned declaratively on each host by nix-config (its darwin.nix /

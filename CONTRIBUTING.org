@@ -1,0 +1,52 @@
+#+title:    Contributing
+#+language: en
+
+* Emacs package overrides live in their own files
+
+When you add or override an Emacs package in the ~overrideScope~ in
+[[file:emacs-package.nix]], put that package's build in its own file under
+~nix/emacs-packages/<name>.nix~ rather than inlining it.
+
+~emacs-package.nix~ is already large.  Inlining a package's source pin, build
+phases, and the /why/ behind them buries the scope's list of overrides under
+walls of build detail and makes review harder.  A per-package file keeps each
+package self-contained — source, build, and rationale in one place — and lets
+~emacs-package.nix~ read as a flat list of /what/ is overridden.
+
+This is the pattern going forward.  Existing inlined overrides may be migrated
+opportunistically, but new ones should start in their own file.
+
+** Shape
+
+Each file is a ~callPackage~-compatible function.  nixpkgs inputs (~stdenv~,
+~fetchFromGitHub~, …) are filled automatically; scope-specific builders such as
+~trivialBuild~ are threaded in explicitly from the ~overrideScope~ so the
+package compiles against this config's Emacs:
+
+#+begin_src nix
+  # nix/emacs-packages/<name>.nix
+  { stdenv, fetchFromGitHub, trivialBuild, ... }:
+  trivialBuild {
+    pname = "<name>";
+    version = "...";
+    src = fetchFromGitHub { /* ... */ };
+  }
+#+end_src
+
+Wire it into the scope in ~emacs-package.nix~:
+
+#+begin_src nix
+  <name> = pkgs.callPackage ./nix/emacs-packages/<name>.nix {
+    inherit (efinal) trivialBuild;
+  };
+#+end_src
+
+See [[file:nix/emacs-packages/tramp.nix]] for a worked example — it builds Tramp
+from a pinned git revision through Tramp's autotools, then packages it with
+~trivialBuild~.
+
+** General (non-Emacs-package) derivations
+
+Plain nixpkgs-style derivations that are /not/ Emacs packages continue to live
+in ~nix/derivations/~ (for example [[file:nix/derivations/tree-sitter-jq.nix]]),
+called with ~pkgs.callPackage~ and no scope arguments.
