@@ -236,6 +236,16 @@ This should fix it:
 Without this, it might be trying to open this as =vim=. I do want =vim= to be my
 =EDITOR= in most cases.
 
+** display buffer
+
+This keeps Magit from finding a different window to place the Magit display.
+
+#+name: config/magit-display-buffer-same-window
+#+begin_src emacs-lisp :results none :exports code :tangle no
+(setq magit-display-buffer-function
+  #'magit-display-buffer-same-window-except-diff-v1)
+#+end_src
+
 * linking to web mirrors
 I'm not sure if "web mirror" is the proper term, but it kind of makes sense: A
 web version of the git repository. Generally we see this when browsing source in
@@ -441,6 +451,7 @@ of things.
    :desc "initialize repo" :n "i" #'magit-init
    )
   :config
+  <<config/magit-display-buffer-same-window>>
   <<config/git-commit-message-evil-insert-state>>
   <<config/magit-line-numbers>>
   <<config/magit-whitespace-setup>>
