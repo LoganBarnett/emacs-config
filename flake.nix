@@ -6,7 +6,7 @@
       url = "github:nix-community/emacs-overlay/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "github:nixos/nixpkgs/25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     hyuqueue = {
       url = "git+ssh://git@gitea.proton:2222/logan/hyuqueue";
     };
