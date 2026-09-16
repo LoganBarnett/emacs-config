@@ -66,6 +66,25 @@
           sha256 = "08pr8ijvfpnzx4bxbj8cjmibk2mlx0ksjwm3dv3lzp3i6cg5mhsw";
         };
       });
+
+      # Compile lsp-mode's protocol layer with plists instead of hash tables.
+      # This roughly halves (de)serialization work and is a prerequisite for
+      # emacs-lsp-booster's bytecode fast path (see lisp/lsp.el).  The runtime
+      # side is (setenv "LSP_USE_PLISTS" "true") at the top of lisp/init.el --
+      # build and runtime MUST agree, or every lsp-get call throws
+      # wrong-type-argument.  These derivations use __structuredAttrs, so the
+      # flag must go through `env'; a plain attribute would not be exported to
+      # the builder.
+      lsp-mode = eprev.lsp-mode.overrideAttrs (old: {
+        env = (old.env or { }) // { LSP_USE_PLISTS = "true"; };
+      });
+
+      # lsp-ui byte-compiles against lsp-protocol macros, so it must be built
+      # with the same flag.  `overrideScope` already rewires its lsp-mode
+      # dependency to the override above.
+      lsp-ui = eprev.lsp-ui.overrideAttrs (old: {
+        env = (old.env or { }) // { LSP_USE_PLISTS = "true"; };
+      });
     });
     # Tangle all org/*.org files into .el files using a batch Emacs process.
     # Both .org sources and the tangled .el files are installed together under
@@ -150,7 +169,24 @@
       # general provides doom-keybinds.el's (require 'general), which in turn
       # provides the `map!' macro needed at compile time by lsp.el and
       # claude-code.el (via their eval-when-compile doom-keybinds require).
-      packageRequires = [ epkgs.org-contrib epkgs.general ];
+      # lsp-mode and lsp-ui back lsp.el's eval-when-compile requires with
+      # real definitions, so the byte-compiler checks its lsp-* variable
+      # assignments and function references instead of emitting free-variable
+      # and not-known-to-be-defined warnings.
+      packageRequires = [
+        epkgs.org-contrib
+        epkgs.general
+        epkgs.lsp-mode
+        epkgs.lsp-ui
+      ];
+      # Compile with the same plist flag as the runtime (see the lsp-mode
+      # overrideScope override above), so any lsp-protocol macro expanded in
+      # these files bakes in the plist representation rather than hash
+      # tables.  Must go through `env`: trivialBuild derivations use
+      # __structuredAttrs, so a plain attribute becomes a shell variable in
+      # .attrs.sh rather than an exported environment variable the child
+      # emacs process would see.
+      env = { LSP_USE_PLISTS = "true"; };
       preBuild = ''
         # init.el is installed as default.el via defaultInitFile = true.
         rm -f init.el
@@ -176,6 +212,12 @@
           "Path to the yasnippet snippets bundled with the Emacs configuration.
         Set by the Nix build so snippets are found in any environment,
         including isolated test environments where \\$HOME is a temp directory.")
+        (defvar config/lsp-booster-executable
+          "${pkgs.emacs-lsp-booster}/bin/emacs-lsp-booster"
+          "Nix-store path of the emacs-lsp-booster wrapper executable.
+        Consumed by the lsp-resolve-final-command advice in lsp.el.  Injected
+        by the Nix build so the booster needs no PATH entry and works when
+        running ./result/bin/emacs before system activation.")
         (provide 'emacs-config-base-dir)
         ;;; emacs-config-base-dir.el ends here
         HEREDOC
@@ -185,7 +227,7 @@
       # original behaviour: a failure on one file does not abort the rest.
       buildPhase = ''
         runHook preBuild
-        ${pkgs.emacs}/bin/emacs --batch -L . \
+        ${pkgs.emacs}/bin/emacs --batch \
           --script ${./nix/compile-all.el} *.el 2>&1
         runHook postBuild
       '';

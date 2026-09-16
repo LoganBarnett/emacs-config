@@ -7,6 +7,23 @@
 
 ;;; Code:
 
+;; Session-wide subprocess and GC tuning.  These are not LSP settings -- they
+;; apply to every subprocess and the whole session -- but LSP traffic is their
+;; heaviest beneficiary.  The LSP-specific setup (including the LSP_USE_PLISTS
+;; env var, which must be set before anything loads lsp bits) lives in
+;; lisp/lsp.el, which init-batteries.el loads ahead of all language configs.
+;; The default is 4096 bytes, which shreds rust-analyzer's multi-megabyte
+;; payloads into thousands of tiny reads.  1 MiB is the canonical lsp-mode
+;; recommendation.
+(setq read-process-output-max (* 1024 1024))
+;; Deliver subprocess output as soon as it arrives instead of batching it on a
+;; timer -- lowers LSP response latency.
+(setq process-adaptive-read-buffering nil)
+;; The default threshold is 800 KB, so large LSP payloads trigger constant GC
+;; pauses.  100 MiB is the lsp-doctor recommendation.
+(setq gc-cons-threshold (* 100 1024 1024))
+(setq gc-cons-percentage 0.2)
+
 ;; Load the Nix-generated file that sets `config/base-dir' to the pre-tangled
 ;; org files in the Nix store.  This must come before any call to
 ;; `init-org-file'.  The t t args suppress errors and messages so that running
