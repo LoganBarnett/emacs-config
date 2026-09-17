@@ -39,6 +39,11 @@
         inherit (efinal) trivialBuild;
       };
 
+      # envrc from a pinned rev that has `envrc-async'; see the file for why.
+      envrc = pkgs.callPackage ./nix/emacs-packages/envrc.nix {
+        inherit (efinal) trivialBuild inheritenv;
+      };
+
       # Carry NO server binaries in the Emacs package.  The tramp-rpc server is
       # provisioned declaratively on each host by nix-config (its darwin.nix /
       # linux-host.nix install emacs-config.packages.<system>.tramp-rpc-server),
@@ -172,12 +177,14 @@
       # lsp-mode and lsp-ui back lsp.el's eval-when-compile requires with
       # real definitions, so the byte-compiler checks its lsp-* variable
       # assignments and function references instead of emitting free-variable
-      # and not-known-to-be-defined warnings.
+      # and not-known-to-be-defined warnings.  envrc does the same for
+      # envrc-config.el.
       packageRequires = [
         epkgs.org-contrib
         epkgs.general
         epkgs.lsp-mode
         epkgs.lsp-ui
+        epkgs.envrc
       ];
       # Compile with the same plist flag as the runtime (see the lsp-mode
       # overrideScope override above), so any lsp-protocol macro expanded in
@@ -341,6 +348,11 @@
       # Read and apply .editorconfig settings for consistent project-wide
       # formatting (indentation, line endings, charset, etc).
       epkgs.editorconfig
+      # Apply each project's direnv environment (.envrc, Nix devShells) per
+      # buffer so LSP, compile, and eshell find the project's tools.  Chosen
+      # over direnv.el because of performance concerns (30 seconds to bring up a
+      # magit commit window).
+      epkgs.envrc
       # Wrap visual lines at a fixed column width (fill-column) rather than
       # the window edge.  Pairs with visual-line-mode.
       epkgs.visual-fill-column
@@ -351,9 +363,6 @@
       # epkgs.custom
       # A library of helpful, abstract functions.
       epkgs.dash
-      # Make use of direnv + .envrc to give us project specific tools
-      # managed by Nix.
-      epkgs.direnv
       # The best of modelines.
       epkgs.doom-modeline
       # Doom has some good themes.  Let's use one!

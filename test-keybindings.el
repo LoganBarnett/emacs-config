@@ -44,6 +44,11 @@
  "SPC p is a prefix in doom-leader-map (project commands)"
  (keymapp (test-kb/lookup "p")))
 
+;; SPC p e r — reload direnv environment (lisp/envrc-config.el)
+(test-kb/check
+ "SPC p e r is bound to envrc-reload in doom-leader-map"
+ (eq (test-kb/lookup "p e r") #'envrc-reload))
+
 ;; SPC o m — open mu4e (email.org)
 (test-kb/check
  "SPC o m is bound to mu4e in doom-leader-map"

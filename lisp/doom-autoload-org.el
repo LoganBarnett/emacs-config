@@ -465,6 +465,11 @@ Made for `org-tab-first-hook' in evil-mode."
          (call-interactively #'tab-to-tab-stop)
          t)))
 
+;; org-eldoc.el ships in org-contrib, which the compile environment provides
+;; via packageRequires in emacs-package.nix, but nothing loads it at compile
+;; time; assert the definition so the reference below compiles clean.
+(declare-function org-eldoc-get-src-lang "org-eldoc" ())
+
 ;;;###autoload
 (defun +org-yas-expand-maybe-h ()
   "Expand a yasnippet snippet, if trigger exists at point or region is active.

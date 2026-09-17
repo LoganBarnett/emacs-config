@@ -51,8 +51,7 @@
 ;; feedback after typing is better UX than no feedback at all.
 (setq echo-keystrokes 0.02)
 
-;; Expand the minibuffer to fit multi-line text displayed in the echo-area. This
-;; doesn't look too great with direnv, however...
+;; Expand the minibuffer to fit multi-line text displayed in the echo-area.
 (setq resize-mini-windows 'grow-only)
 
 ;; Typing yes/no is obnoxious when y/n will do

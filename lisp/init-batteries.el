@@ -76,7 +76,7 @@
   (load-library "editorconfig-config.el")
   (init-org-file "org-mode.org")
   (init-org-file "file-system.org")
-  (init-org-file "direnv.org")
+  (load-library "envrc-config.el")
   (init-org-file "elisp-mode.org")
   ;; org-contacts adds the contacts file to org-agenda-files but this fails.
   ;; Some recent version of _something_ causes this to prompt to remove the file
