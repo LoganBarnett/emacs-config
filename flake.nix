@@ -32,6 +32,15 @@
       url = "github:ArthurHeymans/emacs-tramp-rpc";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # rust-template provides review-cli: an on-demand code review that judges
+    # the working tree against this repo's README.org / CONTRIBUTING.org /
+    # llms.org conventions via a nested headless `claude` run.  Only its
+    # `review-cli` package is consumed, in the devShell.  Both flakes track
+    # nixos-25.11, so following nixpkgs is safe and avoids a second nixpkgs.
+    rust-template = {
+      url = "github:LoganBarnett/rust-template";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   # Only name inputs here that we explicitly use in the code below.  Everything
@@ -39,7 +48,14 @@
   # which will enter the dependency injection for modules.
   # The `emacs-flake-inputs` naming is to avoid collisions when consumed via
   # other flakes (after all, there's only one dependency injection layer).
-  outputs = emacs-flake-inputs@{ self, emacs-overlay, emacs-tramp-rpc, nixpkgs, ... }:
+  outputs = emacs-flake-inputs@{
+    self,
+    emacs-overlay,
+    emacs-tramp-rpc,
+    nixpkgs,
+    rust-template,
+    ...
+  }:
     let
       # Systems supported by this flake.
       supportedSystems = [ "aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux" ];
@@ -123,6 +139,9 @@
               # Base Emacs for running the lightweight startup / structure tests
               # without requiring the full Nix build.
               pkgs.emacs
+              # On-demand code review of the working tree.  Run via
+              # `just review`; needs `claude` on PATH (it is not added here).
+              rust-template.packages.${system}.review-cli
             ] ++ darwinPackages;
           };
         }

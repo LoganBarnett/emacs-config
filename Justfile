@@ -86,3 +86,10 @@ test-org-auto-id:
 test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-org-auto-id
   nix flake check
   @echo "All tests passed!"
+
+# Review the working tree against this repo's conventions with review-cli.
+# Exit 1 means it found something; exit 2 means it could not run (usually
+# `claude` missing from PATH).  Pass flags through, e.g.
+# `just review --priors clear`.
+review *args:
+  rust-template-review-cli {{args}}
