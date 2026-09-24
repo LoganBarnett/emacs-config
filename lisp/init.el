@@ -9,9 +9,10 @@
 
 ;; Session-wide subprocess and GC tuning.  These are not LSP settings -- they
 ;; apply to every subprocess and the whole session -- but LSP traffic is their
-;; heaviest beneficiary.  The LSP-specific setup (including the LSP_USE_PLISTS
-;; env var, which must be set before anything loads lsp bits) lives in
-;; lisp/lsp.el, which init-batteries.el loads ahead of all language configs.
+;; heaviest beneficiary.  The LSP-specific setup lives in lisp/lsp.el, which
+;; init-batteries.el loads ahead of all language configs.  The LSP_USE_PLISTS
+;; env var, which must be set before anything loads lsp bits, comes from the
+;; Nix-generated emacs-config-base-dir.el loaded just below.
 ;; The default is 4096 bytes, which shreds rust-analyzer's multi-megabyte
 ;; payloads into thousands of tiny reads.  1 MiB is the canonical lsp-mode
 ;; recommendation.

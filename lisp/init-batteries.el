@@ -54,13 +54,17 @@
   ;; (load-library "doom-lib-themes")
   (load-library "config-completion")
   (load-library "dash")
-  ;; Load LSP early -- before any file that could pull in lsp bits (the
-  ;; language configs and language-server-protocol.org below).  lsp.el's
-  ;; :init sets LSP_USE_PLISTS just before its eager require of lsp-mode
-  ;; locks the plist setting in, and the Nix build compiles lsp-mode with
-  ;; the same flag (see emacs-package.nix).  It must still come after the
-  ;; doom/evil foundation above, whose machinery its keybindings use.
-  (load-library "lsp.el")
+  ;; Load LSP early -- before the language configs and
+  ;; language-server-protocol.org below -- so its booster advice is in place
+  ;; when the first server starts.  It must still come after the doom/evil
+  ;; foundation above, whose machinery its keybindings use.  (LSP_USE_PLISTS
+  ;; is set by the Nix-generated emacs-config-base-dir.el at the top of
+  ;; init.el, not by lsp.el.)
+  ;;
+  ;; No ".el" suffix: `load-library' resolves "lsp.el" to the source file
+  ;; itself, skipping lsp.elc and its native code, and loading source
+  ;; evaluates the file's `eval-when-compile' requires at load time.
+  (load-library "lsp")
   ;; :editor
   ;; (init-org-file "org-mode.org")
   ;; :init

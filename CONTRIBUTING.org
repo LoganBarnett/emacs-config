@@ -50,3 +50,19 @@ from a pinned git revision through Tramp's autotools, then packages it with
 Plain nixpkgs-style derivations that are /not/ Emacs packages continue to live
 in ~nix/derivations/~ (for example [[file:nix/derivations/tree-sitter-jq.nix]]),
 called with ~pkgs.callPackage~ and no scope arguments.
+
+* Lisp
+
+Ensure all docstrings and code produce no warnings.
+
+Use lexical binding unless under extreme duress, and then you need documentation
+showing the justification.
+
+Create new configs as ~.el~ files instead of ~.org~ - it's an old system that's
+very slow (files don't get compiled in our current pipeline), and creates some
+load order challenges.
+
+Instead of loading the file with ~(load-library "foo-config.el")~, leave the
+extension off so it will pick the ~.elc~ file instead of compiling.  The cost
+savings isn't that great at this point, but that may change and it's just less
+work for the system to do overall.

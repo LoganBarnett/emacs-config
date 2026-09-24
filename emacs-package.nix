@@ -75,11 +75,12 @@
       # Compile lsp-mode's protocol layer with plists instead of hash tables.
       # This roughly halves (de)serialization work and is a prerequisite for
       # emacs-lsp-booster's bytecode fast path (see lisp/lsp.el).  The runtime
-      # side is (setenv "LSP_USE_PLISTS" "true") at the top of lisp/init.el --
-      # build and runtime MUST agree, or every lsp-get call throws
-      # wrong-type-argument.  These derivations use __structuredAttrs, so the
-      # flag must go through `env'; a plain attribute would not be exported to
-      # the builder.
+      # side is the (setenv "LSP_USE_PLISTS" "true") in the generated
+      # emacs-config-base-dir.el below, which init.el loads before anything can
+      # pull in lsp bits -- build and runtime MUST agree, or every lsp-get call
+      # throws wrong-type-argument.  These derivations use __structuredAttrs,
+      # so the flag must go through `env'; a plain attribute would not be
+      # exported to the builder.
       lsp-mode = eprev.lsp-mode.overrideAttrs (old: {
         env = (old.env or { }) // { LSP_USE_PLISTS = "true"; };
       });
@@ -204,11 +205,27 @@
         cat > emacs-config-base-dir.el << 'HEREDOC'
         ;;; emacs-config-base-dir.el --- Nix store path for org sources  -*- lexical-binding: t; -*-
         ;;; Commentary:
-        ;; Loaded explicitly by init.el via (load "emacs-config-base-dir" t t).
+        ;; Loaded explicitly by init.el via (load "emacs-config-base-dir" t t),
+        ;; before anything else in the config.  Carries the facts only the Nix
+        ;; build knows into the runtime: store paths, and the LSP_USE_PLISTS
+        ;; setting the packages were compiled with.
         ;; Sets config/base-dir so that init-org-file can find pre-tangled org
         ;; files in the Nix store without computing paths relative to
         ;; load-file-name (which points at site-lisp, not the org/ directory).
         ;;; Code:
+        ;; lsp-mode, lsp-ui and this config's own lisp/ were byte-compiled with
+        ;; LSP_USE_PLISTS=true (see the overrideScope and `env` in
+        ;; emacs-package.nix), which bakes plist accessors into their
+        ;; lsp-protocol macro expansions.  lsp-protocol reads this env var once,
+        ;; when it first loads, to pick the matching runtime representation, so
+        ;; the setenv must precede whichever file first requires lsp-mode.
+        ;; Doing it here, in a file the build generates and init.el loads
+        ;; first, keeps build and runtime in agreement by construction.  A
+        ;; mismatch makes every lsp-get on a server response throw
+        ;; wrong-type-argument and leaves LSP silently useless.  Outside the
+        ;; Nix build this file does not exist, so an lsp-mode compiled without
+        ;; the flag is left alone.
+        (setenv "LSP_USE_PLISTS" "true")
         (defvar config/base-dir
           "${emacs-config-org-sources}/share/emacs-config/"
           "Root directory of the Emacs configuration.

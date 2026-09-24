@@ -78,14 +78,28 @@ test-keybindings:
 test-flyspell:
   ./test-flyspell.sh
 
+# Test that the LSP performance setup is in effect after a full startup:
+# lsp-protocol saw LSP_USE_PLISTS, build and runtime agree on plists,
+# emacs-lsp-booster wraps the server command, and the process/GC tuning from
+# init.el is set.  Requires `just build` (./result must exist).
+test-lsp:
+  ./test-lsp.sh
+
 # ERT test suite for org-auto-id.el (standalone, no Nix build needed)
 test-org-auto-id:
   ./test/org-auto-id-tests.sh
 
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-org-auto-id
+test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-lsp test-org-auto-id
   nix flake check
   @echo "All tests passed!"
+
+# Byte-compile and checkdoc the given Emacs Lisp files: prints every compiler
+# warning and every docstring/comment style issue, and exits 1 if there were
+# any.  Uses the Nix-built Emacs so package requires resolve, so it needs
+# `just build` first.  Example: `just lint-elisp lisp/lsp.el test-lsp.el`.
+lint-elisp +files:
+  ./lint-elisp.sh {{files}}
 
 # Review the working tree against this repo's conventions with review-cli.
 # Exit 1 means it found something; exit 2 means it could not run (usually

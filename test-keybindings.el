@@ -74,6 +74,18 @@
  "SPC w R is bound to desktop-read in doom-leader-map"
  (eq (test-kb/lookup "w R") #'desktop-read))
 
+;; SPC m c a — lsp code action (lisp/lsp.el, :localleader under lsp-mode).
+;; lsp.el loads as lsp.elc, so its `map!' was expanded at byte-compile time
+;; rather than at load time like the org-tangled files above; this also
+;; covers that a compiled expansion registers its bindings.
+(test-kb/check
+ "SPC m c a is bound to lsp-execute-code-action in lsp-mode-map (normal state)"
+ (and (boundp 'lsp-mode-map)
+      (member "<normal-state> SPC m c a"
+              (mapcar #'key-description
+                      (where-is-internal #'lsp-execute-code-action
+                                         (list lsp-mode-map))))))
+
 ;;
 ;; ── Report ────────────────────────────────────────────────────────────────────
 
