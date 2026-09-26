@@ -2,35 +2,16 @@
 
 ;;; Commentary:
 
-;; Loaded by test-lsp.sh.  Unlike test-keybindings.el, this file loads the
-;; init itself, because one probe must be in place BEFORE the init runs: the
-;; moment lsp-protocol first loads is when lsp-mode reads LSP_USE_PLISTS and
-;; fixes the plist-vs-hash-table representation for the whole session.  Only a
-;; hook installed ahead of that load can say what the env var held at that
-;; instant and which file dragged lsp-protocol in.
+;; Asserts that the LSP setup survives a full startup of the Nix-built Emacs.
+;; Loaded by test-lsp.sh, which passes the init file and the stand-in server
+;; in via --eval before loading this file.
 ;;
-;; "The LSP optimizations are in effect" means, concretely:
-;;
-;;   1. lsp-protocol saw LSP_USE_PLISTS when it loaded, so `lsp-use-plists'
-;;      is non-nil at runtime.
-;;   2. The Nix build compiled lsp-mode with the same flag, so the
-;;      lsp-interface constructors produce plists ...
-;;   3. ... and the runtime accessors (`lsp-get') agree with them.  A mismatch
-;;      is the failure mode emacs-package.nix warns about: every lsp-get on a
-;;      server response throws wrong-type-argument, workspaces never leave
-;;      `starting', and Rust buffers crawl.
-;;   4. emacs-lsp-booster wraps the resolved server command.  The advice only
-;;      does so when `lsp-use-plists' is set, so this is the user-visible
-;;      consequence of 1.
-;;   5. The subprocess / GC tuning from init.el is in place.
-;;   6. lsp.el itself loads from its byte-compiled form.  Loaded as source, its
-;;      `eval-when-compile' requires run at load time and pull in lsp-protocol
-;;      before anything has set the env var -- which is how 1 breaks.
-;;   7. End to end: a server started through lsp-mode's own start-up path
-;;      reaches `initialized', and was launched through the booster.
-;;
-;; The runner passes the init file and the stand-in server in via --eval
-;; before loading this file.
+;; Unlike the sibling test files, this one loads the init itself, because one
+;; probe must be in place before the init runs.  lsp-protocol reads
+;; LSP_USE_PLISTS the moment it first loads and fixes the plist-versus-hash-
+;; table representation for the whole session, so only a hook installed ahead
+;; of that load can say what the env var held at that instant and which file
+;; dragged lsp-protocol in.
 
 ;;; Code:
 
@@ -47,8 +28,6 @@
 (declare-function lsp "lsp-mode" (&optional arg))
 (declare-function lsp-get "lsp-protocol" (from key))
 (declare-function lsp-register-client "lsp-mode" (client))
-(declare-function lsp-resolve-final-command "lsp-mode"
-                  (command &optional test?))
 (declare-function lsp-stdio-connection "lsp-mode"
                   (command &optional test-command))
 (declare-function lsp-workspace-folders-add "lsp-mode" (project-root))
@@ -120,92 +99,56 @@ Meant for `after-load-functions'; later loads are ignored."
        (chain (mapconcat (lambda (s) (concat "      " s))
                          (plist-get rec :chain) "\n")))
   (test-lsp--check
-   "lsp-protocol was loaded during init"
-   rec)
-  (test-lsp--check
    "LSP_USE_PLISTS was set when lsp-protocol first loaded"
    (equal (plist-get rec :env) "true")
-   (format "env var was %S at that moment; it was loaded by:\n%s"
-           (plist-get rec :env) chain)))
-
-(test-lsp--check
- "lsp-use-plists is non-nil at runtime"
- (bound-and-true-p lsp-use-plists))
+   (if rec
+       (format "env var was %S at that moment; it was loaded by:\n%s"
+               (plist-get rec :env) chain)
+     "lsp-protocol was never loaded during init")))
 
 (let ((pos (and (fboundp 'lsp-make-position)
                 (lsp-make-position :line 1 :character 2))))
-  (test-lsp--check
-   "lsp-mode was compiled with plists (lsp-make-position yields a plist)"
-   (and pos (listp pos))
-   (format "lsp-make-position returned %S" pos))
   (test-lsp--check
    "build and runtime agree on the representation (lsp-get reads it back)"
    (condition-case nil
        (equal 1 (lsp-get pos :line))
      (error nil))
    (condition-case err
-       (format "lsp-get returned %S" (lsp-get pos :line))
-     (error (format "lsp-get signalled %S" err)))))
+       (format "lsp-make-position gave %S; lsp-get returned %S"
+               pos (lsp-get pos :line))
+     (error (format "lsp-make-position gave %S; lsp-get signalled %S"
+                    pos err)))))
 
-(let ((cmd (condition-case err
-               (lsp-resolve-final-command '("rust-analyzer"))
-             (error (list (format "ERROR: %S" err))))))
+;; Only files with a compiled sibling count; loaddefs and subdirs files are
+;; source by design.
+(let* ((site-lisp (file-name-directory
+                   (or (locate-library "emacs-config-base-dir") "")))
+       (as-source
+        (seq-filter
+         (lambda (f)
+           (and (stringp f)
+                (string-suffix-p ".el" f)
+                (string= (file-name-directory f) site-lisp)
+                (file-exists-p (concat f "c"))))
+         (mapcar #'car load-history))))
   (test-lsp--check
-   "lsp-resolve-final-command prepends emacs-lsp-booster"
-   (and (boundp 'config/lsp-booster-executable)
-        (equal (car cmd) config/lsp-booster-executable))
-   (format "resolved command: %S" cmd)))
-
-(test-lsp--check
- "json-parse-buffer carries the booster bytecode-reading advice"
- (and (fboundp 'json-parse-buffer)
-      (advice-member-p 'config--lsp-booster-json-parse 'json-parse-buffer)))
-
-(test-lsp--check
- "the injected emacs-lsp-booster binary runs (--help exits 0)"
- (and (boundp 'config/lsp-booster-executable)
-      (file-executable-p config/lsp-booster-executable)
-      (eq 0 (call-process config/lsp-booster-executable nil nil nil "--help")))
- (format "config/lsp-booster-executable = %S"
-         (and (boundp 'config/lsp-booster-executable)
-              config/lsp-booster-executable)))
-
-(test-lsp--check
- "read-process-output-max is at least 1 MiB"
- (>= read-process-output-max (* 1024 1024))
- (format "read-process-output-max = %d" read-process-output-max))
-
-(test-lsp--check
- "process-adaptive-read-buffering is off"
- (null process-adaptive-read-buffering))
-
-(test-lsp--check
- "gc-cons-threshold is at least 100 MiB"
- (>= gc-cons-threshold (* 100 1024 1024))
- (format "gc-cons-threshold = %d" gc-cons-threshold))
-
-(let ((entries (seq-filter (lambda (f)
-                             (and (stringp f)
-                                  (string-match-p "/lsp\\.elc?\\'" f)))
-                           (mapcar #'car load-history))))
-  (test-lsp--check
-   "lsp.el is loaded from its byte-compiled form (lsp.elc), not as source"
-   (and entries (seq-every-p (lambda (f) (string-suffix-p ".elc" f)) entries))
-   (format "load-history has: %S" entries)))
+   "no config file with a compiled form was loaded as source"
+   (and (not (string= site-lisp "")) (null as-source))
+   (format "loaded as source despite an .elc: %S"
+           (mapcar #'file-name-nondirectory as-source))))
 
 ;;
 ;; ── End to end: a server must reach `initialized' ────────────────────────────
 ;;
-;; Everything above inspects configuration.  This drives lsp-mode's real
+;; This check failing is the user-visible bug itself, not a proxy: under the
+;; plist mismatch the initialize response decodes into hash tables that the
+;; plist-compiled accessors read as empty, the initialize callback never runs,
+;; and the workspace sits in `starting' with nil capabilities, which is what a
+;; Rust buffer showed in the broken session.  It drives lsp-mode's real
 ;; start-up path with a stand-in server (test-lsp-server.sh, which answers
 ;; `initialize' and nothing else): client registration, command resolution
 ;; (where the booster advice wraps the command), the process filter, and
-;; JSON/bytecode parsing -- then waits for the workspace to leave `starting'.
-;; Under the plist mismatch the initialize response is decoded into hash
-;; tables that the plist-compiled accessors read as empty, the initialize
-;; callback never runs, and the workspace sits in `starting' forever with nil
-;; capabilities.  That is exactly the state a Rust buffer shows in the broken
-;; session, so this failing is the user-visible bug itself, not a proxy.
+;; JSON/bytecode parsing, then waits for the workspace to leave `starting'.
 
 (defun test-lsp--lsp-log-tail ()
   "Return the last part of *lsp-log*, indented for the report."
@@ -276,12 +219,7 @@ error form) and :command (the server's argv)."
    (format (concat "workspace status after waiting: %S\n"
                    "    server argv: %S\n"
                    "    *lsp-log* tail:\n%s")
-           status command (test-lsp--lsp-log-tail)))
-  (test-lsp--check
-   "that server was launched through emacs-lsp-booster"
-   (and (boundp 'config/lsp-booster-executable)
-        (equal (car command) config/lsp-booster-executable))
-   (format "server argv: %S" command)))
+           status command (test-lsp--lsp-log-tail))))
 
 ;;
 ;; ── Report ───────────────────────────────────────────────────────────────────

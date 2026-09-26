@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-# Test that the LSP performance setup actually takes effect after a full
-# Emacs startup.  The assertions live in test-lsp.el; in short they check
-# that lsp-protocol saw LSP_USE_PLISTS when it loaded, that the Nix build and
-# the runtime agree on the plist representation, that emacs-lsp-booster wraps
-# the resolved server command, that the subprocess/GC tuning from init.el is
-# set, and that lsp.el loads byte-compiled rather than as source.  Finally it
-# starts a real stdio server (test-lsp-server.sh) through lsp-mode and waits
-# for the workspace to reach `initialized' -- the end-to-end symptom.
+# Test that the LSP setup survives a full Emacs startup.  The checks live in
+# test-lsp.el: the plist switch was set before lsp-protocol first loaded, the
+# Nix build and the runtime agree on the representation, no config file with
+# a compiled form was loaded as source, and a real stdio server
+# (test-lsp-server.sh) started through lsp-mode reaches `initialized'.
 #
 # This test requires `just build` (./result/bin/emacs) to exist first: it
 # needs the real lsp-mode compiled by the Nix build, the injected booster

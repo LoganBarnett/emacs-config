@@ -78,10 +78,10 @@ test-keybindings:
 test-flyspell:
   ./test-flyspell.sh
 
-# Test that the LSP performance setup is in effect after a full startup:
-# lsp-protocol saw LSP_USE_PLISTS, build and runtime agree on plists,
-# emacs-lsp-booster wraps the server command, and the process/GC tuning from
-# init.el is set.  Requires `just build` (./result must exist).
+# Test that the LSP setup survives a full startup: the plist switch was set
+# before lsp-protocol loaded, build and runtime agree, no config file loads as
+# source, and a stand-in server reaches `initialized'.  Requires `just build`
+# (./result must exist).
 test-lsp:
   ./test-lsp.sh
 
