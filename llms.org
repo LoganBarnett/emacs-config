@@ -1,6 +1,580 @@
 #+title:     LLMs
 #+language:  en
-#+file_tags:
-#+tags:
 
-Most of your documentation will flow from [[file:./README.org][README.org]].
+* Imports
+
+@README.org
+
+@CONTRIBUTING.org
+
+* Working with imports
+
+The =Imports= section collects this repo's Claude Code /imports/, which are not
+org links.  Claude Code inlines each named file into the session context before
+the first turn, so those documents are already read: there is no separate step
+to perform, and no judgment call to make about whether a given document is
+relevant enough to open.  =CLAUDE.md= is a symlink to this file; that is how
+Claude Code finds it.
+
+This file covers how to write code and prose here.  =CONTRIBUTING.org= covers
+how to land a change, and =README.org= covers what this repo is and how its
+pieces fit; a change that contradicts it is wrong even when it builds.
+
+** Rules for editing the import list
+
+Do not replace an import with an ~[[file:...][=name=]]~ org link.  A link is an invitation the
+agent may decline; an import is not.  Links remain correct for supporting
+material — the imports are reserved for documents that every change in this repo
+must be measured against.
+
+Some mechanics worth knowing before adding an entry:
+
+- Paths resolve relative to the file doing the importing, and imports recurse,
+  so an imported document brings in its own imports too.
+- A file reached by more than one path is inlined once, so a redundant entry
+  costs nothing.
+- Position is irrelevant to the mechanism.  Claude Code honors an import
+  wherever it sits, and the imported text reaches the session before this file
+  is read at all, so there is no rule about the section coming first — the
+  heading carries the meaning, not the placement.
+- An import is a line that is exactly ~@~ followed by the path — nothing before
+  it, nothing after it.  The runner matches whole lines, not org syntax, so
+  anything else — however valid as org-mode — is not an import to it: an
+  indented path, a path with trailing text, a path inside a sentence.  The
+  converse hazard is a line that merely /begins/ with ~@~, even inside a
+  ~#+begin_src~ block: the runner cannot tell it from an import.  To write an
+  import path in prose without importing it, keep it inside a sentence or wrap
+  it in org verbatim markers.
+- Each import is a paragraph of its own: a blank line before it and a blank line
+  after it.  Two imports on adjacent lines are one org paragraph, so the blank
+  line between them is not optional.
+- Order is meaningful, because the order the documents arrive in is the order
+  they are read.  =README.org= comes first — what the repo /is/ frames
+  everything after it — and =CONTRIBUTING.org= second.
+
+* General code guidelines
+
+These are instructions for LLMs to write code more to my liking.  They are not
+specific to Emacs Lisp; they apply to the Nix, shell, and org-mode in this repo
+too.
+
+** Documents
+
+When authoring new content, make them ~org-mode~ files.
+
+Use ~:exports code~ if you just want to show off the code, and don't want it to
+actually run anything.
+
+No file lists in documentation.
+
+Every document must be reachable — directly or indirectly — from =README.org=.
+
+** Authoring Comments and Documentation
+
+*** Formatting and punctuation
+
+Comments must be complete sentences, wrapped at ~80 columns~, with standard
+punctuation.  Two spaces follow a sentence-ending period; see =README.org=.
+
+Docstrings are documentation, not comments, and Emacs holds them to its own
+rules (a complete first sentence on one line, arguments named in upper case,
+quoting conventions).  ~checkdoc~ enforces them, and ~just lint-elisp~ runs it
+alongside the byte-compiler; see "Verification".
+
+*** Content
+
+Only comment non-obvious intent, invariants, tradeoffs, or historical
+constraints; no restating of control flow.
+
+These rules apply to comments and documentation roughly the same.
+
+**** Anti Pattern: Historical / Tombstone Verbiage
+
+Historical verbiage are such as "We used to do X, but now we do Y".  We should
+only provide such prose in the _surprising_ case.  These would be better thought
+of as "Y, so the usual X does not work; instead we do Z": the fact that breaks
+the obvious approach comes first, as a claim a reader can check, and the
+deviation follows (see "Anti Pattern: Buried Problem").  This is the only case
+in which we use historical prose that refers to prior code that no longer
+exists.
+
+The easy test for this is "If you would have gotten this right on the first
+pass, would this have still needed this prose?".  If the answer is no, then do
+not leave historical prose.
+
+**** Anti Pattern: Obvious Intent
+
+Commenting intent that is obvious "This assigns foo to bar" or "This
+run-workflow function runs the workflow" are simple anti patterns.  We only
+comment on code that needs to be called out.  Assume the reader knows how to
+write software.  If the code is self documenting, obvious code should never need
+comments.
+
+The only exception is the docstring, which tools such as ~describe-function~,
+~eldoc~, and completion aggregate.  Even then, a docstring should only refer to
+abstract outcomes and not implementation detail unless there is something
+specifically important about that implementation.  Stating what algorithm a sort
+uses is fine.  Stating in the docstring that you used ~dolist~ over ~seq-map~ is
+not appropriate.
+
+**** Anti Pattern: Inventory
+
+Taking inventory in prose ("this does X, Y, and Z") just means you now have
+extra places to account for a change.  The moment you stop doing Y, all prose
+that takes inventory must be updated.  Same goes if you add a W activity.  The
+simple answer is to not write this prose at all.  If you find yourself writing
+these remarks, they are virtually always wrong, and instead an even briefer
+summary must be written instead, or the comment must be removed entirely.
+
+This is the /survey structure/ of writer-based prose — the writer's inventory
+of what they know — and the sibling of the narrative structure behind "Anti
+Pattern: Buried Problem", where the literature is named.
+
+**** Anti Pattern: Buried Problem
+
+A comment that justifies a surprise — a workaround, a deviation from the obvious
+approach, a step nobody would expect — opens with its conclusion.  The first
+sentence is a succinct, free-standing, falsifiable claim that states the
+conclusion (e.g. "Repeating the same code a lot is an anti pattern").  The
+conclusion is often a problem statement (e.g. "Clicking the add button while
+loading causes an error").  It avoids nuance and dynamics.  It is a framing
+sentence that provides the context for the rest of the paragraph; the
+mechanisms involved are elaborated afterwards.
+
+The test: cover everything after the first sentence.  A reader who stops there
+should already know the point.  If what they know is which functions get
+called, a mechanism has been promoted and the conclusion is still buried.
+
+The composition literature calls the anti-pattern /writer-based prose/ (Linda
+Flower, 1979): text ordered by the writer's own process of discovery rather
+than by what a reader needs first.  From memory rather than from the page,
+Flower's names for its two shapes are the /narrative/ (the discovery process
+retold in order) and the /survey/ (an inventory of what the writer knows);
+correct them here if that recollection is wrong.  Journalism calls the symptom
+burying the lede; the military's cure is "bottom line up front".  The comment
+is written in
+discovery order: the mechanism first, then its consequence, with the conclusion
+arriving in a trailing "so", "since", or "because" clause, or inside a
+parenthetical.  A reviewer cannot evaluate any of it until they reach that
+clause, so they hold every moving part in their head and then read the whole
+thing again.  The tells:
+
+- The problem sits at the end, in a trailing "so", "since", or "because" clause,
+  or in a parenthetical.
+- The opening sentence takes inventory of the moving parts before saying why
+  they matter.
+- The opening asserts intent ("this is deliberate") or passes judgement
+  ("deliberately simple") rather than stating a fact that could be false.
+
+Bad — the problem (a package initialized before its environment variable is set)
+is a trailing clause, and the fix never appears:
+
+#+begin_example
+`load-library' resolves "lsp.el" to the source file itself, skipping
+lsp.elc, and loading source evaluates the file's `eval-when-compile'
+requires at load time, so lsp-protocol was loaded before the env var was
+set.
+#+end_example
+
+Good — the first sentence is the conclusion, it stands on its own, and the
+mechanism follows it:
+
+#+begin_example
+lsp.el must be loaded from its compiled form.  Loaded as source, it pulls
+in lsp-protocol before LSP_USE_PLISTS is set: `load-library' resolves
+"lsp.el" to the source file, skipping lsp.elc, and source evaluates
+`eval-when-compile' requires at load time.  So the suffix is dropped.
+#+end_example
+
+The opening claim is also the deletion condition for the code beneath it: when
+the claim stops holding, the workaround goes.  A statement of intent gives the
+reader neither a claim to check nor a condition to delete on.
+
+This applies wherever a surprise is justified — a code comment, a docstring, a
+passage in =README.org=, a comment in a Nix derivation.  Summaries are the same
+rule with nothing after the first sentence: the conclusion of a summary is the
+outcome, and the mechanism is left out rather than placed second (see "How to
+Summarize").
+
+**** How to Summarize
+
+This covers any summarized activity (docstrings, file headers, the first line of
+a shell script's comment, and so on).
+
+A summary is the framing sentence of "Anti Pattern: Buried Problem" standing
+alone.  It states an absolute fact about the thing, with the one constraint that
+the fact is the outcome: a docstring's first line completes "Calling this
+function ...", and a commit summary completes "Applying this commit will ..."
+(see "Commit Messages").  The same rules apply, and the same tells give a bad
+one away.
+
+A summary details what the outcome of the activity is, and never the steps
+involved unless those steps are particularly surprising.  A "fire the nukes"
+script shouldn't include anything about arming the nukes, aiming the nukes,
+authorizing the nukes, or anything else that we _do_ to fire the nukes unless
+there's some specific quirk that truly needs calling out that is _relevant to
+that summary_.  A good summary for a ~nuke-fire.sh~ is "Fires the nukes.".
+
+***** Documenting Quirks and Surprises
+
+Most quirks in a function or script needn't make it to the summary.  Let's say
+that we generally expect these steps for any nation to fire its nukes:
+
+1. Arm the nuke.
+2. Aim the nuke.
+3. Authorize the firing of the nuke.
+4. Fire the nuke.
+
+Any nuke firing activity here wouldn't be in a summary.
+
+Let's say our nation requires the tips to be signed using the public key of the
+recipient.  So now our script looks like:
+
+1. Arm the nuke.
+2. Aim the nuke.
+3. Sign the tip with the recipient's public key.
+4. Authorize the firing of the nuke.
+5. Fire the nuke.
+
+Okay that's an odd step, and because it's an odd step, it would require a
+comment _immediately adjacent_ to that specific functionality.  That comment
+opens with the fact that forces the step (the recipient's silo rejects an
+unsigned tip), not with a description of the signing; see "Anti Pattern: Buried
+Problem".  Since this has no great impact on how our ~nuke-fire.sh~ script
+works, we should leave it out of the summary.
+
+** Version Control
+
+*** Commit Messages
+
+A commit message logs a change that is suitable for a reviewer.  Generally
+speaking, we want to submit one commit per pull request.  Multiple commits can
+be presented in a pull request if somehow the changes are completely different
+yet required in order for the pull request to be considered complete.  Many git
+forge sites default the one-and-only-one commit as both a pull request title and
+description (from the commit summary and body).  We want to leverage that as
+much as we can.
+
+For the commit message content itself, the summary is in the imperative mood —
+the bare verb, as in "add", "fix", "switch" — with no prefixes and no
+"Conventional Commit" tagging.  The reason is git itself, not preference: git
+writes its own messages in the imperative ("Merge branch ...", "Revert ..."),
+and its contributor documentation asks the same of every patch, so a summary in
+any other mood is the odd one out in every log that contains a merge or a
+revert.  The test that yields the right form: imagine a sentence starting with
+"Applying this commit will ..." and let the summary complete it.  Only the bare
+verb survives ("will adds" and "will added" do not), and the bare verb is the
+imperative.  No punctuation at the end (this is our one and only one exception
+to the punctuation rule).
+
+Good:
+
+#+begin_example
+clarify documentation re: ritual summoning
+#+end_example
+
+#+begin_example
+switch from direnv to envrc to speed magit commits
+#+end_example
+
+#+begin_example
+add flux capacitor to front-end
+#+end_example
+
+Bad:
+
+#+begin_example
+(feat) Add a flux capacitor to the front-end in main.elm
+#+end_example
+
+The commit body is your opportunity to document the motivation for the changes
+(e.g. to fix a bug, to optimize a workflow, to add a new feature, and so on).
+This is the "why" part.  Why were these changes necessary?  In addition, provide
+context for the change.  Does the bug fix come at some cost to performance?
+Were other considerations made as part of the changes, and then discarded?  Is
+this the first commit in a series of similar refactors?
+
+A commit body that contains line numbers, file names, and symbol names (e.g.
+functions, variables, etc.) is a high scoring smell and should be avoided.
+
+One thing to be mindful of when crafting a commit is that whoever is viewing the
+commit _can always see what changed for themselves_.
+
+If you find yourself including critical information in the commit whose value
+extends outside of the commit (e.g. that this is a workaround or some surprising
+change), that should exist as a code comment.  It can be worth calling out such
+workarounds in the commit as well, but you don't need to specifically locate
+them (no line numbers, function names, and so on).
+
+Another reason not to include line numbers is that code formatters will change
+this as part of making the commit.
+
+*** History Hygiene
+
+We want to avoid commits that are essentially "I accomplished a task" and then
+later a "jk here's the rest of the task done".  When this happens, we should
+perform a fixup assuming the commits are unpublished.
+
+This tends to come up especially when you have a mega-commit for a bunch of
+unrelated work.  In these cases, the right thing to do is break up the work
+assuming the work can survive independently.
+
+In the event that you can't resolve these notions, halt and ask the operator for
+direction.
+
+** Code
+
+*** Rule of least power
+
+Choose the least expressive construct that does the job.  The principle comes
+from Tim Berners-Lee: a more powerful construct can do more, and that capacity
+is a /liability/ for the reader, who has to verify what it actually does versus
+what a narrower construct would have constrained it to.  ~seq-filter~ can only
+select; a ~dolist~ that pushes onto an accumulator can do anything, so the
+reader has to read the whole body to be sure.  The narrower form carries an
+invariant the broader one does not.
+
+The Emacs Lisp corollary is to prefer combinators and expressions over ~dolist~,
+~while~, and ~setq~ when the combinator form expresses the same control flow.
+Concretely:
+
+- ~seq-map~, ~seq-filter~, ~seq-find~, ~seq-some~, ~seq-reduce~ (or their dash
+  equivalents; dash is loaded early) over ~dolist~ with ~push~ and ~nreverse~.
+- ~when-let*~ and ~if-let*~ over a ~let~ whose body immediately tests the
+  binding.
+- ~pcase~ over a ~cond~ chain that destructures the same value repeatedly.
+- ~let~ over ~setq~ on an outer variable; a pure expression over a statement
+  with side effects.
+- Threading macros (~->~, ~->>~) over a pyramid of nested calls or a chain of
+  single-use ~let~ bindings; =README.org= covers this under 80 columns.
+
+The bias to watch for: LLMs reach for ~dolist~, ~while~, and ~setq~ because that
+is how most training-set Emacs Lisp reads, and because imperative constructs are
+the most expressive available.  Maximum expressivity is the wrong default.
+Reach for the narrowest construct that fits; escalate to a loop only when the
+combinator form distorts the meaning.
+
+*** Functional Style
+
+Emacs Lisp is happy to be imperative, but we can still leverage functional
+principles where possible.
+
+Code should be written in functional style whenever possible.  Imperative style
+will be an inevitable part of configuring an editor — hooks, advice, ~setq~ on
+customization variables, modes being turned on — but you can perform practically
+all of the data manipulation that the imperative bits need in a functional
+section.  The imperative bits are effectively quarantined to where it is
+absolutely necessary, and then reasoning about them becomes easy, since the
+imperative part of them is laid bare and not intermingled with data
+manipulation.  Typical imperative surfaces are hooks, advice, process and buffer
+manipulation, and emitting output.
+
+Imperative smells:
++ Early exits :: ~catch~ / ~throw~, ~cl-return~, and ~cl-return-from~ used to
+  bail out of the middle of a function outline a possible need to sharpen the
+  data earlier, or to move logic branches into their own functions.  A function
+  should generally be viewed as "what is this returning" and not "what
+  alterations are being made".  An early exit is basically saying "no further
+  alterations", whereas branches are saying "these are the possible ways in
+  which results are produced".
++ List building :: ~push~ onto an accumulator followed by ~nreverse~ is firmly
+  in imperative territory.  It's a sure sign that a compositor isn't being used
+  (such as ~seq-filter~ or ~mapcar~).
++ Long lived variables :: Long living variables, especially those assigned more
+  than once with ~setq~, are frequent trademarks of imperative functions that
+  are probably too long and doing too much.  Not all of them are culprits but
+  many are.  Keep in mind that a long lived variable carries its own cognitive
+  load - you have to be aware that it could be used at any point in the function
+  past its declaration, all the way to the end of scope.
+
+*** Code Structure
+
+**** Files
+
+The entry points (~lisp/init.el~ and ~lisp/init-batteries.el~) are
+orchestrators: they set the handful of values that must precede everything else
+and load the rest in order.  Everything else lives in a sibling file named for
+its concern (~lisp/<name>-config.el~), and the orchestrator delegates to it.  It
+is okay if such a file winds up being a single ~use-package~ form.
+
+=README.org= explains why new configuration goes in ~lisp/~ rather than ~org/~,
+and =CONTRIBUTING.org= how to load it.
+
+**** Local variables and naming
+
+Local variables should be generally frowned upon unless the language
+specifically requires them (a value with multiple uses, or a binding whose
+scope is the point), and threading macros remove most of the rest.
+
+Another way to avoid local variables is to build a structure atomically from
+function calls.  Prefer nouns (~config--booster-executable~) over verb-prefixed
+names (~config--get-booster-executable~), since verbs are highly subjective in
+software.  Predicates end in ~-p~ as Emacs convention has it.
+
+When functions grow complicated, simplify by extracting smaller functions.
+
+*** LLM code biases to avoid
+
+These are reminders, not boundaries.  A model already knows each of these; it
+needs the nudge, and the review agent needs a list to check against.  Every one
+is a judgement call in the "I know it when I see it" sense — deliberately vague
+so that no threshold can be gamed.  DRY is the example: "after three
+repetitions" lets two functions share two hundred lines, and when the language
+cannot express the abstraction (no lenses for pulling data out of a structure),
+the repetition is the honest form.
+
+- Copying a block instead of finding, or extracting, the helper that already
+  does it.
+- Speculative generality: parameters, options, hooks, and abstractions nobody
+  asked for, kept "for later".
+- Compatibility shims nobody asked for: an old name kept as an alias, a
+  deprecation path in a repo with one user.  Delete instead.
+- Long functions with nested branches where extraction would name the pieces.
+- Masking errors: broad handlers, ~ignore-errors~, defaults that turn a failure
+  into a wrong answer (see "Errors").
+- Silencing a check instead of fixing what it found: a suppressed warning, a
+  weakened or deleted test, a ~declare-function~ to hush an unknown symbol.
+- Calling functions, arguments, or variables that do not exist.  The
+  byte-compiler behind ~just lint-elisp~ is the check; run it before offering
+  code.
+- Restyling or reformatting code the task did not touch.
+- A test that has never been seen failing.  Run it against the code before the
+  fix and show the failure, then the pass.
+- Placeholders and "implement later" in shipped code.
+
+*** Errors
+
+Errors must never be silently swallowed.  ~ignore-errors~, a ~condition-case~
+whose handler is empty or returns ~nil~, and the ~noerror~ arguments of ~load~
+and ~require~ all discard a failure the same way ~.ok()~ does in Rust: the
+program carries on with a hole in it, and the symptom surfaces somewhere far
+from the cause.  Propagate by letting the error signal, transform it with a
+~condition-case~ that re-signals something more specific, or handle it
+explicitly.
+
+The exception is a failure that is genuinely expected and acceptable — a
+Nix-generated file that legitimately does not exist outside the Nix build, a
+private org file that some hosts do not have.  That exception earns a comment
+immediately adjacent to the suppression, opening with why the failure is
+acceptable (see "Anti Pattern: Buried Problem"), and the code that follows must
+degrade to something correct rather than merely not crash.
+
+Errors that are signaled carry context.  Say what was being done and to what
+(the file, the mode, the variable), not just that something failed: "[INIT] No
+pre-tangled .el found for FILE (expected: PATH)" tells the next reader where to
+look; "load failed" does not.  ~user-error~ is for mistakes the person at the
+keyboard made; ~error~ is for everything else.
+
+*** Debugging
+
+When lacking information during debugging, permanent additions to the logs (at
+appropriate levels: ~message~ for progress, ~display-warning~ for things that
+need attention) are one of the best cures.  The configuration should tell you
+what ails it.
+
+Create tests which exercise the problem you are running into.  Prefer tests that
+drive the Nix-built Emacs through the real init with a stand-in service (a
+stdio program that answers the protocol) so we can test real behavior, over unit
+tests which test contrived situations.  The ~test-*.sh~ scripts at the repo root
+are the pattern.
+
+Tests and test scripts must exit with a proper error code.
+
+* Responses to the operator
+
+A reply in the conversation is prose like any other, and the anti-patterns
+above apply to it.  The one that matters most there is
+[[*Anti Pattern: Buried Problem][Buried Problem]], because a reply is where the
+writer's journey is freshest: the investigation just happened, in discovery
+order, and the temptation is to replay it.
+
+Open with the conclusion — the answer to the question, or the outcome of the
+work.  If something could not be verified, that is the first sentence.  The
+mechanism, the evidence, and the path taken come after, in descending order of
+how much each changes what the operator does next.
+
+The path taken is not the answer.  "I checked X, then Y, then found Z" is the
+narrative structure of writer-based prose; Z is the conclusion, and X and Y
+belong only where they qualify it.  An inventory of everything that was done is
+the survey structure; say what stands now and what is still open.
+
+A finding is stated as its claim first, then its evidence, so the operator can
+judge the claim before reading the support — the same shape as the lead
+paragraph of a commit message.  A question is answered before it is qualified.
+
+Numbers, commands, and quoted output go in tables or code blocks rather than
+sentences, so the claim in the prose stays checkable at a glance.
+
+* Persistent memory
+
+Use the assistant's local memory only for facts specific to one clone or one
+machine — local paths, machine quirks, transient personal context.  Anything
+that is a repo convention, decision, or standard belongs in the repository
+(=llms.org=, =CONTRIBUTING.org=, or =README.org=), where every contributor
+benefits from it and it can be reviewed.  Reaching for memory to record a
+convention is the signal that it should be codified here instead.
+
+* Capturing plans
+
+When a planning or investigation pass produces a design worth keeping, record it
+as a GitHub issue on this repo, cross-linking related issues and closing
+superseded ones, rather than leaving it only in an ephemeral plan file or a
+chat transcript.  There is no ~tasks.org~ backlog here; the issue tracker is
+it.
+
+When a change completes an issue, the commit body claims it (~Closes #N~) in the
+same change set that does the work.  The implementing change carries its own
+status flip; do not leave it for a follow-up, which otherwise either drifts (the
+work merges but the issue stays open) or forces an otherwise-empty commit just
+to move the marker.
+
+* Verification
+
+** Use the Nix development shell
+
+The repo's ~flake.nix~ provides a ~devShell~ with the tooling (~just~, the
+review tool, and so on), and ~.envrc~ activates it through direnv.  Run commands
+through it — either by letting direnv load it or with ~nix develop --command~ —
+rather than with whatever happens to be on the system ~PATH~.
+
+** Run the tests after changes
+
+Run ~just test~ after making any change.  Most of the suite runs against the
+Nix-built Emacs, so it builds first (~just build~), and that build is itself the
+most comprehensive check of the configuration: byte-compilation and org
+tangling happen there.  The ~Justfile~ describes each recipe, so a single area
+can be re-run on its own while iterating.
+
+** Lint every Emacs Lisp file you touch
+
+Any change that touches an ~.el~ file must pass the byte-compiler and
+~checkdoc~ clean before it is presented for review:
+
+#+begin_src sh :results none :exports code
+just lint-elisp lisp/foo-config.el test-foo.el
+#+end_src
+
+It prints every compiler warning and every docstring or comment-style issue,
+and exits 1 if there were any.  Files are compiled in one session, in the order
+given, so a file whose ~eval-when-compile~ requires depend on an earlier file's
+can report an ordering artifact when linted alone; the Nix build log is the
+authority when the two disagree.
+
+This applies to every contributor, human or agent.  Nothing runs it on your
+behalf.
+
+** Run the code review before offering a change
+
+~just review~ sends the working tree to a nested reviewer that judges it against
+this repo's convention documents and your own =~/.claude/CLAUDE.md=, and reports
+what stands.  Run it before opening a pull request, and address what it reports.
+
+A run that found something and a run that broke must not look alike, so the
+exit code tells them apart: 0 means the changes conform, 1 means the review ran
+and something stands against them, and 2 means it could not judge the tree in
+full.  ~just~ reports both 1 and 2 as a failed recipe, so read the code.
+Verdicts are recorded per file in ~review.json~ (ignored by git), so a re-run
+judges only the files that changed since; pass ~--priors clear~ to judge the
+recorded files afresh.
+
+Nothing in CI runs the review on your behalf.
