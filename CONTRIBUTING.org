@@ -66,3 +66,18 @@ Instead of loading the file with ~(load-library "foo-config.el")~, leave the
 extension off so it will pick the ~.elc~ file instead of compiling.  The cost
 savings isn't that great at this point, but that may change and it's just less
 work for the system to do overall.
+* Scripts
+** BSD Commands
+
+Don't cater to them.  Assuming GNU regardless of platform.  Commands in scripts
+should be GNU.  Do not seek portability of commands by using short arguments.
+
+This repository assumes you are a Nix consumer and thus you're always running in
+a ~nix develop~ context, regardless of your platform.
+
+** Long Arguments
+
+Always use long arguments when available in scripts.  This is self documenting
+code to the letter.  If a command lacks long arguments, the short argument must
+be documented each time it appears.  This is the tax of leaving out long
+arguments.
