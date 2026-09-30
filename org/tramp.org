@@ -5,6 +5,13 @@
 #+language: en
 #+tags:     config tramp ssh remote
 
+* RPC for faster SSH
+
+You can use paths like ~/rpc:<host>:<path>~ for using a faster way of
+communicating with another host than over ssh.  The other host does need to have
+the executable installed.  You can find more details at
+[[https://github.com/ArthurHeymans/emacs-tramp-rpc]].
+
 * shell settings
 
 Tramp logs in via =ssh= as one of its modes. When it does so, it interacts with
