@@ -518,7 +518,7 @@ enabled.  We need some key bindings to be able to toggle them.
 
 #+name: config/doom-big-font-setup
 #+begin_src emacs-lisp :results none :exports code :tangle no
-(load-library "doom-fonts.el")
+(load-library "doom-fonts")
 ;; Required for doom-big-font-mode.
 (setq doom-font (font-spec :family "Source Code Pro" :size 12))
 (defun doom-init-fonts-h (&optional reload)

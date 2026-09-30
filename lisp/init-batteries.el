@@ -78,10 +78,10 @@
   (init-org-file "fundamental-mode.org")
   (init-org-file "prog-mode.org")
   (load-library "jit-lock-config")
-  (load-library "editorconfig-config.el")
+  (load-library "editorconfig-config")
   (init-org-file "org-mode.org")
   (init-org-file "file-system.org")
-  (load-library "envrc-config.el")
+  (load-library "envrc-config")
   (init-org-file "elisp-mode.org")
   ;; org-contacts adds the contacts file to org-agenda-files but this fails.
   ;; Some recent version of _something_ causes this to prompt to remove the file
@@ -119,13 +119,13 @@
   ;;
   ;; Begin languages. These should be sorted alphabetically.
   ;;
-  (load-library "applescript-mode.el")
+  (load-library "applescript-mode")
   (init-org-file "docker.org")
-  (load-library "config-d2-mode.el")
+  (load-library "config-d2-mode")
   (init-org-file "javascript.org")
   (init-org-file "groovy.org")
   (init-org-file "purescript.org")
-  (load-library "python-config.el")
+  (load-library "python-config")
   (init-org-file "scad.org")
   (init-org-file "svg.org")
   (init-org-file "css.org")
@@ -139,7 +139,7 @@
   (init-org-file "xml-mode.org")
   ;; End languages.
   ;; Programming Support.
-  (load-library "claude-code.el")
+  (load-library "claude-code")
   ;; End Programming Support.
   (init-org-file "hipchat.org")
   (init-org-file "keychain.org")
@@ -164,12 +164,12 @@
   (init-org-file "yasnippet.org")
   (init-org-file "language-server-protocol.org")
   (init-org-file "java.org")
-  (load-library "just-mode-config.el")
-  (load-library "jq-mode-config.el")
+  (load-library "just-mode-config")
+  (load-library "jq-mode-config")
   (init-org-file "graphviz-dot.org")
   (init-org-file "html.org")
   (init-org-file "markdown.org")
-  (load-library "visual-line-config.el")
+  (load-library "visual-line-config")
   (init-org-file "web.org")
   (init-org-file "web-mode.org")
   (init-org-file "font.org")
@@ -179,10 +179,10 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Begin Emacs "apps".
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (load-library "eat-config.el")
-  (load-library "ibuffer-config.el")
+  (load-library "eat-config")
+  (load-library "ibuffer-config")
   (init-org-file "email.org")
-  (load-library "eshell-config.el")
+  (load-library "eshell-config")
   ;; org-agenda must be loaded after mu4e. The file itself does not call upon
   ;; mu4e directly, but perhaps something in org-agenda? This has been difficult
   ;; to track down. I might need to hook up some dependency hooks with
@@ -196,12 +196,12 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; End Emacs "apps".
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (load-library "npc-generator.el")
-  (load-library "doom-fonts.el")
+  (load-library "npc-generator")
+  (load-library "doom-fonts")
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Begin helper libraries.
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (load-library "time-tracking.el")
+  (load-library "time-tracking")
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; End helper libraries.
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

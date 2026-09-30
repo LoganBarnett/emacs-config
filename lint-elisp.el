@@ -22,6 +22,11 @@
 (require 'bytecomp)
 (require 'checkdoc)
 
+;; Between a `.elc' and `.el' file, prefer the newer.  This avoids stale
+;; compiled files winning in our development environment, and shouldn't impact
+;; our compiled/distributed environment because .elc should always be newer.
+(setq load-prefer-newer t)
+
 (defvar lint-elisp--findings 0
   "How many compiler warnings and checkdoc issues have been reported.")
 

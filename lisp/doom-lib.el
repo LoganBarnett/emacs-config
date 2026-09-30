@@ -2,6 +2,10 @@
 ;;; Commentary:
 ;;; Code:
 
+;; The hook macros below call `string-remove-suffix' while expanding, but
+;; there's no autoloads for it.
+(require 'subr-x)
+
 ;;; Custom error types
 (define-error 'doom-error "An unexpected Doom error")
 (define-error 'doom-font-error "Could not find a font on your system" 'doom-error)

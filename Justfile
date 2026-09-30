@@ -22,9 +22,14 @@ test-startup-time:
 # Run all startup tests
 test-all: test-startup test-startup-time
 
-# Clean up test logs
-clean:
-  rm -f emacs-startup*.log
+# Remove test logs and stray byte-compiled files
+clean: clean-elc
+  rm --force emacs-startup*.log
+
+# Remove byte-compiled files from lisp/.  It shouldn't matter because we now
+# have `load-prefer-newer' as `t'.
+clean-elc:
+  rm --force --verbose lisp/*.elc
 
 # Test a specific org file initialization
 test-org-file file:
@@ -98,7 +103,7 @@ test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand
 # warning and every docstring/comment style issue, and exits 1 if there were
 # any.  Uses the Nix-built Emacs so package requires resolve, so it needs
 # `just build` first.  Example: `just lint-elisp lisp/lsp.el test-lsp.el`.
-lint-elisp +files:
+lint-elisp +files: clean-elc
   ./lint-elisp.sh {{files}}
 
 # Review the working tree against this repo's conventions with review-cli.

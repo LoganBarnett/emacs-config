@@ -81,14 +81,8 @@
 
 ;;; Code:
 
-;; doom-keybinds.el defines the `map!' macro used below.  The eval-when-compile
-;; block ensures the macro is available during byte/native compilation; dotted-
-;; pair prefix specs like ("t" . "toggle") cause native-compiler errors without
-;; this.
+;; doom-keybinds.el defines the `map!' macro used below.
 (eval-when-compile
-  (require 'doom-constants)
-  (require 'doom-lib)
-  (require 'doom-use-package)
   (require 'doom-keybinds))
 
 ;; Indent continuation lines to align with the logical line's first

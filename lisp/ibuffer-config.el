@@ -6,6 +6,11 @@
 ;;; Code:
 (require 'use-package)
 
+;; `map!' below must be expanded at compile time, or the compiled file calls it
+;; as a function and init dies with invalid-function.
+(eval-when-compile
+  (require 'doom-keybinds))
+
 (use-package ibuffer
   :config
   ;; Initialize evil-collection for ibuffer to get vim-like keybindings.

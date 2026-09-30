@@ -217,8 +217,9 @@
 
 (use-package consult
   :init
-  (setq completion-in-region-function 'consult-completion-in-region)
-  )
+  ;; Use `setq-default' because a `setq' at this stage in the config becomes
+  ;; buffer local, and we need it globally.
+  (setq-default completion-in-region-function 'consult-completion-in-region))
 
 (use-package embark
   :ensure t

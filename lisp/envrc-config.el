@@ -32,13 +32,8 @@
 
 ;;; Code:
 
-;; doom-keybinds.el defines the `map!' macro used in :config below.  Load the
-;; dependency chain at compile time so the macro is available during
-;; byte-compilation (same pattern as lisp/lsp.el).
+;; doom-keybinds.el defines the `map!' macro used in :config below.
 (eval-when-compile
-  (require 'doom-constants)
-  (require 'doom-lib)
-  (require 'doom-use-package)
   (require 'doom-keybinds)
   ;; Give the byte-compiler the real definitions so the `envrc-async' custom
   ;; and the lsp-* calls below are checked and arity-checked rather than

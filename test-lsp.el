@@ -119,8 +119,9 @@ Meant for `after-load-functions'; later loads are ignored."
      (error (format "lsp-make-position gave %S; lsp-get signalled %S"
                     pos err)))))
 
-;; Only files with a compiled sibling count; loaddefs and subdirs files are
-;; source by design.
+;; Only files with a compiled sibling count.  subdirs.el can never be loaded
+;; compiled even though the build produces subdirs.elc: Emacs's startup loads
+;; it by its source name from every load-path directory.
 (let* ((site-lisp (file-name-directory
                    (or (locate-library "emacs-config-base-dir") "")))
        (as-source
@@ -128,6 +129,7 @@ Meant for `after-load-functions'; later loads are ignored."
          (lambda (f)
            (and (stringp f)
                 (string-suffix-p ".el" f)
+                (not (string= (file-name-nondirectory f) "subdirs.el"))
                 (string= (file-name-directory f) site-lisp)
                 (file-exists-p (concat f "c"))))
          (mapcar #'car load-history))))
