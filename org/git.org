@@ -246,6 +246,30 @@ This keeps Magit from finding a different window to place the Magit display.
   #'magit-display-buffer-same-window-except-diff-v1)
 #+end_src
 
+** reveal org folds when visiting a file
+
+When visiting an ~org-mode~ file from Magit's diff, if it points on a folded
+section of the document, we instead land on the unfolded parent.  This is
+problematic for deeply nested text.
+
+We have to setup a hook with ~magit~ so it isn't an invasive ~org-mode~ change
+that crushes all other behavior.
+
+~org-fold-show-context~ only unfolds, so subtrees already opened by hand stay as
+they were; see [[file:org-mode.org::*reveal after jump][reveal after jump]] for the alternative it avoids.
+
+#+name: config/magit-visit-file-reveal-org
+#+begin_src emacs-lisp :results none :exports code :tangle no
+(defun config--magit-visit-file-reveal-org ()
+  "Unfold around point when magit lands inside a folded org subtree."
+  (when (derived-mode-p 'org-mode)
+    ;; Sharing the `mark-goto' context with the evil reveal in org-mode.org
+    ;; lets one `org-fold-show-context-detail' entry tune both.
+    (org-fold-show-context 'mark-goto)))
+
+(add-hook 'magit-diff-visit-file-hook #'config--magit-visit-file-reveal-org)
+#+end_src
+
 * linking to web mirrors
 I'm not sure if "web mirror" is the proper term, but it kind of makes sense: A
 web version of the git repository. Generally we see this when browsing source in
@@ -424,6 +448,7 @@ of things.
 <<config/git-tramp-vc-backend-optimize>>
 <<config/git-blame-output>>
 <<config/git-gutter-magit-connect>>
+<<config/magit-visit-file-reveal-org>>
 ;; Not working, and I think in fact is is breaking my local setup.
 ;; <<config/magit-load-remote-keychain-env>>
 
