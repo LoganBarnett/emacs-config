@@ -727,6 +727,7 @@ library is already loaded.
      xref
      flycheck
      replace
+     profiler
      ;; Diff / merge / patch UIs.
      diff-mode
      smerge-mode
