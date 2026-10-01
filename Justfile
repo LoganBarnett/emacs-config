@@ -96,12 +96,18 @@ test-lsp:
 test-visual-line:
   ./test-visual-line.sh
 
+# Test that the session is saved on exit without the previous one being
+# restored at startup, and that the exit save asks nothing.  Requires
+# `just build` (./result must exist).
+test-desktop:
+  ./test-desktop.sh
+
 # ERT test suite for org-auto-id.el (standalone, no Nix build needed)
 test-org-auto-id:
   ./test/org-auto-id-tests.sh
 
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-lsp test-visual-line test-org-auto-id
+test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-lsp test-visual-line test-desktop test-org-auto-id
   nix flake check
   @echo "All tests passed!"
 
