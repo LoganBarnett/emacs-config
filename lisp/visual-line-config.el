@@ -66,18 +66,16 @@
 ;; visual-line-mode is only used here to read others' unwrapped files, wrapping
 ;; at the window edge is sufficient.
 ;;
-;;   adaptive-wrap-prefix-mode -- indents continuation lines to align with the
+;;   visual-wrap-prefix-mode  -- indents continuation lines to align with the
 ;;                              first non-whitespace character of the logical
 ;;                              line, e.g. list item continuations stay under
-;;                              the text rather than the bullet
-;;   visual-wrap-prefix-mode  -- displays a visible prefix on continuation
-;;                              lines so it is obvious that a logical line
-;;                              continues rather than ending
+;;                              the text rather than the bullet.  Built into
+;;                              Emacs 30.
 ;;   evil-respect-visual-line-mode -- makes evil motions work on visual lines
 ;;                              (set in evil.el before evil loads)
 ;;
-;; All companion modes are hooked to visual-line-mode so the stack comes on
-;; and goes off as a unit.
+;; The companion follows visual-line-mode's state, so the stack comes on and
+;; goes off as a unit.
 
 ;;; Code:
 
@@ -85,20 +83,22 @@
 (eval-when-compile
   (require 'doom-keybinds))
 
-;; Indent continuation lines to align with the logical line's first
-;; non-whitespace character.
-(use-package adaptive-wrap
-  :hook (visual-line-mode . adaptive-wrap-prefix-mode))
+;; Ensure this minor mode is both turned on and off with its "parent" minor
+;; mode.  Otherwise turning off `visual-line-mode' turns _on_
+;; `visual-wrap-prefix-mode'.  For code this is an immense slow-down.
+(defun config--visual-line-companion ()
+  "Turn the wrap-prefix companion on or off together with `visual-line-mode'."
+  (visual-wrap-prefix-mode (if visual-line-mode 1 -1)))
 
-;; Show a visible prefix on continuation lines so it is clear a logical line
-;; wraps rather than ends.  Built into Emacs 29+.
-(add-hook 'visual-line-mode-hook #'visual-wrap-prefix-mode)
+(add-hook 'visual-line-mode-hook #'config--visual-line-companion)
 
 ;; Show fringe indicators: a right-curly-arrow in the right fringe where a line
 ;; wraps, and a left-curly-arrow in the left fringe on continuation lines.
 ;; Defaults to (nil nil).  visual-line-mode reads this variable when it
 ;; activates, so setting it here is sufficient.
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+
+(require 'so-long)
 
 ;; Raise so-long-mode's trigger threshold.  The default (250) is aggressive
 ;; enough to fire on ordinary prose paragraphs, which would undo visual-line-mode
@@ -108,8 +108,6 @@
 (setq so-long-threshold 1000)
 
 ;; In text-mode buffers, ensure auto-fill-mode is on by default.
-;; fundamental-mode.org already adds config/disable-visual-line-mode to
-;; text-mode-hook; no need to disable visual-line-mode here as well.
 (add-hook 'text-mode-hook #'auto-fill-mode)
 
 (defun config/maybe-enable-visual-line-mode ()
@@ -135,10 +133,8 @@ rather than because the file was written without hard wrapping."
             (throw 'found t)))
         (forward-line 1)))))
 
-;; Append (t) so this runs after fundamental-mode.org's
-;; config/disable-visual-line-mode, which is prepended and thus runs earlier.
-;; Without append, the disable hook would undo any visual-line-mode activation
-;; done here.
+;; This must run after the auto-fill hook above.  Prepended, it would turn
+;; auto-fill off only for that hook to turn it back on.
 (add-hook 'text-mode-hook #'config/maybe-enable-visual-line-mode t)
 
 (defun config/toggle-wrap-mode ()

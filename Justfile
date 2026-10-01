@@ -90,12 +90,18 @@ test-flyspell:
 test-lsp:
   ./test-lsp.sh
 
+# Test that no wrap prefix is computed in buffers that do not wrap, and that
+# the wrap-prefix companion of visual-line-mode follows the mode when toggled.
+# Requires `just build` (./result must exist).
+test-visual-line:
+  ./test-visual-line.sh
+
 # ERT test suite for org-auto-id.el (standalone, no Nix build needed)
 test-org-auto-id:
   ./test/org-auto-id-tests.sh
 
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-lsp test-org-auto-id
+test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-lsp test-visual-line test-org-auto-id
   nix flake check
   @echo "All tests passed!"
 

@@ -1,4 +1,4 @@
-;;; my-utils -- Various language level Lisp utilities
+;;; my-utils.el --- Various language level Lisp utilities  -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; A module providing Lisp utilities for handling generic data. This uses the
 ;; "my" prefix to avoid potential collisions with the very generic "utils" name.
@@ -10,17 +10,11 @@
     (insert-file-contents file-path)
     (buffer-string)))
 
-;; A function so we can debug better if need be.
-(defun config/disable-visual-line-mode ()
-  (interactive)
-  (visual-line-mode -1)
-  (global-visual-line-mode -1)
-  )
-
 ;; Adapted from
 ;; https://emacs.stackexchange.com/questions/1051/copy-region-from-emacs-without-newlines
 (defun config/yank-as-unfilled (beg end)
-  "Save the current region to the kill ring after stripping extra whitespace and new lines"
+  "Save the region BEG to END to the kill ring with its whitespace collapsed.
+Leading whitespace and newlines are stripped and the paragraph is unfilled."
   (interactive "r")
   (copy-region-as-kill beg end)
   (with-temp-buffer
@@ -29,7 +23,6 @@
     (while (looking-at "[ \t\n]")
       (delete-char 1))
     (compact-uncompact-block)
-    (mark-whole-buffer)
     (kill-region (point-min) (point-max))))
 
 (defun compact-uncompact-block ()

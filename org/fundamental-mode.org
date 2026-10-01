@@ -19,8 +19,6 @@ buffer, rather than "folded" (the docs' term) or wrapped.
 (defun config/disable-line-wrapping ()
   (interactive)
   (setq-default truncate-lines t)
-  (require 'my-utils) ;; Needed for config/disable-visual-line-mode.
-  (config/disable-visual-line-mode)
   )
 #+end_src
 
@@ -29,8 +27,4 @@ buffer, rather than "folded" (the docs' term) or wrapped.
 #+name: config/line-wrapping-disable
 #+begin_src emacs-lisp :results none :tangle yes :noweb yes
 <<config/prog-mode-disable-line-wrapping-fn>>
-
-(add-hook 'prog-mode-hook #'config/disable-visual-line-mode)
-(add-hook 'text-mode-hook #'config/disable-visual-line-mode)
-(add-hook 'org-mode-hook #'config/disable-visual-line-mode)
 #+end_src

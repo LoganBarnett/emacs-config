@@ -461,14 +461,12 @@ are there so many ways to configure indentation?!
   <<config/prog-mode-comment-and-yank-newline-fix>>
   <<config/prog-mode-c-style-comment-block-fix>>
   <<config/prog-mode-fix-c-indentation>>
-  <<prog-mode-disable-visual-line-mode>>
   (config/rainbow-delimiters)
   <<config/prog-mode-line-numbers-enable>>
   <<config/prog-mode-manage-final-newline>>
   <<config/fix-multi-line-comment-continuations>>
   (add-hook 'prog-mode-hook #'config/auto-fill-comments)
   (add-hook 'prog-mode-hook #'config/disable-line-wrapping)
-  <<config/prog-mode-disable-visual-line-mode>>
   <<config/tab-width>>
   <<config/multi-line-keybinding>>
   ;; (add-hook 'prog-mode-hook #'config/disable-smartparens-pairs)

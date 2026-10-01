@@ -359,8 +359,10 @@
       # Automatically compile .el files when loading.
       epkgs.auto-compile
       # Indent continuation lines of a wrapped line to align with the
-      # first non-whitespace character of the logical line.
-      epkgs.adaptive-wrap
+      # first non-whitespace character of the logical line.  Superseded by
+      # visual-wrap-prefix-mode, which Emacs 30 derived from this package and
+      # ships built in.
+      # epkgs.adaptive-wrap
       epkgs.browse-at-remote
       # Read and apply .editorconfig settings for consistent project-wide
       # formatting (indentation, line endings, charset, etc).

@@ -450,8 +450,6 @@ A common form of hidden content is collapsed headings."
 
 #+name: config/org-dirty-config-run
 #+begin_src emacs-lisp :results none :tangle no
-(require 'my-utils) ;; Needed for config/disable-visual-line-mode.
-(add-hook 'org-mode-hook #'config/disable-visual-line-mode)
 ;; set default diary location
 (setq-default
  diary-file "~/notes/diary.org"
