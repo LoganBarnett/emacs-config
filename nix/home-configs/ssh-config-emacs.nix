@@ -1,7 +1,7 @@
 { ... }: {
   programs.ssh = {
 
-    matchBlocks = {
+    settings = {
       # Global defaults for all hosts.
       "*" = {
         # For Emacs.  Reuse a single, warm, *persistent* master connection for
@@ -13,12 +13,12 @@
         # %C is a hash of {host,port,user,laddr}, which keeps the socket path
         # short enough for macOS's ~104-char unix-socket limit (a literal
         # %h-%p-%r path can overflow it for longer FQDNs).
-        controlMaster = "auto";
-        controlPath = "~/.ssh/control-%C";
-        controlPersist = "10m";
+        ControlMaster = "auto";
+        ControlPath = "~/.ssh/control-%C";
+        ControlPersist = "10m";
         # Send keepalive packets to prevent the ssh host or
         # firewall/loadbalancer itself from dropping connections.
-        serverAliveInterval = 50;
+        ServerAliveInterval = 50;
       };
 
     };
