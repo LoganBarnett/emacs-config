@@ -20,7 +20,7 @@
     # When the fix lands upstream, drop this input and the overrideAttrs
     # in emacs-package.nix.
     org-mode-fork = {
-      url = "github:LoganBarnett/org-mode/fix/org-lint-include-no-side-effects";
+      url = "github:LoganBarnett/org-mode/org-lint-include-no-side-effects";
       flake = false;
     };
     # tramp-rpc: a Rust + JSON-RPC Tramp backend that services remote file ops

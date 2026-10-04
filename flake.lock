@@ -275,16 +275,16 @@
     "org-mode-fork": {
       "flake": false,
       "locked": {
-        "lastModified": 1779668985,
-        "narHash": "sha256-V7PDDBYCqusuobfEX0PylFAEhGFxVw9xA/uq4xAhHVw=",
+        "lastModified": 1779676561,
+        "narHash": "sha256-ZyN3MtDw1VJO0jIWl8AexUPG4YuTsSKe/tKNe8OPOEI=",
         "owner": "LoganBarnett",
         "repo": "org-mode",
-        "rev": "a1b4ca765eedee4b5b236cebd56b2f79c81b4702",
+        "rev": "f73b5098e182402520062d24f3cd4cb1a334d3f7",
         "type": "github"
       },
       "original": {
         "owner": "LoganBarnett",
-        "ref": "fix/org-lint-include-no-side-effects",
+        "ref": "org-lint-include-no-side-effects",
         "repo": "org-mode",
         "type": "github"
       }
