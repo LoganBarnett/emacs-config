@@ -485,6 +485,11 @@ of things.
   (setq magit-diff-paint-whitespace t)
   (setq magit-diff-paint-whitespace-lines 'all)
   (config/connect-git-gutter-and-magit)
+  ;; List all worktrees of the repo in the status buffer.
+  (magit-add-section-hook 'magit-status-sections-hook
+                          #'magit-insert-worktrees
+                          #'magit-insert-untracked-files
+                          'append)
   )
 
 (use-package forge
