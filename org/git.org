@@ -488,7 +488,7 @@ of things.
   ;; List all worktrees of the repo in the status buffer.
   (magit-add-section-hook 'magit-status-sections-hook
                           #'magit-insert-worktrees
-                          #'magit-insert-untracked-files
+                          #'magit-insert-stashes
                           'append)
   )
 
