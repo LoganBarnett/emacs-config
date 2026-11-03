@@ -646,7 +646,7 @@ values, I think.
 We should drop or convert these characters.
 
 * org-agenda
-This is worthy of its own file. See [[file:./org-agenda.org][org-agenda.org]].
+This is worthy of its own file.  See [[file:../lisp/org-agenda-config.el][lisp/org-agenda-config.el]].
 * org-babel
 ** images
 
@@ -1455,12 +1455,6 @@ This is the region of offending code, I think:
   ;; documentation states that if evil is not loaded yet, then evil-specific
   ;; bindings are ignored.  At the moment we don't have anything for evil here
   ;; but that could change.
-  (map!
-   :leader
-   (:prefix ("o" . "+standlone apps")
-      :desc "org-agenda" "a" #'org-agenda
-      )
-   )
   (map!
    ;; :after org-mode
    :mode org-mode

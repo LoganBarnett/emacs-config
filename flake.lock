@@ -2,12 +2,61 @@
   "nodes": {
     "changelog-roller": {
       "inputs": {
+        "crane": [
+          "hyuqueue",
+          "crane"
+        ],
+        "nixpkgs": [
+          "hyuqueue",
+          "nixpkgs"
+        ],
+        "rust-overlay": [
+          "hyuqueue",
+          "rust-overlay"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788219997,
+        "narHash": "sha256-rMRLkUW24q3wW8RdqF5uF/t8vKELF2m/TXgZsDW/vj0=",
+        "owner": "LoganBarnett",
+        "repo": "changelog-roller",
+        "rev": "4558a8d325fe93165da8eef93476cc76456a05cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LoganBarnett",
+        "repo": "changelog-roller",
+        "type": "github"
+      }
+    },
+    "changelog-roller_2": {
+      "inputs": {
         "crane": "crane_2",
+        "nixpkgs": "nixpkgs",
+        "rust-overlay": "rust-overlay_2"
+      },
+      "locked": {
+        "lastModified": 1780088497,
+        "narHash": "sha256-J2rIAUdOvYOqIX67E47hCw62nYCh/ZhEI2uhhFq/vN0=",
+        "owner": "LoganBarnett",
+        "repo": "changelog-roller",
+        "rev": "4bf5e3106f4cba9dd3cee58a308865aa2330b3d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LoganBarnett",
+        "repo": "changelog-roller",
+        "type": "github"
+      }
+    },
+    "changelog-roller_3": {
+      "inputs": {
+        "crane": "crane_4",
         "nixpkgs": [
           "rust-template",
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay_3"
+        "rust-overlay": "rust-overlay_5"
       },
       "locked": {
         "lastModified": 1788219997,
@@ -68,6 +117,36 @@
         "type": "github"
       }
     },
+    "crane_4": {
+      "locked": {
+        "lastModified": 1770419512,
+        "narHash": "sha256-o8Vcdz6B6bkiGUYkZqFwH3Pv1JwZyXht3dMtS7RchIo=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "2510f2cbc3ccd237f700bb213756a8f35c32d8d7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
+    "crane_5": {
+      "locked": {
+        "lastModified": 1773189535,
+        "narHash": "sha256-E1G/Or6MWeP+L6mpQ0iTFLpzSzlpGrITfU2220Gq47g=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "6fa2fb4cf4a89ba49fc9dd5a3eb6cde99d388269",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "emacs-overlay": {
       "inputs": {
         "nixpkgs": [
@@ -111,24 +190,49 @@
         "type": "github"
       }
     },
-    "hyuqueue": {
+    "foundation": {
       "inputs": {
-        "crane": "crane",
-        "nixpkgs": "nixpkgs",
-        "rust-overlay": "rust-overlay_2"
+        "changelog-roller": "changelog-roller_2",
+        "crane": "crane_3",
+        "nixpkgs": "nixpkgs_3",
+        "org-fmt": "org-fmt",
+        "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1775519836,
-        "narHash": "sha256-ZmR4pTYz92/btIVdIz3Cxxks/uaO5Aqpl8SdZXmLfqw=",
-        "ref": "refs/heads/main",
-        "rev": "f99d7da805ae3e19fb1bff711915765d43d76210",
-        "revCount": 5,
-        "type": "git",
-        "url": "ssh://git@gitea.proton:2222/logan/hyuqueue"
+        "lastModified": 1780547773,
+        "narHash": "sha256-aGCoPNYcbQw6FLzFt8DHzjOdO6lsXvr/vg7IRbParIY=",
+        "owner": "LoganBarnett",
+        "repo": "rust-template",
+        "rev": "ec222cd0701ef28fcff98e28aaeca91b75afbb48",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@gitea.proton:2222/logan/hyuqueue"
+        "owner": "LoganBarnett",
+        "ref": "v0.7.0",
+        "repo": "rust-template",
+        "type": "github"
+      }
+    },
+    "hyuqueue": {
+      "inputs": {
+        "changelog-roller": "changelog-roller",
+        "crane": "crane",
+        "foundation": "foundation",
+        "nixpkgs": "nixpkgs_5",
+        "rust-overlay": "rust-overlay_4"
+      },
+      "locked": {
+        "lastModified": 1780953273,
+        "narHash": "sha256-SORDYEoOed8WBlhNG0ehUFQ5HFaYea/3XskY5DGiy5w=",
+        "owner": "LoganBarnett",
+        "repo": "hyuqueue",
+        "rev": "1e1f6ff61484b97737be7298513fae60ddbcfb64",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LoganBarnett",
+        "repo": "hyuqueue",
+        "type": "github"
       }
     },
     "nixpkgs": {
@@ -181,16 +285,16 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1790920529,
-        "narHash": "sha256-nQyFkMR78WP6PiXKkDW2SjqzLf/spQqjRuxRGSbcV8k=",
-        "owner": "nixos",
+        "lastModified": 1764521362,
+        "narHash": "sha256-M101xMtWdF1eSD0xhiR8nG8CXRlHmv6V+VoY65Smwf4=",
+        "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "774debe7a0d1b496e35677ad955a1011c6ff74f3",
+        "rev": "871b9fd269ff6246794583ce4ee1031e1da71895",
         "type": "github"
       },
       "original": {
-        "owner": "nixos",
-        "ref": "nixos-26.05",
+        "owner": "NixOS",
+        "ref": "25.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -213,6 +317,70 @@
     },
     "nixpkgs_5": {
       "locked": {
+        "lastModified": 1764521362,
+        "narHash": "sha256-M101xMtWdF1eSD0xhiR8nG8CXRlHmv6V+VoY65Smwf4=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "871b9fd269ff6246794583ce4ee1031e1da71895",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_6": {
+      "locked": {
+        "lastModified": 1744536153,
+        "narHash": "sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg/N38=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "18dd725c29603f582cf1900e0d25f9f1063dbf11",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_7": {
+      "locked": {
+        "lastModified": 1790920529,
+        "narHash": "sha256-nQyFkMR78WP6PiXKkDW2SjqzLf/spQqjRuxRGSbcV8k=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "774debe7a0d1b496e35677ad955a1011c6ff74f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_8": {
+      "locked": {
+        "lastModified": 1744536153,
+        "narHash": "sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg/N38=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "18dd725c29603f582cf1900e0d25f9f1063dbf11",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_9": {
+      "locked": {
         "lastModified": 1744536153,
         "narHash": "sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg/N38=",
         "owner": "NixOS",
@@ -230,20 +398,52 @@
     "org-dnd": {
       "flake": false,
       "locked": {
-        "lastModified": 1771454919,
-        "narHash": "sha256-pnh5SDj+8owCZcWCQe+NOgT+HujoNpmWU9KGRGkLSYc=",
-        "ref": "refs/heads/main",
-        "rev": "7e941a65a7f7f5b5dc6df40c1665b44d0feac52e",
-        "revCount": 5,
-        "type": "git",
-        "url": "ssh://git@gitea.proton:2222/logan/org-dnd"
+        "lastModified": 1774153835,
+        "narHash": "sha256-J7UKh9lUBG954q653Ee1Fi+D/QKo40cF4nGOx74Vh5M=",
+        "owner": "LoganBarnett",
+        "repo": "org-dnd",
+        "rev": "de400c0eeed2596a0895e5a8e952d04ccfa188a1",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@gitea.proton:2222/logan/org-dnd"
+        "owner": "LoganBarnett",
+        "repo": "org-dnd",
+        "type": "github"
       }
     },
     "org-fmt": {
+      "inputs": {
+        "crane": [
+          "hyuqueue",
+          "foundation",
+          "crane"
+        ],
+        "nixpkgs": [
+          "hyuqueue",
+          "foundation",
+          "nixpkgs"
+        ],
+        "rust-overlay": [
+          "hyuqueue",
+          "foundation",
+          "rust-overlay"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780170211,
+        "narHash": "sha256-J88qNRVC5YFxp1AaqsW6R6bByjFxZ4n+dXsTV439CV4=",
+        "owner": "LoganBarnett",
+        "repo": "org-fmt",
+        "rev": "92a603feea4ae8c9046e4e2ad0dfbf5950d4af4c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LoganBarnett",
+        "repo": "org-fmt",
+        "type": "github"
+      }
+    },
+    "org-fmt_2": {
       "inputs": {
         "crane": [
           "rust-template",
@@ -294,7 +494,7 @@
         "emacs-overlay": "emacs-overlay",
         "emacs-tramp-rpc": "emacs-tramp-rpc",
         "hyuqueue": "hyuqueue",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_7",
         "org-dnd": "org-dnd",
         "org-mode-fork": "org-mode-fork",
         "rust-template": "rust-template"
@@ -326,6 +526,42 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
+        "lastModified": 1770433312,
+        "narHash": "sha256-IaiqGwmLBrR0z67t/oaS6GIFxv9V8mDY7dBTuYVTbKY=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "9922ff9f99a6436756cbe6f5d11f9c3630e58cf0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_3": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_4"
+      },
+      "locked": {
+        "lastModified": 1773716879,
+        "narHash": "sha256-vXCTasEzzTTd0ZGEuyle20H2hjRom66JeNr7i2ktHD0=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "1a9ddeb45c5751b800331363703641b84d1f41f0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_4": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_6"
+      },
+      "locked": {
         "lastModified": 1775445266,
         "narHash": "sha256-3fgIj85WHQbOamrpIw9WY3ZL1PoEvjPOjmzMYNsEQJo=",
         "owner": "oxalica",
@@ -339,9 +575,9 @@
         "type": "github"
       }
     },
-    "rust-overlay_3": {
+    "rust-overlay_5": {
       "inputs": {
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_8"
       },
       "locked": {
         "lastModified": 1770433312,
@@ -357,9 +593,9 @@
         "type": "github"
       }
     },
-    "rust-overlay_4": {
+    "rust-overlay_6": {
       "inputs": {
-        "nixpkgs": "nixpkgs_5"
+        "nixpkgs": "nixpkgs_9"
       },
       "locked": {
         "lastModified": 1773716879,
@@ -377,13 +613,13 @@
     },
     "rust-template": {
       "inputs": {
-        "changelog-roller": "changelog-roller",
-        "crane": "crane_3",
+        "changelog-roller": "changelog-roller_3",
+        "crane": "crane_5",
         "nixpkgs": [
           "nixpkgs"
         ],
-        "org-fmt": "org-fmt",
-        "rust-overlay": "rust-overlay_4"
+        "org-fmt": "org-fmt_2",
+        "rust-overlay": "rust-overlay_6"
       },
       "locked": {
         "lastModified": 1790014624,

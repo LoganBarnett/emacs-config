@@ -8,10 +8,10 @@
     };
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     hyuqueue = {
-      url = "git+ssh://git@gitea.proton:2222/logan/hyuqueue";
+      url = "github:LoganBarnett/hyuqueue";
     };
     org-dnd = {
-      url = "git+ssh://git@gitea.proton:2222/logan/org-dnd";
+      url = "github:LoganBarnett/org-dnd";
       flake = false;
     };
     # Personal fork of org-mode carrying a fix to org-lint that avoids
@@ -90,6 +90,17 @@
       darwinModules.ssh-config-emacs = import ./nix/home-configs/ssh-config-emacs.nix;
       homeModules.ssh-config-emacs = import ./nix/home-configs/ssh-config-emacs.nix;
 
+      # The org-agenda file list, declared per user under
+      # programs.emacs.org-agenda and read by lisp/nix-org-agenda-config.el.
+      # Importing this module as a value here and by path from the ICS module
+      # below would declare its options twice.  So it is exported as the path,
+      # not an `import`.
+      homeModules.org-agenda = ./nix/home-modules/org-agenda.nix;
+      # ICS calendar feeds synced into org files for the agenda.  The host is
+      # assumed to run agenix-rekey and home-manager.
+      darwinModules.org-agenda-ics-calendars =
+        ./nix/darwin-modules/org-agenda-ics-calendars.nix;
+
       # Provide emacs-overlay as a passthrough for convenience.
       overlays.default = emacs-overlay.overlays.default;
 
@@ -114,6 +125,53 @@
           # versions stay in lockstep.  Native (non-static) build -- fine for a
           # nix-store-resident binary on the host.
           tramp-rpc-server = pkgs.emacs-tramp-rpc-server;
+        }
+      );
+
+      # `nix flake check` evaluates the agenda home module against a fixture
+      # and compares the JSON it writes.  home-manager is not an input here,
+      # so the one home-manager option the module sets is stubbed.
+      checks = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor.${system};
+          inherit (pkgs) lib;
+          homeFileStub = { lib, ... }: {
+            options.home.file = lib.mkOption {
+              type = lib.types.attrsOf (lib.types.submodule {
+                options.source = lib.mkOption { type = lib.types.path; };
+              });
+              default = { };
+            };
+          };
+          fixture = {
+            directories = [ "/home/me/notes" "/home/me/work-notes" ];
+            excludes = [ "_archive\\.org\\'" "journal/" ];
+            files = [ "/home/me/generated/cal.org" ];
+          };
+          declaration = (lib.evalModules {
+            modules = [
+              homeFileStub
+              ./nix/home-modules/org-agenda.nix
+              {
+                _module.args.pkgs = pkgs;
+                programs.emacs.org-agenda = fixture;
+              }
+            ];
+          }).config.home.file.".config/emacs/nix-org-agenda.json".source;
+          expected = pkgs.writeText "expected-nix-org-agenda.json"
+            (builtins.toJSON {
+              org-agenda-directories = fixture.directories;
+              org-agenda-excludes = fixture.excludes;
+              org-agenda-files = fixture.files;
+            });
+        in
+        {
+          org-agenda-declaration = pkgs.runCommand "org-agenda-declaration"
+            { nativeBuildInputs = [ pkgs.jq ]; } ''
+              diff <(jq --sort-keys . ${expected}) \
+                <(jq --sort-keys . ${declaration})
+              touch "$out"
+            '';
         }
       );
 

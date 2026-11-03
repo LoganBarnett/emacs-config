@@ -188,7 +188,8 @@
   ;; mu4e directly, but perhaps something in org-agenda? This has been difficult
   ;; to track down. I might need to hook up some dependency hooks with
   ;; use-package to properly fix this.
-  (init-org-file "org-agenda.org")
+  (load-library "org-agenda-config")
+  (load-library "nix-org-agenda-config")
   (init-org-file "browser.org")
   (init-org-file "transportation-circle.org")
   (init-org-file "dnd.org")

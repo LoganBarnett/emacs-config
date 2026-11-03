@@ -78,6 +78,12 @@ test-yasnippet-expand:
 test-keybindings:
   ./test-keybindings.sh
 
+# Test that the Nix agenda declaration drives org-agenda-files: declared
+# directories are walked, exclusions apply, and missing paths warn.  Requires
+# `just build` (./result must exist).
+test-nix-org-agenda:
+  ./test-nix-org-agenda.sh
+
 # Test that C-; on a misspelled word invokes flyspell-correct with suggestions.
 # Requires `just build` (./result must exist).
 test-flyspell:
@@ -107,7 +113,7 @@ test-org-auto-id:
   ./test/org-auto-id-tests.sh
 
 # Quick test to verify Emacs can start (recommended for CI)
-test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-flyspell test-lsp test-visual-line test-desktop test-org-auto-id
+test: test-structure build test-nix-startup test-yasnippet test-yasnippet-expand test-keybindings test-nix-org-agenda test-flyspell test-lsp test-visual-line test-desktop test-org-auto-id
   nix flake check
   @echo "All tests passed!"
 

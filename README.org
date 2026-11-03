@@ -140,14 +140,6 @@ Pass 1 runs (finding the ~:tangle yes~ blocks) and Pass 2 is silently skipped,
 so the bare blocks are lost.  The stitch pattern avoids this entirely — exactly
 one ~:tangle yes~ block (the stitch) collects everything.
 
-*** Exception: ~org-agenda.org~
-
-~org-agenda.org~ is intentionally MIXED.  Some blocks use ~:tangle yes~ for
-settings safe to include in the Nix build.  Bare blocks contain user-specific
-paths (e.g. ~~/notes~) that must /not/ be tangled during a Nix build because
-the paths don't exist at build time.  Do not convert this file to the stitch
-pattern.
-
 *** Adding a new configuration block
 
 1. Write the block with a ~#+name:~ and ~:tangle no~:
@@ -204,6 +196,10 @@ configuration:
     darwinConfigurations.myhost = nix-darwin.lib.darwinSystem {
       modules = [
         emacs-config.darwinModules.default
+        # ICS calendar feeds synced into org files for the agenda.  Options
+        # under programs.emacs.org-agenda.ics-calendars.  Assumes the host
+        # runs agenix-rekey and home-manager.
+        emacs-config.darwinModules.org-agenda-ics-calendars
         # ... other modules
       ];
     };
@@ -211,6 +207,7 @@ configuration:
     # For home-manager:
     homeConfigurations.myuser = home-manager.lib.homeManagerConfiguration {
       modules = [
+        emacs-config.homeModules.org-agenda
         emacs-config.homeModules.ssh-config-emacs
         # ... other modules
       ];
@@ -227,7 +224,11 @@ configuration:
 - ~nix/~ :: Additional Nix modules and derivations.
   - ~derivations/~ :: Custom package derivations (e.g., ~tree-sitter-jq~,
     ~emacs-app~).
-  - ~home-configs/~ :: Home Manager configuration modules.
+  - ~home-configs/~ :: Home Manager configuration that takes effect on import.
+  - ~home-modules/~ :: Home Manager modules that declare options, such as the
+    agenda file list.
+  - ~darwin-modules/~ :: nix-darwin modules that declare options, such as the
+    ICS calendar sync.
 - ~doom-emacs.org~ :: Documentation for Doom Emacs-specific configurations.
 
 ** ~emacs-app~ (macOS)

@@ -186,6 +186,12 @@
         epkgs.lsp-mode
         epkgs.lsp-ui
         epkgs.envrc
+        # evil backs every eval-when-compile that expands `map!' with state
+        # keys, because `map!' emits state-specific bindings only when evil
+        # is loaded at expansion time.  evil-org defines the agenda key
+        # function org-agenda-config.el calls.
+        epkgs.evil
+        epkgs.evil-org
       ];
       # Compile with the same plist flag as the runtime (see the lsp-mode
       # overrideScope override above), so any lsp-protocol macro expanded in

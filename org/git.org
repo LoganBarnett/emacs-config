@@ -270,6 +270,19 @@ they were; see [[file:org-mode.org::*reveal after jump][reveal after jump]] for 
 (add-hook 'magit-diff-visit-file-hook #'config--magit-visit-file-reveal-org)
 #+end_src
 
+** worktrees
+
+Worktrees are basically local clones but they are tied to the original clone.
+I'm not actually sure how they are different from a local clone, other than
+perhaps you can query the original clone to see what was built off of it.  Magit
+can take advantage of this by listing worktrees in the ~magit-status~ view.  It
+just needs to be turned on thusly:
+
+#+name: config/magit-worktree-enable
+#+begin_src emacs-lisp :results none :exports code :tangle no
+(add-hook 'magit-status-sections-hook #'magit-insert-worktrees t)
+#+end_src
+
 * linking to web mirrors
 I'm not sure if "web mirror" is the proper term, but it kind of makes sense: A
 web version of the git repository. Generally we see this when browsing source in
@@ -476,6 +489,7 @@ of things.
    :desc "initialize repo" :n "i" #'magit-init
    )
   :config
+  <<config/magit-worktree-enable>>
   <<config/magit-display-buffer-same-window>>
   <<config/git-commit-message-evil-insert-state>>
   <<config/magit-line-numbers>>

@@ -86,6 +86,33 @@
                       (where-is-internal #'lsp-execute-code-action
                                          (list lsp-mode-map))))))
 
+;; org-agenda (lisp/org-agenda-config.el).
+(test-kb/check
+ "SPC o a is bound to org-agenda in doom-leader-map"
+ (eq (test-kb/lookup "o a") #'org-agenda))
+(test-kb/check
+ "org-agenda-mode starts in motion state"
+ (eq (evil-initial-state 'org-agenda-mode) 'motion))
+(let ((map (evil-get-auxiliary-keymap org-agenda-mode-map 'motion)))
+  (test-kb/check
+   "j is org-agenda-next-line in org-agenda motion state"
+   (and map (eq (lookup-key map "j") #'org-agenda-next-line)))
+  (test-kb/check
+   "d s is org-agenda-schedule in org-agenda motion state"
+   (and map (eq (lookup-key map (kbd "d s")) #'org-agenda-schedule)))
+  (test-kb/check
+   "d d is org-agenda-date-prompt in org-agenda motion state"
+   (and map (eq (lookup-key map (kbd "d d")) #'org-agenda-date-prompt)))
+  (test-kb/check
+   "b r is org-agenda-redo in org-agenda motion state"
+   (and map (eq (lookup-key map (kbd "b r")) #'org-agenda-redo))))
+
+;; ibuffer (lisp/ibuffer-config.el): q kills the buffer instead of burying it.
+(test-kb/check
+ "q is kill-current-buffer in ibuffer normal state"
+ (let ((map (evil-get-auxiliary-keymap ibuffer-mode-map 'normal)))
+   (and map (eq (lookup-key map "q") #'kill-current-buffer))))
+
 ;;
 ;; ── Report ────────────────────────────────────────────────────────────────────
 

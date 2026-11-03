@@ -82,11 +82,14 @@ first line.
   #+end_src
 
 ** evil-collection
-   =evil-collection= is a user maintained list of =evil-mode= bindings. It's not
-   very compatible with the Spacemacs way of doing things, and I've had trouble
-   getting some of the keybindings to work properly. For now I've opted to not
-   use =evil-collection= and instead wire up my own bindings by hand. I've found
-   a way to do this that seems to work consistently enough.
+=evil-collection= supplies the =evil= bindings for every mode named in the
+=evil-collection-init= call in the stitch block.  The list is explicit rather
+than the upstream default, because three supported modes would undo choices
+made here: =magit-section= rebinds the digits that the magit options below
+unbind, =lispy= replaces the bindings =lispyville= already provides, and
+=outline= reaches =org-mode= buffers through the parent keymap of
+=org-mode-map=.  =org-agenda= has no module at all.  =evil-org= covers it from
+[[file:../lisp/org-agenda-config.el][lisp/org-agenda-config.el]].
 
 *** magit options
 
@@ -715,10 +718,23 @@ library is already loaded.
      wdired
      ibuffer
      package-menu
+     bookmark
+     tabulated-list
+     process-menu
      ;; Read-only documentation.
      help
      helpful
+     elisp-refs
      info
+     apropos
+     shortdoc
+     custom
+     man
+     woman
+     ;; Read-only buffers in general: special-mode and everything derived from
+     ;; it, such as *Messages*.
+     simple
+     view
      ;; Tooling result buffers.
      compile
      grep
@@ -728,6 +744,10 @@ library is already loaded.
      flycheck
      replace
      profiler
+     lsp-ui-imenu
+     ;; Debugger buffers, which debug-on-error raises during init.
+     debug
+     edebug
      ;; Diff / merge / patch UIs.
      diff-mode
      smerge-mode
@@ -741,12 +761,30 @@ library is already loaded.
      ;; Shells / terminals.
      eshell
      eat
+     comint
      ;; Git.
      magit
      forge
+     with-editor
      ;; Major modes.
      markdown-mode
      org
+     calendar
+     yaml-mode
+     elisp-mode
+     python
+     ruby-mode
+     sh-script
+     ;; Keeps eldoc output up while evil motions run.
+     eldoc
+     ;; Buffers edited from the browser.
+     atomic-chrome
+     ;; Archives, images, documents, and keys.
+     arc-mode
+     tar-mode
+     image
+     doc-view
+     epa
      ;; Mail.
      mu4e
      ))

@@ -1,24 +1,21 @@
-;;; ibuffer-config.el --- configure ibuffer with evil-collection -*- lexical-binding: t; -*-
+;;; ibuffer-config.el --- configure ibuffer -*- lexical-binding: t; -*-
 ;;; Commentary:
-;; ibuffer is Emacs' built-in buffer management interface.  Configure it with
-;; evil-collection for vim-like keybindings.
+;; Configuration for ibuffer.
 
 ;;; Code:
 (require 'use-package)
 
 ;; `map!' below must be expanded at compile time, or the compiled file calls it
-;; as a function and init dies with invalid-function.
+;; as a function and init dies with invalid-function.  `evil' must already be
+;; loaded at that expansion, or `map!' drops the normal-state binding from the
+;; compiled output.  Native compilation runs each file in a fresh Emacs, so
+;; this file has to load evil itself.
 (eval-when-compile
+  (require 'evil)
   (require 'doom-keybinds))
 
 (use-package ibuffer
   :config
-  ;; Initialize evil-collection for ibuffer to get vim-like keybindings.
-  ;; Only initialize if evil-collection is available.
-  (with-eval-after-load 'evil-collection
-    (evil-collection-init 'ibuffer))
-
-  ;; Add Doom's minimal keybindings.
   (with-eval-after-load 'general
     (map! :map ibuffer-mode-map
           :n "q" #'kill-current-buffer))
